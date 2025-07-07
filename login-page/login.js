@@ -75,28 +75,6 @@
             });
         }
 
-        // Remove this block: it references 'data' which is not defined here
-        /*
-        fetch(`/api/auth/profile/${data.user._id}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${data.token}`
-            }
-        })
-        .then(res => res.json())
-        .then(profile => {
-            // Save the full user profile
-            localStorage.setItem('userData', JSON.stringify(profile));
-
-            // Redirect to dashboard
-            window.location.href = data.redirect;
-        })
-        .catch(err => {
-            console.error('[PROFILE FETCH ERROR]', err);
-            showError('Unable to load user profile');
-        });
-        */
-
         // Initialize input validation
         initializeInputValidation();
     }
@@ -130,7 +108,7 @@
         
             // Login successful
     // Login successful
-    localStorage.setItem('token', data.token);
+    localStorage.setItem('token', data.token); // ✅ correct key
     localStorage.setItem('userId', data.user._id);            // Optional but useful
     localStorage.setItem('userName', data.user.fullName);    // 🔥 Always set this
 
