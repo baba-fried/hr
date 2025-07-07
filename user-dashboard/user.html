@@ -341,9 +341,7 @@
                     </h3>
                     <ul class="text-gray-700 text-sm">
                         <li>Total Mock Tests Attempted: <span id="stat-mock-attempted" class="font-bold">--</span></li>
-                        <li>Average Mock Test Score: <span id="stat-mock-avg" class="font-bold">--</span></li>
                         <li>Best Mock Test Score: <span id="stat-mock-best" class="font-bold">--</span></li>
-                        <li>Last Attempt: <span id="stat-mock-last" class="font-bold">--</span></li>
                     </ul>
                 </div>
                 <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
@@ -353,21 +351,6 @@
                     </h3>
                     <ul class="text-gray-700 text-sm">
                         <li>Total Exams Completed: <span id="stat-exam-completed" class="font-bold">--</span></li>
-                        <li>Average Exam Score: <span id="stat-exam-avg" class="font-bold">--</span></li>
-                        <li>Best Exam Score: <span id="stat-exam-best" class="font-bold">--</span></li>
-                        <li>Last Exam: <span id="stat-exam-last" class="font-bold">--</span></li>
-                    </ul>
-                </div>
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
-                    <h3 class="font-semibold text-yellow-700 mb-2 flex items-center">
-                        <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><path d="M12 8v4l3 3" stroke-width="2"/><circle cx="12" cy="12" r="9" stroke-width="2"/></svg>
-                        Quick Insights
-                    </h3>
-                    <ul class="text-gray-700 text-sm">
-                        <li>Mock Test Success Rate: <span id="stat-mock-success" class="font-bold">--</span></li>
-                        <li>Exam Pass Rate: <span id="stat-exam-pass" class="font-bold">--</span></li>
-                        <li>Upcoming Test: <span id="stat-upcoming" class="font-bold">--</span></li>
-                        <li>Next Mock Test: <span id="stat-next-mock" class="font-bold">--</span></li>
                     </ul>
                 </div>
             </div>
@@ -388,12 +371,12 @@
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <h4 class="font-medium text-gray-800 mb-2">Average Score</h4>
                                 <p class="text-3xl font-bold" id="mock-tests-avg-score">--</p>
-                                <p class="text-sm text-gray-500 mt-1">All mock tests</p>
+                                <p class="text-xs text-gray-500 mt-1">All mock tests</p>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <h4 class="font-medium text-gray-800 mb-2">Success Rate</h4>
                                 <p class="text-3xl font-bold text-green-600" id="mock-tests-success-rate">--</p>
-                                <p class="text-sm text-gray-500 mt-1">Pass percentage</p>
+                                <p class="text-xs text-gray-500 mt-1">Pass percentage</p>
                             </div>
                         </div>
                     </div>
@@ -404,17 +387,7 @@
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <h4 class="font-medium text-gray-800 mb-2">Exams Completed</h4>
                                 <p class="text-3xl font-bold" id="exams-completed">--</p>
-                                <p class="text-sm text-gray-500 mt-1">Last 30 days</p>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-800 mb-2">Average Score</h4>
-                                <p class="text-3xl font-bold" id="exams-avg-score">--</p>
-                                <p class="text-sm text-gray-500 mt-1">All exams</p>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-800 mb-2">Performance</h4>
-                                <p class="text-3xl font-bold text-green-600" id="exams-performance">--</p>
-                                <p class="text-sm text-gray-500 mt-1">Above average</p>
+                                <p class="text-xs text-gray-500 mt-1">Last 30 days</p>
                             </div>
                         </div>
                     </div>
@@ -524,7 +497,6 @@
                             <li>Review your syllabus and focus on weak areas.</li>
                             <li>Practice with mock tests for better time management.</li>
                             <li>Read instructions carefully before starting any exam.</li>
-                            <li>Keep your ID and necessary materials ready.</li>
                         </ul>
                     </div>
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
@@ -538,12 +510,9 @@
             </div>
 
             <div class="border border-red-400 rounded-lg p-6 mb-8 bg-white">
-                <h2 class="text-xl font-semibold mb-4">Exam & Mock Test Information</h2>
-                
-                
-                <hr class="my-6">
-
-                <!-- Upcoming Tests -->
+                <h2 class="text-xl font-semibold mb-4">Exam Information</h2>
+            
+                <!-- Upcoming Tests Table -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold mb-2">Upcoming Tests</h3>
                     <table class="w-full" id="upcoming-tests-table">
@@ -563,66 +532,71 @@
                         <span class="font-semibold">Note:</span> Please arrive 5 minutes before the scheduled time.
                     </div>
                 </div>
-                
-                <hr class="my-6">
-
-                <!-- Mock Tests Section (merged here) -->
-                <div class="border border-yellow-400 rounded-lg p-6 mb-8 bg-white mt-8">
-                    <h2 class="text-xl font-semibold mb-4">Mock Tests</h2>
-                    <p class="text-gray-700 mb-2 text-sm">Practice with mock tests to boost your confidence before the real exam. Your recent mock test attempts and their scores will appear here.</p>
-                    <table class="w-full mb-8" id="mock-tests-table">
-                        <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50">
-                                <th class="text-left py-2">Mock Test Name</th>
-                                <th class="text-left py-2">Date</th>
-                                <th class="text-left py-2">Status</th>
-                                <th class="text-left py-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                    <!-- Available Mock Tests Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- SDE Mock Test Card -->
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <h3 class="font-semibold mb-2">SDE Mock Test</h3>
-                            <p class="text-gray-600 mb-4">Duration: 90 mins | Questions: 40</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Difficulty: Hard</span>
-                                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="sde">Start Test</button>
-                            </div>
+            </div>
+            
+            <!-- 📦 Mock Tests Container -->
+            <div class="border border-yellow-400 rounded-lg p-6 mb-8 bg-white">
+                <h2 class="text-xl font-semibold mb-4">Mock Tests</h2>
+                <p class="text-gray-700 mb-2 text-sm">Practice with mock tests to boost your confidence before the real exam. Your recent mock test attempts and their scores will appear here.</p>
+            
+                <!-- Mock Test History Table -->
+                <table class="w-full mb-8" id="mock-tests-table">
+                    <thead>
+                        <tr class="border-b border-gray-200 bg-gray-50">
+                            <th class="text-left py-2">Mock Test Name</th>
+                            <th class="text-left py-2">Date</th>
+                            <th class="text-left py-2">Status</th>
+                            <th class="text-left py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            
+                <!-- Available Mock Tests Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- SDE -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-semibold mb-2">SDE Mock Test</h3>
+                        <p class="text-gray-600 mb-4">Duration: 90 mins | Questions: 40</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">Difficulty: Hard</span>
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="sde">Start Test</button>
                         </div>
-                        <!-- BA Mock Test Card -->
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <h3 class="font-semibold mb-2">BA Mock Test</h3>
-                            <p class="text-gray-600 mb-4">Duration: 60 mins | Questions: 30</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Difficulty: Medium</span>
-                                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="ba">Start Test</button>
-                            </div>
+                    </div>
+            
+                    <!-- BA -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-semibold mb-2">BA Mock Test</h3>
+                        <p class="text-gray-600 mb-4">Duration: 60 mins | Questions: 30</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">Difficulty: Medium</span>
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="ba">Start Test</button>
                         </div>
-                        <!-- DevOps Mock Test Card -->
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <h3 class="font-semibold mb-2">DevOps Mock Test</h3>
-                            <p class="text-gray-600 mb-4">Duration: 75 mins | Questions: 35</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Difficulty: Medium</span>
-                                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="devops">Start Test</button>
-                            </div>
+                    </div>
+            
+                    <!-- DevOps -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-semibold mb-2">DevOps Mock Test</h3>
+                        <p class="text-gray-600 mb-4">Duration: 75 mins | Questions: 35</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">Difficulty: Medium</span>
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="devops">Start Test</button>
                         </div>
-                        <!-- UI/UX Designer Mock Test Card -->
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <h3 class="font-semibold mb-2">UI/UX Designer Mock Test</h3>
-                            <p class="text-gray-600 mb-4">Duration: 60 mins | Questions: 25</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Difficulty: Medium</span>
-                                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="uiux">Start Test</button>
-                            </div>
+                    </div>
+            
+                    <!-- UI/UX -->
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-semibold mb-2">UI/UX Designer Mock Test</h3>
+                        <p class="text-gray-600 mb-4">Duration: 60 mins | Questions: 25</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">Difficulty: Medium</span>
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="uiux">Start Test</button>
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
             <!-- End Combined Exam Section -->
         </div>
