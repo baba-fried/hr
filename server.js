@@ -12,12 +12,13 @@ const testRoutes = require('./routes/testRoutes'); // <-- Add this after other r
 const userRoutes = require('./routes/users');
 
 
+
 // Load environment variables
 dotenv.config();
 
 // Create Express app
 const app = express();
-
+const mockResultsRoute = require('./routes/mockResults');
 // serve everything in your "public" (or however you've named it) folder:
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -50,7 +51,9 @@ app.use('/api/users', userRoutes); // 👈 THIS LINE IS MISSING
 // API routes
 
 app.use('/api/auth', authRoutes);
-app.use('/api/tests', testRoutes); // <-- Add this after examRoutes
+app.use('/api/tests', testRoutes);
+// Mock results route
+app.use('/api/mock-results', mockResultsRoute); // <-- Add this after examRoutes
 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'login-page', 'login.html'));
@@ -82,7 +85,6 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Something went wrong!' });
 });
-
 // Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

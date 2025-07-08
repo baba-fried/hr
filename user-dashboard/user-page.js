@@ -578,25 +578,7 @@ async function loadDashboardStats() {
     }
 }
 
-// Fetch and populate last exam details
-async function loadLastExamDetails() {
-    try {
-        const res = await fetch('/api/user/last-exam', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        if (!res.ok) throw new Error('Failed to fetch last exam');
-        const exam = await res.json();
-        const ul = document.getElementById('last-exam-details');
-        ul.innerHTML = `
-            <li><strong>Last Exam:</strong> Completed on ${exam.date}</li>
-            <li><strong>Score:</strong> ${exam.score}%</li>
-            <li><strong>Status:</strong> ${exam.status}</li>
-        `;
-    } catch (err) {
-        // Fallback or show error
-        console.error(err);
-    }
-}
+
 
 // Fetch and populate upcoming tests table
 async function loadUpcomingTests() {
@@ -741,7 +723,6 @@ async function initializeDashboardCharts() {
 document.addEventListener('DOMContentLoaded', function() {
     // ...existing code...
     loadDashboardStats();
-    loadLastExamDetails();
     loadUpcomingTests();
     loadMockTests();
     initializeDashboardCharts();

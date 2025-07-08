@@ -6,7 +6,13 @@
     <title>POSSPOLE AI MEETING ADVISOR</title>
     <link rel="icon" href="/components/Asset 2posspole_logo_svg.png" type="image/png">
     <!-- Fix CSP to allow Chart.js CDN -->
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;">
+    <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  connect-src 'self' http://localhost:5001;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
+  font-src https://fonts.gstatic.com;">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -298,6 +304,23 @@
             <!-- ...existing code... -->
             
             <script>
+                document.addEventListener('DOMContentLoaded', async function () {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    try {
+        const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
+        if (!res.ok) throw new Error('Failed to fetch user test results');
+
+        const results = await res.json();
+        updateMockTestStats(results);
+        disableCompletedTests(results);
+
+    } catch (err) {
+        console.error('Error disabling tests:', err);
+    }
+});
+
                 // Dropdown logic
                 document.addEventListener('DOMContentLoaded', function() {
                     const userProfileButton = document.getElementById('userProfileButton');
@@ -372,11 +395,6 @@
                                 <h4 class="font-medium text-gray-800 mb-2">Average Score</h4>
                                 <p class="text-3xl font-bold" id="mock-tests-avg-score">--</p>
                                 <p class="text-xs text-gray-500 mt-1">All mock tests</p>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-800 mb-2">Success Rate</h4>
-                                <p class="text-3xl font-bold text-green-600" id="mock-tests-success-rate">--</p>
-                                <p class="text-xs text-gray-500 mt-1">Pass percentage</p>
                             </div>
                         </div>
                     </div>
@@ -622,6 +640,7 @@
                 <button id="closeResultBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Close</button>
             </div>
         </div>
+        
 
         <!-- Footer -->
         <div class="footer">
@@ -645,7 +664,7 @@
       document.getElementById('loader').classList.remove('flex');
     });
     </script>
-    <script src="/user-dashboard/loader.js"></script>
+    <script src="loader.js"></script>
     <script>
       window.addEventListener('load', hideLoader);
     </script>
@@ -1049,6 +1068,13 @@
         const questions = mockTestData[test].questions;
         let score = 0;
         let total = questions.length;
+        const userId = localStorage.getItem('userId'); // Make sure to set this at login
+
+if (!userId) {
+    alert('User not identified. Please log in again.');
+    return;
+}
+
         let resultHtml = '<ul class="mb-4">';
         questions.forEach((q, idx) => {
             const selected = form.querySelector(`input[name="q${idx+1}"]:checked`);
@@ -1063,6 +1089,34 @@
         });
         resultHtml += '</ul>';
         resultHtml = `<div class="mb-4 text-lg font-semibold">Score: ${score} / ${total}</div>` + resultHtml;
+        fetch('http://localhost:5001/api/mock-results', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        userId,
+        testName: test,
+        score,
+        total
+    })
+})
+.then(res => {
+    if (!res.ok) throw new Error('Error submitting score or test already taken.');
+    return res.json();
+})
+.then(data => {
+    console.log('✅ Score saved to MongoDB:', data);
+    // Optionally refresh dashboard stats
+    return fetch(`http://localhost:5001/api/mock-results/${userId}`);
+})
+.then(res => res.json())
+.then(results => {
+    updateMockTestStats(results);
+    disableCompletedTests(results);
+})
+.catch(err => {
+    console.error('❌ Failed to save score:', err);
+});
+
         document.getElementById('mockTestModal').classList.add('hidden');
         document.getElementById('mockTestResultContent').innerHTML = resultHtml;
         document.getElementById('mockTestResultModal').classList.remove('hidden');
@@ -1071,7 +1125,57 @@
     document.getElementById('closeMockTestResultModal').onclick = function() {
         document.getElementById('mockTestResultModal').classList.add('hidden');
     };
-    document.getElementById('closeResultBtn').onclick = function() {
-        document.getElementById('mockTestResultModal').classList.add('hidden');
+    document.getElementById('closeResultBtn').onclick = async function() {
+    document.getElementById('mockTestResultModal').classList.add('hidden');
+    
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+
+    try {
+        const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
+        if (!res.ok) throw new Error('Failed to fetch updated test results');
+        const results = await res.json();
+        disableCompletedTests(results);
+    } catch (err) {
+        console.error('Error marking test completed after close:', err);
+    }
     };
+    function updateMockTestStats(results) {
+    const scores = results.map(r => Number(r.score));
+    const totals = results.map(r => Number(r.total));
+
+    const attempted = results.length;
+    const bestScore = scores.length ? Math.max(...scores) : 0;
+    const avgScore = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) : 0;
+
+    let passed = 0;
+    for (let i = 0; i < results.length; i++) {
+        const percent = (results[i].score / results[i].total) * 100;
+        if (percent >= 60) passed++;
+        disableCompletedTests(results);
+    }
+    const successRate = scores.length ? Math.round((passed / scores.length) * 100) : 0;
+
+    function disableCompletedTests(results) {
+    const completedTests = new Set(results.map(r => r.testName));
+    document.querySelectorAll('.start-test-btn').forEach(btn => {
+        const testName = btn.getAttribute('data-test');
+        if (completedTests.has(testName)) {
+            btn.disabled = true;
+            btn.classList.remove('hover:bg-blue-700', 'bg-blue-600');
+            btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            btn.textContent = 'Completed';
+        }
+    });
+}
+
+
+    // Update dashboard elements
+    document.getElementById('stat-mock-attempted').textContent = attempted;
+    document.getElementById('stat-mock-best').textContent = bestScore;
+    document.getElementById('mock-tests-completed').textContent = attempted;
+    document.getElementById('mock-tests-avg-score').textContent = avgScore;
+    document.getElementById('mock-tests-success-rate').textContent = successRate + '%';
+}
+
 </script>

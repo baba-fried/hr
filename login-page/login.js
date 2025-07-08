@@ -67,7 +67,7 @@
     });
 
     function initializeLoginForm() {
-        const loginForm = document.querySelector('#login-form');
+        const loginForm = document.querySelector('#loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', function(event) {
                 event.preventDefault();
@@ -109,7 +109,7 @@
             // Login successful
     // Login successful
     localStorage.setItem('token', data.token); // ✅ correct key
-    localStorage.setItem('userId', data.user._id);            // Optional but useful
+    localStorage.setItem('userId', data.user.id);            // Optional but useful
     localStorage.setItem('userName', data.user.fullName);    // 🔥 Always set this
 
 
