@@ -34,7 +34,7 @@
       <div class="inline-flex bg-white border border-black rounded-full p-1">
         <button id="studentTab" type="button"
           class="px-6 py-1 rounded-full text-sm font-medium bg-black text-white transition duration-200">
-          Student
+          Candidate
         </button>
         <button id="adminTab" type="button"
           class="px-6 py-1 rounded-full text-sm font-medium text-black transition duration-200">
@@ -156,7 +156,7 @@
         }
 
         // Store user data
-        localStorage.setItem('userId', data.user._id);
+        localStorage.setItem('userId', data.user.id);
         localStorage.setItem('userName', data.user.fullName);
         localStorage.setItem('userCollegeName', data.user.collegeName);
         localStorage.setItem('userCourse', data.user.course);
@@ -166,9 +166,11 @@
 
         // If your backend returns a token, store it for authenticated requests
         if (data.token) {
-          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('token', data.token);
         }
-
+        if (data.user) {
+  localStorage.setItem('user', JSON.stringify(data.user));
+}
         alert("Login successful!");
         console.log('User ID being saved:', data.user._id);
 

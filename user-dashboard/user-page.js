@@ -67,14 +67,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Navigate to profile page
                     window.location.href = '/profile';
                     break;
-                case 'settings':
-                    // Navigate to settings page
-                    window.location.href = '/settings';
-                    break;
                 case 'log out':
                     // Clear user data and redirect to login
                     localStorage.removeItem('userName');
-                    localStorage.removeItem('userToken');
+                    localStorage.removeItem('token');
                     window.location.href = '/login-page/login.html';
                     break;
             }
@@ -548,7 +544,7 @@ async function loadDashboardStats() {
     try {
         // Replace with your backend endpoint
         const res = await fetch('/api/user/dashboard', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('userToken')}` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         if (!res.ok) throw new Error('Failed to fetch dashboard data');
         const data = await res.json();
@@ -578,57 +574,51 @@ async function loadDashboardStats() {
     }
 }
 
-// Fetch and populate last exam details
-async function loadLastExamDetails() {
-    try {
-        const res = await fetch('/api/user/last-exam', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('userToken')}` }
-        });
-        if (!res.ok) throw new Error('Failed to fetch last exam');
-        const exam = await res.json();
-        const ul = document.getElementById('last-exam-details');
-        ul.innerHTML = `
-            <li><strong>Last Exam:</strong> Completed on ${exam.date}</li>
-            <li><strong>Score:</strong> ${exam.score}%</li>
-            <li><strong>Status:</strong> ${exam.status}</li>
-        `;
-    } catch (err) {
-        // Fallback or show error
-        console.error(err);
-    }
-}
+
 
 // Fetch and populate upcoming tests table
 async function loadUpcomingTests() {
     try {
-        const res = await fetch('/api/user/upcoming-tests', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('userToken')}` }
+        const res = await fetch('/api/tests/my-tests', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
-        if (!res.ok) throw new Error('Failed to fetch upcoming tests');
+
+        if (!res.ok) throw new Error('Failed to fetch assigned tests');
+
         const tests = await res.json();
         const tbody = document.querySelector('#upcoming-tests-table tbody');
         tbody.innerHTML = '';
+
         tests.forEach(test => {
+            const date = new Date(test.dateAdded);
+            const formattedDate = date.toLocaleDateString();
+            const formattedTime = date.toLocaleTimeString();
+
             tbody.innerHTML += `
                 <tr class="border-b border-gray-100">
                     <td class="py-3">${test.name}</td>
-                    <td class="py-3">${test.date}</td>
-                    <td class="py-3">${test.time}</td>
-                    <td class="py-3"><a href="#" class="text-blue-600 hover:underline">View Details</a></td>
+                    <td class="py-3">${formattedDate}</td>
+                    <td class="py-3">${formattedTime}</td>
+                    <td class="py-3">
+                        <a href="#" class="text-blue-600 hover:underline">Start Test</a>
+                    </td>
                 </tr>
             `;
         });
     } catch (err) {
-        // Fallback or show error
-        console.error(err);
+        console.error('Error:', err);
     }
 }
+
+  
 
 // Fetch and populate mock tests table
 async function loadMockTests() {
     try {
         const res = await fetch('/api/user/mock-tests', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('userToken')}` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         if (!res.ok) throw new Error('Failed to fetch mock tests');
         const tests = await res.json();
@@ -657,7 +647,7 @@ async function initializeDashboardCharts() {
     let breakdown = [65, 20, 15];
     try {
         const res = await fetch('/api/user/dashboard-charts', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('userToken')}` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         if (res.ok) {
             const data = await res.json();
@@ -729,7 +719,6 @@ async function initializeDashboardCharts() {
 document.addEventListener('DOMContentLoaded', function() {
     // ...existing code...
     loadDashboardStats();
-    loadLastExamDetails();
     loadUpcomingTests();
     loadMockTests();
     initializeDashboardCharts();
