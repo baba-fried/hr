@@ -327,12 +327,8 @@
                     const userDropdown = document.getElementById('userDropdown');
                     const logoutBtn = document.getElementById('logoutBtn');
             
-                    userProfileButton.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        userDropdown.classList.toggle('active');
-                    });
-            
-                    document.addEventListener('click', function(e) {
+
+                        document.addEventListener('click', function(e) {
                         if (!userProfileButton.contains(e.target)) {
                             userDropdown.classList.remove('active');
                         }

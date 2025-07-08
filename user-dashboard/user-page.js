@@ -67,10 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Navigate to profile page
                     window.location.href = '/profile';
                     break;
-                case 'settings':
-                    // Navigate to settings page
-                    window.location.href = '/settings';
-                    break;
                 case 'log out':
                     // Clear user data and redirect to login
                     localStorage.removeItem('userName');
