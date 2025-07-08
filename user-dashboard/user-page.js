@@ -377,7 +377,7 @@ function initializeCombinedCharts() {
     });
 }
 
-// Initialize all functionality when DOM is loaded
+    // Initialize all functionality when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     userProfile.loadUserData();
     initializeSectionNavigation();
