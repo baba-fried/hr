@@ -157,16 +157,11 @@
         <div class="bg-white p-4 rounded-lg shadow mb-6">
             <h3 class="text-lg font-semibold mb-4 text-[#1a1a1a]">Filters</h3>
             <div class="flex flex-wrap gap-4">
-                <!-- Date Range Filter -->
+                <!-- Test Name Filter -->
                 <div>
-                    <label class="block text-sm font-medium mb-1 text-[#1a1a1a]">Date Range</label>
-                    <div class="flex gap-2">
-                        <input type="date" id="start-date" class="p-2 border border-[#d1d5db] rounded text-[#1a1a1a]">
-                        <span class="text-[#1a1a1a]">to</span>
-                        <input type="date" id="end-date" class="p-2 border border-[#d1d5db] rounded text-[#1a1a1a]">
-                    </div>
+                    <label class="block text-sm font-medium mb-1 text-[#1a1a1a]">Test Name</label>
+                    <input type="text" id="test-name-filter" class="p-2 border border-[#d1d5db] rounded text-[#1a1a1a]" placeholder="Enter test name...">
                 </div>
-
                 <!-- Role Filter -->
                 <div>
                     <label class="block text-sm font-medium mb-1 text-[#1a1a1a]">Role</label>
@@ -183,11 +178,12 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Clear Filters Button -->
-                <button id="clear-filters" class="bg-[#d1d5db] text-[#1a1a1a] px-4 py-2 rounded-lg hover:bg-[#9ca3af]">
-                    Clear Filters
-                </button>
+                <div class="flex items-end ml-2" style="align-self: flex-end;">
+                    <button id="clear-filters" class="py-1 px-2 border border-[#d1d5db] rounded text-[#1a1a1a] bg-[#d1d5db] hover:bg-[#9ca3af] text-sm h-10 flex items-center">
+                        Clear Filters
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -226,8 +222,10 @@
                             <option value="Business Analyst">Business Analyst</option>
                             <option value="Data Analyst">Data Analyst</option>
                             <option value="Solution Engineer">Solution Engineer</option>
+                            <option value="custom">Custom...</option>
                         </select>
                     </div>
+                    <input type="text" id="custom-role-input" class="w-full p-2 border border-[#d1d5db] rounded text-[#1a1a1a] mt-2 hidden" placeholder="Enter custom role">
                     <div class="mb-4">
                         <label for="test-duration" class="block text-sm font-medium text-[#1a1a1a]">Duration (minutes)</label>
                         <input type="number" id="test-duration" class="w-full p-2 border border-[#d1d5db] rounded text-[#1a1a1a]" required>
@@ -361,11 +359,8 @@
 
         // Filter state
         let filters = {
-            startDate: null,
-            endDate: null,
+            testName: '',
             roles: []
-
-
         };
 
         // Load tests into the table based on filters
@@ -374,26 +369,18 @@
             tableBody.innerHTML = '';
 
             const filteredTests = tests.filter(test => {
-                // Date filter
-                let passesDateFilter = true;
-                const testDate = new Date(test.dateAdded);
-                if (filters.startDate) {
-                    const startDate = new Date(filters.startDate);
-                    passesDateFilter = passesDateFilter && testDate >= startDate;
+                // Test name filter
+                let passesNameFilter = true;
+                if (filters.testName) {
+                    passesNameFilter = test.name.toLowerCase().includes(filters.testName);
                 }
-                if (filters.endDate) {
-                    const endDate = new Date(filters.endDate);
-                    passesDateFilter = passesDateFilter && testDate <= endDate;
-                }
-
                 // Role filter
                 let passesRoleFilter = true;
                 if (filters.roles.length > 0) {
                     passesRoleFilter = filters.roles.includes(test.role);
                 }
-
                 // Combine filters (all must pass)
-                return passesDateFilter && passesRoleFilter;
+                return passesNameFilter && passesRoleFilter;
             });
 
             filteredTests.forEach(test => {
@@ -484,90 +471,92 @@
 
         // Add Test Form Submission
         addTestForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const testName = document.getElementById('test-name').value;
-                const testRole = document.getElementById('test-role').value;
-                const testDuration = document.getElementById('test-duration').value;
+            e.preventDefault();
+            const testName = document.getElementById('test-name').value;
+            const testRole = document.getElementById('test-role').value === 'custom'
+                ? document.getElementById('custom-role-input').value.trim()
+                : document.getElementById('test-role').value;
+            const testDuration = document.getElementById('test-duration').value;
 
-                const payload = {
-                    name: testName,
-                    role: testRole,
-                    duration: parseInt(testDuration)
-                };
+            const payload = {
+                name: testName,
+                role: testRole,
+                duration: parseInt(testDuration)
+            };
 
-                try {
-                    const response = await fetch('/api/tests', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...getAuthHeaders()
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await response.json();
-                    if (response.ok) {
-                        alert(result.message || 'Test created successfully!');
-                        addTestModal.style.display = 'none';
-                        addTestForm.reset();
-                        await fetchTestsFromBackend(); // Refresh dashboard with new test
-                    } else {
-                        alert(result.message || 'Failed to create test.');
-                        console.error('Backend error:', result);
-                    }
-                } catch (err) {
-                    alert('Error creating test.');
-                    console.error(err);
+            try {
+                const response = await fetch('/api/tests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message || 'Test created successfully!');
+                    addTestModal.style.display = 'none';
+                    addTestForm.reset();
+                    await fetchTestsFromBackend(); // Refresh dashboard with new test
+                } else {
+                    alert(result.message || 'Failed to create test.');
+                    console.error('Backend error:', result);
                 }
-            });
+            } catch (err) {
+                alert('Error creating test.');
+                console.error(err);
+            }
+        });
 
-            // Show Test Details Modal
-            const testDetailsModal = document.getElementById('test-details-modal');
-            const editQuestionModal = document.getElementById('edit-question-modal');
-            const editQuestionForm = document.getElementById('edit-question-form');
-            const addQuestionModal = document.getElementById('add-question-modal');
-            const addQuestionForm = document.getElementById('add-question-form');
+        // Show Test Details Modal
+        const testDetailsModal = document.getElementById('test-details-modal');
+        const editQuestionModal = document.getElementById('edit-question-modal');
+        const editQuestionForm = document.getElementById('edit-question-form');
+        const addQuestionModal = document.getElementById('add-question-modal');
+        const addQuestionForm = document.getElementById('add-question-form');
 
-            async function showTestDetails(testId) {
-                const test = tests.find(t => t.id == testId);
-                if (!test) return;
+        async function showTestDetails(testId) {
+            const test = tests.find(t => t.id == testId);
+            if (!test) return;
 
-                document.getElementById('details-test-name').textContent = test.name;
-                document.getElementById('details-role').textContent = test.role;
-                // document.getElementById('details-date-added').textContent = test.dateAdded; // Remove this line
-                document.getElementById('details-duration').textContent = test.duration;
+            document.getElementById('details-test-name').textContent = test.name;
+            document.getElementById('details-role').textContent = test.role;
+            // document.getElementById('details-date-added').textContent = test.dateAdded; // Remove this line
+            document.getElementById('details-duration').textContent = test.duration;
 
-                // Fetch questions for the test's role if needed
-                let questions = test.questions;
-                if (!questions || questions.length === 0) {
-                    questions = await fetchQuestionsForRole(test.role);
-                    test.questions = questions;
-                }
+            // Fetch questions for the test's role if needed
+            let questions = test.questions;
+            if (!questions || questions.length === 0) {
+                questions = await fetchQuestionsForRole(test.role);
+                test.questions = questions;
+            }
 
-                // Render questions
-                const questionsList = document.getElementById('questions-list');
-                questionsList.innerHTML = questions.length
-                    ? questions.map((q, index) => `
-                        <div class="question-item break-words">
-                            <p class="text-[#1a1a1a]"><strong>Question ${index + 1}:</strong> ${q.questionText || ''}</p>
-                            <ol class="list-decimal pl-5 text-[#1a1a1a]">
-                                ${q.options.map((opt, i) => `<li${i === q.correctAnswer ? ' class="font-bold"' : ''}>${opt}</li>`).join('')}
-                            </ol>
-                            <div class="mt-2">
-                                <button class="edit-question-btn text-[#6b7280] hover:underline hover:text-[#4b5563] mr-2" data-test-id="${test.id}" data-question-id="${q._id || q.id}">Edit</button>
-                                <button class="delete-question-btn text-[#4b5563] hover:underline hover:text-[#374151]" data-test-id="${test.id}" data-question-id="${q._id || q.id}">Delete</button>
-                            </div>
+            // Render questions
+            const questionsList = document.getElementById('questions-list');
+            questionsList.innerHTML = questions.length
+                ? questions.map((q, index) => `
+                    <div class="question-item break-words">
+                        <p class="text-[#1a1a1a]"><strong>Question ${index + 1}:</strong> ${q.questionText || ''}</p>
+                        <ol class="list-decimal pl-5 text-[#1a1a1a]">
+                            ${q.options.map((opt, i) => `<li${i === q.correctAnswer ? ' class="font-bold"' : ''}>${opt}</li>`).join('')}
+                        </ol>
+                        <div class="mt-2">
+                            <button class="edit-question-btn text-[#6b7280] hover:underline hover:text-[#4b5563] mr-2" data-test-id="${test.id}" data-question-id="${q._id || q.id}">Edit</button>
+                            <button class="delete-question-btn text-[#4b5563] hover:underline hover:text-[#374151]" data-test-id="${test.id}" data-question-id="${q._id || q.id}">Delete</button>
                         </div>
-                    `).join('')
-                    : '<p class="text-[#1a1a1a]">No questions assigned yet.</p>';
+                    </div>
+                `).join('')
+                : '<p class="text-[#1a1a1a]">No questions assigned yet.</p>';
 
 
-                testDetailsModal.style.display = 'block';
+            testDetailsModal.style.display = 'block';
 
-                // Add Question Button
-                const addQuestionBtn = document.getElementById('add-question-btn');
-                addQuestionBtn.onclick = () => {
-                    addQuestionModal.style.display = 'block';
-                    addQuestionForm.onsubmit = async (e) => {
+            // Add Question Button
+            const addQuestionBtn = document.getElementById('add-question-btn');
+            addQuestionBtn.onclick = () => {
+                addQuestionModal.style.display = 'block';
+                addQuestionForm.onsubmit = async (e) => {
     e.preventDefault();
 
     // Collect data from form
@@ -628,97 +617,97 @@
     }
 };
 
+            };
+
+            // Add event listeners for edit and delete question buttons
+            document.querySelectorAll('.edit-question-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const testId = btn.dataset.testId;
+                    const questionId = btn.dataset.questionId;
+                    showEditQuestionModal(testId, questionId);
+                });
+            });
+            document.querySelectorAll('.delete-question-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const testId = btn.dataset.testId;
+                    const questionId = btn.dataset.questionId;
+                    deleteQuestion(testId, questionId);
+                });
+            });
+        }
+
+        // Show Edit Question Modal
+        function showEditQuestionModal(testId, questionId) {
+            const test = tests.find(t => t.id == testId);
+            // Support both MongoDB (_id) and local (id) question keys
+            const question = test.questions.find(q => (q._id ? q._id == questionId : q.id == questionId));
+            if (!question) return;
+
+            // Fill modal fields with correct keys
+            document.getElementById('edit-question-text').value = question.questionText || question.text || '';
+            document.getElementById('edit-option-1').value = question.options?.[0] || '';
+            document.getElementById('edit-option-2').value = question.options?.[1] || '';
+            document.getElementById('edit-option-3').value = question.options?.[2] || '';
+            document.getElementById('edit-option-4').value = question.options?.[3] || '';
+            document.getElementById('edit-correct-option').value = question.correctAnswer ?? question.correct ?? 0;
+
+            editQuestionModal.style.display = 'block';
+
+            // Remove previous submit handler to avoid stacking
+            editQuestionForm.onsubmit = null;
+
+            // Handle Edit Question Form Submission
+            editQuestionForm.onsubmit = async (e) => {
+                e.preventDefault();
+
+                // Prepare updated data
+                const updatedQuestion = {
+                    questionText: document.getElementById('edit-question-text').value,
+                    options: [
+                        document.getElementById('edit-option-1').value,
+                        document.getElementById('edit-option-2').value,
+                        document.getElementById('edit-option-3').value,
+                        document.getElementById('edit-option-4').value
+                    ],
+                    correctAnswer: parseInt(document.getElementById('edit-correct-option').value)
                 };
 
-                // Add event listeners for edit and delete question buttons
-                document.querySelectorAll('.edit-question-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const testId = btn.dataset.testId;
-                        const questionId = btn.dataset.questionId;
-                        showEditQuestionModal(testId, questionId);
-                    });
-                });
-                document.querySelectorAll('.delete-question-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const testId = btn.dataset.testId;
-                        const questionId = btn.dataset.questionId;
-                        deleteQuestion(testId, questionId);
-                    });
-                });
-            }
-
-            // Show Edit Question Modal
-            function showEditQuestionModal(testId, questionId) {
-                const test = tests.find(t => t.id == testId);
-                // Support both MongoDB (_id) and local (id) question keys
-                const question = test.questions.find(q => (q._id ? q._id == questionId : q.id == questionId));
-                if (!question) return;
-
-                // Fill modal fields with correct keys
-                document.getElementById('edit-question-text').value = question.questionText || question.text || '';
-                document.getElementById('edit-option-1').value = question.options?.[0] || '';
-                document.getElementById('edit-option-2').value = question.options?.[1] || '';
-                document.getElementById('edit-option-3').value = question.options?.[2] || '';
-                document.getElementById('edit-option-4').value = question.options?.[3] || '';
-                document.getElementById('edit-correct-option').value = question.correctAnswer ?? question.correct ?? 0;
-
-                editQuestionModal.style.display = 'block';
-
-                // Remove previous submit handler to avoid stacking
-                editQuestionForm.onsubmit = null;
-
-                // Handle Edit Question Form Submission
-                editQuestionForm.onsubmit = async (e) => {
-                    e.preventDefault();
-
-                    // Prepare updated data
-                    const updatedQuestion = {
-                        questionText: document.getElementById('edit-question-text').value,
-                        options: [
-                            document.getElementById('edit-option-1').value,
-                            document.getElementById('edit-option-2').value,
-                            document.getElementById('edit-option-3').value,
-                            document.getElementById('edit-option-4').value
-                        ],
-                        correctAnswer: parseInt(document.getElementById('edit-correct-option').value)
-                    };
-
-                    // Persist changes to backend if question has _id (MongoDB)
-                    if (question._id) {
-                        try {
-                            const response = await fetch(`/api/tests/${testId}/questions/${question._id}`, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    ...getAuthHeaders()
-                                },
-                                body: JSON.stringify(updatedQuestion)
-                            });
-                            const result = await response.json();
-                            if (!response.ok) {
-                                alert(result.message || 'Failed to update question.');
-                                return;
-                            }
-                            // Update local question with backend response if needed
-                            Object.assign(question, result.question);
-                        } catch (err) {
-                            alert('Error updating question.');
-                            console.error(err);
+                // Persist changes to backend if question has _id (MongoDB)
+                if (question._id) {
+                    try {
+                        const response = await fetch(`/api/tests/${testId}/questions/${question._id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...getAuthHeaders()
+                            },
+                            body: JSON.stringify(updatedQuestion)
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            alert(result.message || 'Failed to update question.');
+                            return;
                         }
-                    } else {
-                        // For local-only (not in DB) update
-                        question.questionText = updatedQuestion.questionText;
-                        question.options = updatedQuestion.options;
-                        question.correctAnswer = updatedQuestion.correctAnswer;
+                        // Update local question with backend response if needed
+                        Object.assign(question, result.question);
+                    } catch (err) {
+                        alert('Error updating question.');
+                        console.error(err);
                     }
+                } else {
+                    // For local-only (not in DB) update
+                    question.questionText = updatedQuestion.questionText;
+                    question.options = updatedQuestion.options;
+                    question.correctAnswer = updatedQuestion.correctAnswer;
+                }
 
-                    editQuestionModal.style.display = 'none';
-                    editQuestionForm.reset();
-                    showTestDetails(testId); // Refresh test details
-                };
-            }
+                editQuestionModal.style.display = 'none';
+                editQuestionForm.reset();
+                showTestDetails(testId); // Refresh test details
+            };
+        }
 
-            // Delete Question
+        // Delete Question
 async function deleteQuestion(testId, questionId) {
     if (confirm('Are you sure you want to delete this question?')) {
         try {
@@ -790,19 +779,14 @@ async function deleteTest(testId) {
 
 
         // Filter Handling
-        const startDateInput = document.getElementById('start-date');
-        const endDateInput = document.getElementById('end-date');
+        const testNameInput = document.getElementById('test-name-filter');
         const roleSelect = document.getElementById('role-select');
         const roleOptions = document.getElementById('role-options');
         const clearFiltersBtn = document.getElementById('clear-filters');
 
-        // Date Filter
-        startDateInput.addEventListener('change', () => {
-            filters.startDate = startDateInput.value;
-            loadTests();
-        });
-        endDateInput.addEventListener('change', () => {
-            filters.endDate = endDateInput.value;
+        // Test Name Filter
+        testNameInput.addEventListener('input', () => {
+            filters.testName = testNameInput.value.trim().toLowerCase();
             loadTests();
         });
 
@@ -829,9 +813,8 @@ async function deleteTest(testId) {
 
         // Clear Filters
         clearFiltersBtn.addEventListener('click', () => {
-            filters = { startDate: null, endDate: null, roles: [] };
-            startDateInput.value = '';
-            endDateInput.value = '';
+            filters = { testName: '', roles: [] };
+            testNameInput.value = '';
             roleSelect.textContent = 'Select Roles';
             roleOptions.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             loadTests();
@@ -1055,21 +1038,31 @@ async function deleteTest(testId) {
   });
 });
 
+        // Add JS to show/hide custom input and use its value on submit
+        const testRoleSelect = document.getElementById('test-role');
+        const customRoleInput = document.getElementById('custom-role-input');
+        testRoleSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRoleInput.classList.remove('hidden');
+                customRoleInput.required = true;
+            } else {
+                customRoleInput.classList.add('hidden');
+                customRoleInput.required = false;
+            }
+        });
 
     </script>
             //assign modal
             <div id="assignModal" class="modal">
-              <div class="modal-content max-w-lg">
+              <div class="modal-content max-w-lg min-w-[350px] min-h-[300px] resize overflow-auto" style="max-width:600px; min-width:350px; min-height:300px; resize:both; overflow:auto;">
                 <span id="closeAssignModal" class="close-btn">&times;</span>
-                <h3 class="text-xl font-bold mb-4 text-[#1a1a1a]">Assign Candidate</h3>
-                
+                <h3 class="text-xl font-bold mb-4 text-[#1a1a1a] cursor-move select-none">Assign Candidate</h3>
                 <input id="candidateInput" type="text" placeholder="Search by name or email" 
                        class="w-full px-3 py-2 border border-gray-300 rounded mb-2" />
                 <ul id="candidateSuggestions" class="border border-gray-300 rounded max-h-40 overflow-y-auto hidden bg-white mb-4"></ul>
-                
                 <button id="confirmAssignBtn" class="bg-black text-white px-4 py-2 rounded">Assign</button>
-                
-                <div id="assignedCandidates" class="mt-4 space-y-2"></div>
+                <div id="assignedCandidates" class="mt-4 space-y-2 max-h-60 overflow-y-auto border-t pt-2"></div>
+                <div class="text-xs text-gray-400 mt-2">Drag the bottom-right corner to resize. Scroll to see all assigned candidates.</div>
               </div>
             </div>
 </body>
