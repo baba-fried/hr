@@ -155,7 +155,6 @@
 
         <!-- Filters Section -->
         <div class="bg-white p-4 rounded-lg shadow mb-6">
-            <h3 class="text-lg font-semibold mb-4 text-[#1a1a1a]">Filters</h3>
             <div class="flex flex-wrap gap-4">
                 <!-- Test Name Filter -->
                 <div>
@@ -166,16 +165,12 @@
                 <div>
                     <label class="block text-sm font-medium mb-1 text-[#1a1a1a]">Role</label>
                     <div class="multiselect">
-                        <div id="role-select" class="p-2 border border-[#d1d5db] rounded cursor-pointer text-[#1a1a1a]">
-                            Select Roles
+                        <div id="role-select" class="p-2 border border-[#d1d5db] rounded cursor-pointer text-[#1a1a1a] flex items-center min-w-[160px]">
+                            <span id="role-select-label">Select Roles</span>
+                            <svg class="ml-2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </div>
-                        <div id="role-options" class="multiselect-options">
-                            <label><input type="checkbox" value="Digital Marketing" class="mr-2">Digital Marketing</label>
-                            <label><input type="checkbox" value="SDE" class="mr-2">SDE</label>
-                            <label><input type="checkbox" value="Business Analyst" class="mr-2">Business Analyst</label>
-                            <label><input type="checkbox" value="Data Analyst" class="mr-2">Data Analyst</label>
-                            <label><input type="checkbox" value="Solution Engineer" class="mr-2">Solution Engineer</label>
-                        </div>
+                        <div id="role-options" class="multiselect-options"></div>
+                        <div id="selected-roles-chips" class="flex flex-wrap gap-1 mt-2"></div>
                     </div>
                 </div>
                 <!-- Clear Filters Button -->
@@ -783,42 +778,58 @@ async function deleteTest(testId) {
         const roleSelect = document.getElementById('role-select');
         const roleOptions = document.getElementById('role-options');
         const clearFiltersBtn = document.getElementById('clear-filters');
+        const selectedRolesChips = document.getElementById('selected-roles-chips');
+        const roleSelectLabel = document.getElementById('role-select-label');
 
-        // Test Name Filter
-        testNameInput.addEventListener('input', () => {
-            filters.testName = testNameInput.value.trim().toLowerCase();
-            loadTests();
-        });
-
-        // Role Filter (Multi-select)
-        roleSelect.addEventListener('click', () => {
+        function updateRoleChips() {
+            selectedRolesChips.innerHTML = '';
+            filters.roles.forEach(role => {
+                const chip = document.createElement('span');
+                chip.className = 'bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs flex items-center gap-1';
+                chip.innerHTML = `${role} <button type="button" class="ml-1 text-blue-500 hover:text-blue-700 remove-role-chip" data-role="${role}">&times;</button>`;
+                selectedRolesChips.appendChild(chip);
+            });
+            roleSelectLabel.textContent = filters.roles.length ? filters.roles.join(', ') : 'Select Roles';
+        }
+        roleSelect.addEventListener('click', (e) => {
+            e.stopPropagation();
             roleOptions.style.display = roleOptions.style.display === 'block' ? 'none' : 'block';
         });
-
-        roleOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                filters.roles = Array.from(roleOptions.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.value);
-                roleSelect.textContent = filters.roles.length > 0 ? filters.roles.join(', ') : 'Select Roles';
-                loadTests();
-            });
-        });
-
-        // Close role options when clicking outside
         document.addEventListener('click', (e) => {
             if (!roleSelect.contains(e.target) && !roleOptions.contains(e.target)) {
                 roleOptions.style.display = 'none';
             }
         });
-
-        // Clear Filters
+        roleOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                filters.roles = Array.from(roleOptions.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                updateRoleChips();
+                loadTests();
+            });
+        });
+        selectedRolesChips.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-role-chip')) {
+                const role = e.target.dataset.role;
+                const cb = Array.from(roleOptions.querySelectorAll('input[type="checkbox"]')).find(cb => cb.value === role);
+                if (cb) cb.checked = false;
+                filters.roles = filters.roles.filter(r => r !== role);
+                updateRoleChips();
+                loadTests();
+            }
+        });
+        testNameInput.addEventListener('input', () => {
+            filters.testName = testNameInput.value.trim().toLowerCase();
+            loadTests();
+        });
         clearFiltersBtn.addEventListener('click', () => {
             filters = { testName: '', roles: [] };
             testNameInput.value = '';
-            roleSelect.textContent = 'Select Roles';
             roleOptions.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateRoleChips();
             loadTests();
         });
+        // Initialize chips on page load
+        updateRoleChips();
 
         // Initial Load
         fetchTestsFromBackend();
@@ -1050,6 +1061,49 @@ async function deleteTest(testId) {
                 customRoleInput.required = false;
             }
         });
+
+        async function fetchRoles() {
+            let roles = [];
+            try {
+                // Try to fetch from /api/roles
+                const res = await fetch('/api/roles');
+                if (res.ok) {
+                    roles = await res.json();
+                } else {
+                    // Fallback: fetch all tests and extract unique roles
+                    const testsRes = await fetch('/api/tests');
+                    if (testsRes.ok) {
+                        const tests = await testsRes.json();
+                        roles = [...new Set(tests.map(t => t.role).filter(Boolean))];
+                    }
+                }
+            } catch (err) {
+                roles = [];
+            }
+            return roles;
+        }
+        async function renderRoleOptions() {
+            const roleOptions = document.getElementById('role-options');
+            roleOptions.innerHTML = '<div class="px-4 py-2 text-gray-400 text-sm">Loading...</div>';
+            const roles = await fetchRoles();
+            if (!roles.length) {
+                roleOptions.innerHTML = '<div class="px-4 py-2 text-gray-400 text-sm">No roles found</div>';
+                return;
+            }
+            roleOptions.innerHTML = roles.map(role =>
+                `<label><input type="checkbox" value="${role}" class="mr-2">${role}</label>`
+            ).join('');
+            // Re-attach event listeners for checkboxes
+            roleOptions.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    filters.roles = Array.from(roleOptions.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    updateRoleChips();
+                    loadTests();
+                });
+            });
+        }
+        // Call renderRoleOptions on page load
+        renderRoleOptions();
 
     </script>
             //assign modal
