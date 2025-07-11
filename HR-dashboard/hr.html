@@ -102,26 +102,23 @@
     <h1 class="text-4xl font-bold mb-6">HR Dashboard</h1>
 
     <!-- Permanent Test Dropdown -->
-    <div class="mb-6 flex items-center gap-4">
-      <label for="permanent-test-dropdown" class="font-semibold">Select Test:</label>
-      <select id="permanent-test-dropdown" class="w-64 p-2 border border-gray-300 rounded">
-        <option value="">Loading tests...</option>
-      </select>
-    </div>
-
+    <!-- Removed the Select Test dropdown as per user request -->
+    
     <!-- Search and Filter -->
-    <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-wrap gap-4 items-center">
-      <input type="text" id="searchName" placeholder="Search by Name" class="w-64">
-      <input type="text" id="searchTime" placeholder="Search by Time (e.g., 10:00 AM)" class="w-64">
-      <select id="sortBy" class="w-48">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center gap-4 bg-white p-6 rounded-xl shadow border border-gray-200">
+      <div class="relative w-full sm:w-72">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" id="searchName" placeholder="Search by Name" class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition" />
+      </div>
+      <select id="sortBy" class="w-48 border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
         <option value="">Sort By</option>
         <option value="name-asc">Name A-Z</option>
         <option value="name-desc">Name Z-A</option>
-        <option value="time-asc">Time Asc</option>
-        <option value="time-desc">Time Desc</option>
       </select>
-      <button onclick="applySearch()">Search</button>
-      <button onclick="clearSearch()" class="bg-gray-600 hover:bg-gray-800">Clear</button>
+      <button onclick="applySearch()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg shadow-sm transition">Search</button>
+      <button onclick="clearSearch()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-5 rounded-lg shadow-sm transition">Clear</button>
     </div>
 
     <!-- Users Table -->
@@ -157,26 +154,15 @@
 let tests = [];
 let users = [];
 let assignedCandidates = []; // userIds assigned to selected test
-let selectedTestId = "";
 
-// Fetch all tests and populate permanent dropdown
-async function fetchAndPopulateTestsDropdown() {
+// Fetch all tests (for assign popup only)
+async function fetchAllTests() {
   try {
     const res = await fetch("/api/tests");
     const data = await res.json();
     tests = Array.isArray(data.tests) ? data.tests : data;
-    const dropdown = document.getElementById('permanent-test-dropdown');
-    if (tests.length) {
-      dropdown.innerHTML = tests.map(t => `<option value="${t._id}">${t.name}</option>`).join('');
-      selectedTestId = tests[0]._id;
-      dropdown.value = selectedTestId;
-    } else {
-      dropdown.innerHTML = `<option disabled>No tests available</option>`;
-      selectedTestId = "";
-    }
   } catch (err) {
-    document.getElementById('permanent-test-dropdown').innerHTML = `<option disabled>Error loading tests</option>`;
-    selectedTestId = "";
+    tests = [];
   }
 }
 
@@ -187,67 +173,19 @@ async function fetchUsers() {
     const data = await res.json();
     users = data.users;
     renderUsers(users);
-    await updateAssignedCandidatesAndButtons();
+    // No need to update assigned candidates for a selected test
   } catch (err) {
     console.error("Error fetching users:", err);
     alert("Failed to load candidates.");
   }
 }
 
-// Fetch assigned candidates for the selected test
-async function fetchAssignedCandidates(testId) {
-  if (!testId) {
-    assignedCandidates = [];
-    return;
-  }
-  try {
-    const res = await fetch(`/api/tests/${testId}`);
-    const data = await res.json();
-    // Try to get assigned candidates from different possible keys
-    assignedCandidates = Array.isArray(data.assigned) ? data.assigned
-      : Array.isArray(data.candidates) ? data.candidates
-      : Array.isArray(data.assignedCandidates) ? data.assignedCandidates
-      : [];
-    // If assignedCandidates is array of objects with _id, map to _id
-    if (assignedCandidates.length && typeof assignedCandidates[0] === 'object') {
-      assignedCandidates = assignedCandidates.map(u => u._id || u.id || u);
-    }
-  } catch (err) {
-    assignedCandidates = [];
-  }
-}
-
-// Update Assign buttons based on assignedCandidates
-function updateAssignButtons() {
-  document.querySelectorAll('.assign-candidate-btn').forEach(btn => {
-    const userId = btn.getAttribute('data-user-id');
-    const assigned = assignedCandidates.includes(userId);
-    if (assigned) {
-      btn.textContent = 'Assigned';
-      btn.classList.remove('bg-blue-600', 'bg-blue-500');
-      btn.classList.add('bg-gray-400');
-      btn.disabled = true;
-      if (btn.nextElementSibling) btn.nextElementSibling.style.display = 'inline';
-    } else {
-      btn.textContent = 'Assign';
-      btn.classList.add('bg-blue-600');
-      btn.classList.remove('bg-gray-400');
-      btn.disabled = false;
-      if (btn.nextElementSibling) btn.nextElementSibling.style.display = 'none';
-    }
-  });
-}
-
-// Fetch assigned candidates and update buttons
-async function updateAssignedCandidatesAndButtons() {
-  await fetchAssignedCandidates(selectedTestId);
-  updateAssignButtons();
-}
-
 function renderUsers(data) {
   const table = document.getElementById("userTable");
   table.innerHTML = "";
   data.forEach(user => {
+    // Count assigned tests for this user
+    const numAssigned = Array.isArray(user.assignedTests) ? user.assignedTests.length : 0;
     table.innerHTML += `
       <tr>
         <td class="p-3">${user._id}</td>
@@ -256,17 +194,18 @@ function renderUsers(data) {
         <td class="p-3">
           <a href="${user.resumeUrl || '#'}" class="download-btn" download>Download</a>
         </td>
-        <td class="p-3">
+        <td class="p-3 flex items-center gap-2">
           <button class="assign-candidate-btn bg-blue-600 text-white px-3 py-1 rounded"
             data-user-id="${user._id}" data-user-name="${user.fullName}" data-user-email="${user.email}">
             Assign
           </button>
-          <span class="assign-status ml-2 text-green-600 text-sm" style="display:none;">All Tests Assigned</span>
+          <button class="view-assigned-btn bg-green-50 border border-green-400 text-green-700 font-semibold px-3 py-1 rounded hover:bg-green-100 transition" data-user-id="${user._id}" data-user-name="${user.fullName}">
+            View (${numAssigned})
+          </button>
         </td>
       </tr>
     `;
   });
-  updateAssignButtons();
 }
 
 function parseTime(timeStr) {
@@ -279,26 +218,18 @@ function parseTime(timeStr) {
 
 function applySearch() {
   const nameInput = document.getElementById("searchName").value.toLowerCase();
-  const timeInput = document.getElementById("searchTime").value.toLowerCase();
   const sortBy = document.getElementById("sortBy").value;
 
   let filtered = users.filter(user =>
-    user.name.toLowerCase().includes(nameInput) &&
-    user.time.toLowerCase().includes(timeInput)
+    (user.fullName || user.name || '').toLowerCase().includes(nameInput)
   );
 
   switch (sortBy) {
     case "name-asc":
-      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      filtered.sort((a, b) => (a.fullName || a.name).localeCompare(b.fullName || b.name));
       break;
     case "name-desc":
-      filtered.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-    case "time-asc":
-      filtered.sort((a, b) => parseTime(a.time) - parseTime(b.time));
-      break;
-    case "time-desc":
-      filtered.sort((a, b) => parseTime(b.time) - parseTime(a.time));
+      filtered.sort((a, b) => (b.fullName || b.name).localeCompare(a.fullName || a.name));
       break;
   }
 
@@ -307,71 +238,14 @@ function applySearch() {
 
 function clearSearch() {
   document.getElementById("searchName").value = "";
-  document.getElementById("searchTime").value = "";
   document.getElementById("sortBy").value = "";
   renderUsers(users);
 }
 
 window.onload = async () => {
-  await fetchAndPopulateTestsDropdown();
+  await fetchAllTests();
   await fetchUsers();
-  await updateAssignedCandidatesAndButtons();
 };
-
-// Permanent test dropdown change handler
-document.addEventListener('DOMContentLoaded', function() {
-  const dropdown = document.getElementById('permanent-test-dropdown');
-  dropdown.addEventListener('change', async function() {
-    selectedTestId = this.value;
-    await updateAssignedCandidatesAndButtons();
-  });
-});
-
-// Universal logout confirmation for all HR-dashboard pages
-function setupLogoutButton() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            // Use a custom modal for confirmation with Cancel/Logout buttons
-            if (document.getElementById('logout-modal')) return; // Prevent multiple modals
-
-            const modal = document.createElement('div');
-            modal.id = 'logout-modal';
-            modal.style.position = 'fixed';
-            modal.style.top = 0;
-            modal.style.left = 0;
-            modal.style.width = '100vw';
-            modal.style.height = '100vh';
-            modal.style.background = 'rgba(0,0,0,0.4)';
-            modal.style.display = 'flex';
-            modal.style.alignItems = 'center';
-            modal.style.justifyContent = 'center';
-            modal.style.zIndex = 9999;
-            modal.innerHTML = `
-              <div style="background:#fff;padding:2rem 2.5rem;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);max-width:350px;text-align:center;">
-                <h2 class="text-xl font-bold mb-4">Log out?</h2>
-                <p class="mb-6">Are you sure you want to log out?</p>
-                <div style="display:flex;gap:1rem;justify-content:center;">
-                  <button id="cancel-logout" style="padding:0.5rem 1.5rem;border-radius:8px;background:#e5e7eb;color:#222;border:none;font-weight:500;cursor:pointer;">Cancel</button>
-                  <button id="confirm-logout" style="padding:0.5rem 1.5rem;border-radius:8px;background:#000;color:#fff;border:none;font-weight:500;cursor:pointer;">Logout</button>
-                </div>
-              </div>
-            `;
-            document.body.appendChild(modal);
-
-            document.getElementById('cancel-logout').onclick = function() {
-                document.body.removeChild(modal);
-            };
-            document.getElementById('confirm-logout').onclick = function() {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.href = '/login-page/login.html';
-            };
-        });
-    }
-}
-setupLogoutButton();
 
 // Assign button logic with test selection modal
 let assignPopup = null;
@@ -384,7 +258,7 @@ document.addEventListener('click', async function(e) {
     const userName = btn.getAttribute('data-user-name');
     const userEmail = btn.getAttribute('data-user-email');
     // Always fetch latest tests for popup dropdown
-    await fetchAndPopulateTestsDropdown();
+    await fetchAllTests();
 
     // Remove any existing popup
     if (assignPopup) assignPopup.remove();
@@ -417,7 +291,7 @@ document.addEventListener('click', async function(e) {
 
     // Build test dropdown for popup
     let testOptions = tests.length
-      ? tests.map(t => `<option value="${t._id}"${t._id===selectedTestId?' selected':''}>${t.name}</option>`).join('')
+      ? tests.map(t => `<option value="${t._id}">${t.name}</option>`).join('')
       : `<option disabled>No tests available</option>`;
 
     assignPopup.innerHTML = `
@@ -469,11 +343,6 @@ document.addEventListener('click', async function(e) {
         });
         const result = await res.json();
         if (res.ok) {
-          // If assigned to the currently selected test, update UI
-          if (testId === selectedTestId) {
-            assignedCandidates.push(userId);
-            updateAssignButtons();
-          }
           alert('Assignment email sent to ' + userName + ' for test "' + testName + '"!');
           assignPopup.remove();
           assignPopupBackdrop.remove();
@@ -490,6 +359,151 @@ document.addEventListener('click', async function(e) {
     };
   }
 });
+
+// Listen for test creation form submission and refresh tests list after creation
+// (Assume the form has id='create-test-form')
+const createTestForm = document.getElementById('create-test-form');
+if (createTestForm) {
+  createTestForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    // ...existing form submission logic...
+    // After successful creation:
+    await fetchAllTests();
+    // Optionally, show a notification or reset the form
+  });
+}
+
+// Add event delegation for .view-assigned-btn click to open the assigned tests popup
+// (Place after the existing event delegation for assign-status)
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.view-assigned-btn');
+  if (btn) {
+    const userId = btn.getAttribute('data-user-id');
+    const userName = btn.getAttribute('data-user-name');
+    if (userId) {
+      showAssignedTestsPopup(userId, userName);
+    }
+  }
+});
+
+// Universal logout confirmation for all HR-dashboard pages
+function setupLogoutButton() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            // Use a custom modal for confirmation with Cancel/Logout buttons
+            if (document.getElementById('logout-modal')) return; // Prevent multiple modals
+
+            const modal = document.createElement('div');
+            modal.id = 'logout-modal';
+            modal.style.position = 'fixed';
+            modal.style.top = 0;
+            modal.style.left = 0;
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.background = 'rgba(0,0,0,0.4)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = 9999;
+            modal.innerHTML = `
+              <div style="background:#fff;padding:2rem 2.5rem;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);max-width:350px;text-align:center;">
+                <h2 class="text-xl font-bold mb-4">Log out?</h2>
+                <p class="mb-6">Are you sure you want to log out?</p>
+                <div style="display:flex;gap:1rem;justify-content:center;">
+                  <button id="cancel-logout" style="padding:0.5rem 1.5rem;border-radius:8px;background:#e5e7eb;color:#222;border:none;font-weight:500;cursor:pointer;">Cancel</button>
+                  <button id="confirm-logout" style="padding:0.5rem 1.5rem;border-radius:8px;background:#000;color:#fff;border:none;font-weight:500;cursor:pointer;">Logout</button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('cancel-logout').onclick = function() {
+                document.body.removeChild(modal);
+            };
+            document.getElementById('confirm-logout').onclick = function() {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = '/login-page/login.html';
+            };
+        });
+    }
+}
+setupLogoutButton();
+
+async function showAssignedTestsPopup(userId, userName) {
+  // Remove any existing popup
+  const existing = document.getElementById('assigned-tests-popup');
+  const existingBackdrop = document.getElementById('assigned-tests-popup-backdrop');
+  if (existing) existing.remove();
+  if (existingBackdrop) existingBackdrop.remove();
+
+  // Create backdrop
+  const backdrop = document.createElement('div');
+  backdrop.id = 'assigned-tests-popup-backdrop';
+  backdrop.style.position = 'fixed';
+  backdrop.style.top = 0;
+  backdrop.style.left = 0;
+  backdrop.style.width = '100vw';
+  backdrop.style.height = '100vh';
+  backdrop.style.background = 'rgba(0,0,0,0.4)';
+  backdrop.style.zIndex = 9998;
+  document.body.appendChild(backdrop);
+
+  // Create popup
+  const popup = document.createElement('div');
+  popup.id = 'assigned-tests-popup';
+  popup.style.position = 'fixed';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.style.background = '#fff';
+  popup.style.padding = '2rem 2.5rem';
+  popup.style.borderRadius = '12px';
+  popup.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
+  popup.style.zIndex = 9999;
+  popup.style.maxWidth = '400px';
+  popup.style.textAlign = 'center';
+
+  popup.innerHTML = `
+    <button id="close-assigned-tests-popup" style="position:absolute;top:10px;right:16px;font-size:22px;background:none;border:none;cursor:pointer;color:#888;">&times;</button>
+    <h2 class="text-xl font-bold mb-4">Assigned Tests</h2>
+    <p class="mb-2"><strong>Candidate:</strong> ${userName}</p>
+    <div id="assigned-tests-list" class="mb-4">Loading...</div>
+    <div class="flex gap-2 justify-center mt-6">
+      <button id="close-assigned-tests-popup-btn" class="bg-gray-300 text-black px-4 py-2 rounded">Close</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  // Close handlers
+  document.getElementById('close-assigned-tests-popup').onclick = function() {
+    popup.remove();
+    backdrop.remove();
+  };
+  document.getElementById('close-assigned-tests-popup-btn').onclick = function() {
+    popup.remove();
+    backdrop.remove();
+  };
+
+  // Fetch assigned tests for this user
+  try {
+    const res = await fetch(`/api/users/${userId}/assigned-tests`);
+    const data = await res.json();
+    const listDiv = document.getElementById('assigned-tests-list');
+    if (res.ok && Array.isArray(data.assignedTests) && data.assignedTests.length) {
+      listDiv.innerHTML = `<ul style='text-align:left;max-height:200px;overflow:auto;padding-left:1.2em;'>` +
+        data.assignedTests.map(t => `<li style='margin-bottom:0.5em;'><strong>${t.name}</strong>${t.assignedAt ? ` <span style='color:#888;font-size:0.9em;'>(Assigned: ${new Date(t.assignedAt).toLocaleString()})</span>` : ''}</li>`).join('') +
+        `</ul>`;
+    } else {
+      listDiv.textContent = 'No tests assigned.';
+    }
+  } catch (err) {
+    const listDiv = document.getElementById('assigned-tests-list');
+    listDiv.textContent = 'Failed to load assigned tests.';
+  }
+}
   </script>
   <script src="/user-dashboard/user-page.js"></script>
 </body>

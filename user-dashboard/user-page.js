@@ -657,42 +657,6 @@ async function initializeDashboardCharts() {
     } catch (err) {
         // fallback to static data
     }
-
-    // Performance Trends Chart
-    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-    window.performanceChart = new Chart(performanceCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Mock Tests',
-                data: trends,
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Score Percentage'
-                    }
-                }
-            }
-        }
-    });
-
     // Score Breakdown Chart
     const breakdownCtx = document.getElementById('scoreBreakdownChart').getContext('2d');
     window.scoreBreakdownChart = new Chart(breakdownCtx, {
