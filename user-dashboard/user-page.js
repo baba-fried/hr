@@ -45,10 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const userDropdown = document.getElementById('userDropdown');
 
     // Toggle dropdown on click
-    userProfileButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        userDropdown.classList.toggle('active');
-    });
+    //userProfileButton.addEventListener('click', (e) => {
+      //  e.stopPropagation();
+      //  userDropdown.classList.toggle('active');
+   // });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
