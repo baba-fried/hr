@@ -45,10 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const userDropdown = document.getElementById('userDropdown');
 
     // Toggle dropdown on click
-    userProfileButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        userDropdown.classList.toggle('active');
-    });
+    //userProfileButton.addEventListener('click', (e) => {
+      //  e.stopPropagation();
+      //  userDropdown.classList.toggle('active');
+   // });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
@@ -101,12 +101,15 @@ function handleDropdownKeyboard(e) {
 }
 
 // Search Functionality
+// Safe Search Functionality
 const searchBar = document.querySelector('.search-bar input');
-searchBar.addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    // Add your search logic here
-    console.log('Searching for:', searchTerm);
-});
+if (searchBar) {
+    searchBar.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        console.log('Searching for:', searchTerm);
+    });
+}
+
 
 // Section Navigation
 function initializeSectionNavigation() {
@@ -274,6 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSectionNavigation();
     initializeDashboardCharts();
     initializeMockTestsCharts();
+    console.log('🚀 DOMContentLoaded fired — trying to load upcoming tests');
+    loadUpcomingTests();
 });
 
 // Exam Scheduling
@@ -579,38 +584,58 @@ async function loadDashboardStats() {
 // Fetch and populate upcoming tests table
 async function loadUpcomingTests() {
     try {
-        const res = await fetch('/api/tests/my-tests', {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+      const res = await fetch('http://localhost:5001/api/tests/my-tests', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+  
+      if (!res.ok) throw new Error('Failed to fetch assigned tests');
+  
+      const tests = await res.json();
+      console.log('✅ All fetched tests:', tests);
+  
+      const tbody = document.querySelector('#upcoming-tests-table tbody');
+      tbody.innerHTML = '';
+  
+      const token = localStorage.getItem('token');
+      const userId = JSON.parse(atob(token.split('.')[1])).userId;
+      console.log('👤 Decoded userId from token:', userId);
+  
+      const assignedTests = tests.filter(test => {
+        const includesUser = test.candidates?.includes(userId);
+        console.log(`🔍 Test "${test.name}" includes user?`, includesUser);
+        return includesUser;
+      });
+  
+      if (assignedTests.length === 0) {
+        console.warn('⚠️ No tests matched user ID!');
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="2" class="text-center py-4 text-gray-500">
+              No tests assigned to you.
+            </td>
+          </tr>
+        `;
+      } else {
+        console.log('✅ Assigned tests:', assignedTests);
+        assignedTests.forEach(test => {
+          tbody.innerHTML += `
+            <tr class="border-b border-gray-100">
+              <td class="py-3">${test.name}</td>
+              <td class="py-3">
+                <a href="#" class="text-blue-600 hover:underline">Start Test</a>
+              </td>
+            </tr>
+          `;
         });
-
-        if (!res.ok) throw new Error('Failed to fetch assigned tests');
-
-        const tests = await res.json();
-        const tbody = document.querySelector('#upcoming-tests-table tbody');
-        tbody.innerHTML = '';
-
-        tests.forEach(test => {
-            const date = new Date(test.dateAdded);
-            const formattedDate = date.toLocaleDateString();
-            const formattedTime = date.toLocaleTimeString();
-
-            tbody.innerHTML += `
-                <tr class="border-b border-gray-100">
-                    <td class="py-3">${test.name}</td>
-                    <td class="py-3">${formattedDate}</td>
-                    <td class="py-3">${formattedTime}</td>
-                    <td class="py-3">
-                        <a href="#" class="text-blue-600 hover:underline">Start Test</a>
-                    </td>
-                </tr>
-            `;
-        });
+      }
     } catch (err) {
-        console.error('Error:', err);
+      console.error('❌ Error loading upcoming tests:', err);
     }
-}
+  }
+  
+  
 
   
 

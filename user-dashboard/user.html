@@ -484,67 +484,86 @@
         <div id="exam-content" class="content-section" style="display: none;">
             <h1 class="text-2xl font-bold mb-6">Exam Portal</h1>
             <p class="text-gray-600 mb-8">Manage your exams, view upcoming tests, and practice with mock tests in one place.</p>
-
+          
             <!-- Informative Overview -->
             <div class="mb-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow">
-                        <h3 class="font-semibold text-blue-700 mb-2 flex items-center">
-                            <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><circle cx="10" cy="10" r="9" stroke-width="2"/><path d="M10 6v4l2 2" stroke-width="2"/></svg>
-                            Upcoming Exams
-                        </h3>
-                        <p class="text-gray-700">Stay updated with your scheduled exams and never miss a deadline. Check the table below for your next assessments.</p>
-                    </div>
-                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
-                        <h3 class="font-semibold text-green-700 mb-2 flex items-center">
-                            <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><rect x="3" y="3" width="14" height="14" rx="2" stroke-width="2"/><path d="M8 9h4M8 13h4" stroke-width="2"/></svg>
-                            Exam Tips
-                        </h3>
-                        <ul class="list-disc ml-5 text-gray-700 text-sm">
-                            <li>Review your syllabus and focus on weak areas.</li>
-                            <li>Practice with mock tests for better time management.</li>
-                            <li>Read instructions carefully before starting any exam.</li>
-                        </ul>
-                    </div>
-                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
-                        <h3 class="font-semibold text-yellow-700 mb-2 flex items-center">
-                            <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><path d="M12 8v4l3 3" stroke-width="2"/><circle cx="12" cy="12" r="9" stroke-width="2"/></svg>
-                            Results & Feedback
-                        </h3>
-                        <p class="text-gray-700">After your exams, check back here for results and personalized feedback to help you improve further.</p>
-                    </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow">
+                  <h3 class="font-semibold text-blue-700 mb-2 flex items-center">
+                    <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
+                      <circle cx="10" cy="10" r="9" stroke-width="2" />
+                      <path d="M10 6v4l2 2" stroke-width="2" />
+                    </svg>
+                    Upcoming Exams
+                  </h3>
+                  <p class="text-gray-700">Stay updated with your scheduled exams and never miss a deadline. Check the table below for your next assessments.</p>
                 </div>
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
+                  <h3 class="font-semibold text-green-700 mb-2 flex items-center">
+                    <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
+                      <rect x="3" y="3" width="14" height="14" rx="2" stroke-width="2" />
+                      <path d="M8 9h4M8 13h4" stroke-width="2" />
+                    </svg>
+                    Exam Tips
+                  </h3>
+                  <ul class="list-disc ml-5 text-gray-700 text-sm">
+                    <li>Review your syllabus and focus on weak areas.</li>
+                    <li>Practice with mock tests for better time management.</li>
+                    <li>Read instructions carefully before starting any exam.</li>
+                  </ul>
+                </div>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
+                  <h3 class="font-semibold text-yellow-700 mb-2 flex items-center">
+                    <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
+                      <path d="M12 8v4l3 3" stroke-width="2" />
+                      <circle cx="12" cy="12" r="9" stroke-width="2" />
+                    </svg>
+                    Results & Feedback
+                  </h3>
+                  <p class="text-gray-700">After your exams, check back here for results and personalized feedback to help you improve further.</p>
+                </div>
+              </div>
             </div>
-
+          
+            <!-- ✅ WORKING Upcoming Tests Section from OLD -->
             <div class="border border-red-400 rounded-lg p-6 mb-8 bg-white">
-                <h2 class="text-xl font-semibold mb-4">Exam Information</h2>
-            
-                <!-- Upcoming Tests Table -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-2">Upcoming Tests</h3>
-                    <table class="w-full" id="upcoming-tests-table">
-                        <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50">
-                                <th class="text-left py-2">Test Name</th>
-                                <th class="text-left py-2">Date</th>
-                                <th class="text-left py-2">Time</th>
-                                <th class="text-left py-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                    <div class="mt-2 text-xs text-gray-500">
-                        <span class="font-semibold">Note:</span> Please arrive 5 minutes before the scheduled time.
-                    </div>
+              <h2 class="text-xl font-semibold mb-4">Exam Information</h2>
+              <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2">Upcoming Tests</h3>
+                <table class="w-full" id="upcoming-tests-table">
+                  <thead>
+                    <tr class="border-b border-gray-200 bg-gray-50">
+                      <th class="text-left py-2">Test Name</th>
+                      <th class="text-left py-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+                <div class="mt-2 text-xs text-gray-500">
+                  <span class="font-semibold">Note:</span> Please arrive 5 minutes before the scheduled time.
                 </div>
+              </div>
             </div>
-            
-            <!-- 📦 Mock Tests Container -->
+          
+            <!-- 🔄 Retain this if you have mock test cards under exam-content -->
             <div class="border border-yellow-400 rounded-lg p-6 mb-8 bg-white">
-                <h2 class="text-xl font-semibold mb-4">Mock Tests</h2>
-                <p class="text-gray-700 mb-2 text-sm">Practice with mock tests to boost your confidence before the real exam.</p>
+              <h2 class="text-xl font-semibold mb-4">Mock Tests</h2>
+              <p class="text-gray-700 mb-2 text-sm">Practice with mock tests to boost your confidence before the real exam.</p>
+          
+              <!-- Mock Test History Table -->
+              <table class="w-full mb-8" id="mock-tests-table">
+                <tbody>
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+          
+              <!-- Available Mock Tests Cards -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="exam-mock-test-cards"></div>
+            </div>
+          </div>
+          
             
                 <!-- Mock Test History Table -->
                 <table class="w-full mb-8" id="mock-tests-table">
@@ -592,6 +611,7 @@
     <script>
       window.addEventListener('load', hideLoader);
     </script>
+    <script src="user-page.js"></script>
 </body>
 <script>
     // Add section switching functionality
@@ -883,6 +903,19 @@ if (!userId) {
         console.error('Error marking test completed after close:', err);
     }
     };
+
+    function disableCompletedTests(results) {
+    const completedTests = new Set(results.map(r => r.testName));
+    document.querySelectorAll('.start-test-btn').forEach(btn => {
+        const testName = btn.getAttribute('data-test');
+        if (completedTests.has(testName)) {
+            btn.disabled = true;
+            btn.classList.remove('hover:bg-blue-700', 'bg-blue-600');
+            btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            btn.textContent = 'Completed';
+        }
+    });
+}
     function updateMockTestStats(results) {
     const scores = results.map(r => Number(r.score));
     const totals = results.map(r => Number(r.total));
@@ -899,18 +932,6 @@ if (!userId) {
     }
     const successRate = scores.length ? Math.round((passed / scores.length) * 100) : 0;
 
-    function disableCompletedTests(results) {
-    const completedTests = new Set(results.map(r => r.testName));
-    document.querySelectorAll('.start-test-btn').forEach(btn => {
-        const testName = btn.getAttribute('data-test');
-        if (completedTests.has(testName)) {
-            btn.disabled = true;
-            btn.classList.remove('hover:bg-blue-700', 'bg-blue-600');
-            btn.classList.add('bg-gray-400', 'cursor-not-allowed');
-            btn.textContent = 'Completed';
-        }
-    });
-}
 
 
     // Update dashboard elements
