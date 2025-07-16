@@ -1,5 +1,6 @@
 const startScreen = document.getElementById('start-screen');
 const examContainer = document.getElementById('exam-container');
+
 const startExamBtn = document.getElementById('start-exam-btn');
 const webcamFeed = document.getElementById('webcam-feed');
 const audioLevel = document.getElementById('audio-level');
@@ -19,6 +20,7 @@ let questions = [];
 let current = 0;
 let answers = [];
 let score = 0;
+
 
 function getQueryParam(param) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -71,10 +73,12 @@ function hideViolation() {
   violationPopup.style.display = 'none';
 }
 
+
 async function startExam() {
   startScreen.style.display = 'none';
   examContainer.style.display = 'block';
   document.documentElement.requestFullscreen();
+
 
   await fetchQuestions();
   if (questions.length > 0) {
@@ -82,6 +86,35 @@ async function startExam() {
     showQuestion();
   } else {
     questionSection.innerHTML = '<p>No questions found for this test.</p>';
+  }
+}
+
+
+function showPopupMessage(message, type = 'info') {
+  const popup = document.createElement('div');
+  popup.className = `popup-message popup-${type}`;
+  popup.style.position = 'fixed';
+  popup.style.top = '30px';
+  popup.style.left = '50%';
+  popup.style.transform = 'translateX(-50%)';
+  popup.style.background = type === 'error' ? '#ef4444' : '#2563eb';
+  popup.style.color = '#fff';
+  popup.style.padding = '1rem 2rem';
+  popup.style.borderRadius = '8px';
+  popup.style.zIndex = 2000;
+  popup.style.fontSize = '1.1rem';
+  popup.textContent = message;
+  document.body.appendChild(popup);
+  setTimeout(() => { popup.style.opacity = '0'; setTimeout(() => popup.remove(), 500); }, 3000);
+}
+
+async function requestPermissions() {
+  try {
+    await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    return true;
+  } catch (err) {
+    showPopupMessage('Webcam and microphone permissions are required to start the exam.', 'error');
+    return false;
   }
 }
 
@@ -98,7 +131,11 @@ async function postResult() {
         answers
       })
     });
+
+    showPopupMessage('Your result has been submitted!', 'info');
   } catch (err) {
+    showPopupMessage('Failed to submit result to server.', 'error');
+
     console.error('Failed to post result:', err);
   }
 }
@@ -118,6 +155,7 @@ startExamBtn.addEventListener('click', async () => {
 
 closePopupBtn.addEventListener('click', () => {
   hideViolation();
+
 });
 
 document.addEventListener('fullscreenchange', () => {
@@ -156,7 +194,7 @@ nextBtn.onclick = (e) => {
   e.preventDefault();
   const selected = optionsForm.querySelector('input[name="option"]:checked');
   if (!selected) {
-    alert('Please select an option.');
+    showPopupMessage('Please select an option.', 'error');
     return;
   }
   answers[current] = parseInt(selected.value);
@@ -168,7 +206,7 @@ submitBtn.onclick = async (e) => {
   e.preventDefault();
   const selected = optionsForm.querySelector('input[name="option"]:checked');
   if (!selected) {
-    alert('Please select an option.');
+    showPopupMessage('Please select an option.', 'error');
     return;
   }
   answers[current] = parseInt(selected.value);
@@ -235,8 +273,10 @@ async function startProctoring() {
     console.error('Error starting proctoring:', error);
     showViolation('Could not start proctoring. Please ensure you have a webcam and microphone connected and have granted the necessary permissions.');
   }
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     testHeader.innerHTML = `<h2>Test: ${testName}</h2>`;
 });
+
