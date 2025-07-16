@@ -1,120 +1,127 @@
-// Dashboard Index JavaScript
+// Helper to get query param
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize sidebar navigation
-    initializeSidebar();
-    
-    // Initialize dashboard components
-    initializeDashboard();
-    
-    // Initialize notifications
-    initializeNotifications();
+const testName = getQueryParam('testName');
+const userId = localStorage.getItem('userId') || (JSON.parse(localStorage.getItem('userData')||'{}').userId);
+let questions = [];
+let current = 0;
+let answers = [];
+let score = 0;
+
+const testHeader = document.getElementById('test-header');
+const questionSection = document.getElementById('question-section');
+const questionText = document.getElementById('question-text');
+const optionsForm = document.getElementById('options-form');
+const nextBtn = document.getElementById('next-btn');
+const submitBtn = document.getElementById('submit-btn');
+const resultSection = document.getElementById('result-section');
+
+document.addEventListener('DOMContentLoaded', async () => {
+  testHeader.innerHTML = `<h2>Test: ${testName}</h2>`;
+  await fetchQuestions();
+  if (questions.length > 0) {
+    questionSection.style.display = '';
+    showQuestion();
+  } else {
+    questionSection.innerHTML = '<p>No questions found for this test.</p>';
+  }
 });
 
-function initializeSidebar() {
-    // Set active state for current page
-    const currentPage = document.querySelector('.sidebar a[href="/webapp/HR-Dashboard/index.html"]');
-    if (currentPage) {
-        currentPage.classList.add('active');
-    }
-    
-    // Add hover effects
-    const sidebarLinks = document.querySelectorAll('.sidebar a');
-    sidebarLinks.forEach(link => {
-        link.addEventListener('mouseenter', () => {
-            if (!link.classList.contains('active')) {
-                link.classList.add('hover');
-            }
-        });
-        link.addEventListener('mouseleave', () => {
-            link.classList.remove('hover');
-        });
+async function fetchQuestions() {
+  try {
+    // First, get the test by name to find its ID
+    const resTest = await fetch(`http://localhost:5001/api/tests/by-name/${encodeURIComponent(testName)}`);
+    if (!resTest.ok) throw new Error('Test not found');
+    const test = await resTest.json();
+    const testId = test._id;
+
+    // Now fetch the questions using the test ID
+    const resQ = await fetch(`http://localhost:5001/api/tests/${testId}/questions`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     });
+    if (!resQ.ok) throw new Error('Failed to fetch questions');
+    const data = await resQ.json();
+    questions = data.questions || [];
+  } catch (err) {
+    questions = [];
+    console.error('Error fetching questions:', err);
+  }
 }
 
-function initializeDashboard() {
-    // Initialize dashboard cards
-    initializeDashboardCards();
-    
-    // Initialize dashboard charts
-    initializeDashboardCharts();
-    
-    // Initialize quick actions
-    initializeQuickActions();
+function showQuestion() {
+  const q = questions[current];
+  questionText.textContent = `Q${current+1}. ${q.questionText}`;
+  optionsForm.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const id = `option${idx}`;
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.innerHTML = `<input type="radio" name="option" value="${idx}" required> ${opt}`;
+    optionsForm.appendChild(label);
+  });
+  nextBtn.style.display = (current < questions.length - 1) ? '' : 'none';
+  submitBtn.style.display = (current === questions.length - 1) ? '' : 'none';
 }
 
-function initializeDashboardCards() {
-    // Update dashboard summary cards with data
-    const dashboardCards = document.querySelectorAll('.dashboard-card');
-    dashboardCards.forEach(card => {
-        // Add click handlers for dashboard cards
-        card.addEventListener('click', () => {
-            const cardType = card.dataset.cardType;
-            showDetailedView(cardType);
-        });
+nextBtn.onclick = (e) => {
+  e.preventDefault();
+  const selected = optionsForm.querySelector('input[name="option"]:checked');
+  if (!selected) {
+    alert('Please select an option.');
+    return;
+  }
+  answers[current] = parseInt(selected.value);
+  current++;
+  showQuestion();
+};
+
+submitBtn.onclick = async (e) => {
+  e.preventDefault();
+  const selected = optionsForm.querySelector('input[name="option"]:checked');
+  if (!selected) {
+    alert('Please select an option.');
+    return;
+  }
+  answers[current] = parseInt(selected.value);
+  // Calculate score
+  score = 0;
+  questions.forEach((q, idx) => {
+    if (answers[idx] === q.correctAnswer) score++;
+  });
+  showResult();
+  await postResult();
+};
+
+function showResult() {
+  questionSection.style.display = 'none';
+  resultSection.style.display = '';
+  resultSection.innerHTML = `<h3>Test Completed!</h3>
+    <p>Your test has been submitted. You will be able to view your results in the HR report section.</p>`;
+  // Show Exit button
+  document.getElementById('exit-btn').style.display = '';
+}
+
+document.getElementById('exit-btn').onclick = function() {
+  window.location.href = '/user-dashboard/user.html';
+};
+
+async function postResult() {
+  try {
+    await fetch('http://localhost:5001/api/exam-results', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+      body: JSON.stringify({
+        userId,
+        testName,
+        score,
+        total: questions.length,
+        answers
+      })
     });
-}
-
-function initializeDashboardCharts() {
-    // Initialize charts for dashboard metrics
-    const chartContainers = document.querySelectorAll('.chart-container');
-    chartContainers.forEach(container => {
-        const chartType = container.dataset.chartType;
-        createDashboardChart(container, chartType);
-    });
-}
-
-function createDashboardChart(container, type) {
-    // Implement chart creation based on type
-    console.log('Creating dashboard chart:', type);
-    // Add your chart initialization logic here
-}
-
-function initializeQuickActions() {
-    // Initialize quick action buttons
-    const quickActions = document.querySelectorAll('.quick-action');
-    quickActions.forEach(action => {
-        action.addEventListener('click', () => {
-            const actionType = action.dataset.actionType;
-            performQuickAction(actionType);
-        });
-    });
-}
-
-function initializeNotifications() {
-    // Initialize notification system
-    const notificationBell = document.querySelector('.notification-bell');
-    if (notificationBell) {
-        notificationBell.addEventListener('click', () => {
-            toggleNotificationPanel();
-        });
-    }
-    
-    // Check for new notifications
-    checkNewNotifications();
-}
-
-function toggleNotificationPanel() {
-    const panel = document.querySelector('.notification-panel');
-    if (panel) {
-        panel.classList.toggle('hidden');
-    }
-}
-
-function checkNewNotifications() {
-    // Check for new notifications periodically
-    console.log('Checking for new notifications');
-    // Add your notification checking logic here
-}
-
-function showDetailedView(cardType) {
-    // Show detailed view for selected dashboard card
-    console.log('Showing detailed view for:', cardType);
-    // Add your detailed view logic here
-}
-
-function performQuickAction(actionType) {
-    // Handle quick action button clicks
-    console.log('Performing quick action:', actionType);
-    // Add your quick action logic here
-}
+  } catch (err) {
+    console.error('Failed to post result:', err);
+  }
+} 

@@ -624,7 +624,7 @@ async function loadUpcomingTests() {
             <tr class="border-b border-gray-100">
               <td class="py-3">${test.name}</td>
               <td class="py-3">
-                <a href="#" class="text-blue-600 hover:underline">Start Test</a>
+                <a href="/user-dashboard/pre-exam.html?testName=${encodeURIComponent(test.name)}" class="text-blue-600 hover:underline start-exam-link" data-test-name="${test.name}">Start Test</a>
               </td>
             </tr>
           `;

@@ -31,5 +31,14 @@ router.get('/:userId', async (req, res) => {
     }
   });
   
+// GET all exam results (for HR report)
+router.get('/', async (req, res) => {
+  try {
+    const results = await MockTestResult.find({});
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;
