@@ -1,246 +1,149 @@
-// Report Dashboard JavaScript
+let users = [];
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize sidebar navigation
-    initializeSidebar();
-    
-    // Initialize report functionality
-    initializeReports();
-    
-    // Initialize date filters
-    initializeDateFilters();
-
-    // Fetch and display all exam results
-    fetchAndDisplayExamResults();
-});
-
-function initializeSidebar() {
-    // Set active state for current page
-    const currentPage = document.querySelector('.sidebar a[href="report.html"]');
-    if (currentPage) {
-        currentPage.classList.add('active');
-    }
-    
-    // Add hover effects
-    const sidebarLinks = document.querySelectorAll('.sidebar a');
-    sidebarLinks.forEach(link => {
-        link.addEventListener('mouseenter', () => {
-            if (!link.classList.contains('active')) {
-                link.classList.add('hover');
-            }
-        });
-        link.addEventListener('mouseleave', () => {
-            link.classList.remove('hover');
-        });
-    });
+async function fetchUsersFromDB() {
+  try {
+    const res = await fetch('/api/users/students');
+    const data = await res.json();
+    users = data.map(user => ({
+      id: user._id,
+      name: user.fullName,
+      email: user.email,
+      dob: user.dob,
+      college: user.collegeName,
+      course: user.course,
+      year: user.yearOfStudy,
+      resume: user.resumeUrl || '',
+      interview_score: Math.floor(Math.random() * 41) + 60,
+      time: 'To be scheduled',
+      skills: ['Not added'],
+      experience: 'Not available',
+      education: `${user.yearOfStudy}, ${user.course} at ${user.collegeName}`,
+      notes: 'Pending interview feedback'
+    }));
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+  }
 }
 
-function initializeReports() {
-    // Initialize report cards
-    initializeReportCards();
-    
-    // Initialize report charts
-    initializeCharts();
-    
-    // Initialize report tables
-    initializeReportTables();
+function populateReports() {
+  const reportContent = document.getElementById("reportContent");
+  reportContent.innerHTML = "";
+
+  users.forEach(user => {
+    reportContent.innerHTML += `
+      <div class="p-4 border rounded-lg hover:shadow-md transition-shadow">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xl font-semibold">${user.name}</h3>
+          <span class="text-sm text-gray-500">${user.id}</span>
+        </div>
+        <div class="flex justify-end items-center mt-4">
+          <button onclick="showReport('${user.id}')" class="download-btn">View Details</button>
+        </div>
+      </div>
+    `;
+  });
 }
 
-function initializeReportCards() {
-    // Update report summary cards with data
-    const reportCards = document.querySelectorAll('.report-card');
-    reportCards.forEach(card => {
-        // Add click handlers for report cards
-        card.addEventListener('click', () => {
-            const reportType = card.dataset.reportType;
-            showDetailedReport(reportType);
-        });
-    });
-}
-
-function initializeCharts() {
-    // Initialize charts for data visualization
-    const chartContainers = document.querySelectorAll('.chart-container');
-    chartContainers.forEach(container => {
-        const chartType = container.dataset.chartType;
-        createChart(container, chartType);
-    });
-}
-
-function createChart(container, type) {
-    // Implement chart creation based on type
-    console.log('Creating chart:', type);
-    // Add your chart initialization logic here
-}
-
-function initializeReportTables() {
-    // Initialize tables with sorting and export functionality
-    const tables = document.querySelectorAll('.report-table');
-    tables.forEach(table => {
-        // Add sorting functionality
-        initializeTableSorting(table);
-        
-        // Add export functionality
-        initializeTableExport(table);
-    });
-}
-
-function initializeDateFilters() {
-    const dateFilters = document.querySelectorAll('.date-filter');
-    dateFilters.forEach(filter => {
-        filter.addEventListener('change', () => {
-            updateReports();
-        });
-    });
-}
-
-function updateReports() {
-    // Get filter values
-    const startDate = document.querySelector('#start-date').value;
-    const endDate = document.querySelector('#end-date').value;
-    
-    // Update all report components
-    console.log('Updating reports for date range:', { startDate, endDate });
-    // Add your report update logic here
-}
-
-function showDetailedReport(reportType) {
-    // Show detailed view for selected report type
-    console.log('Showing detailed report for:', reportType);
-    // Add your detailed report logic here
-}
-
-function initializeTableSorting(table) {
-    // Add sorting functionality to table headers
-    const headers = table.querySelectorAll('th');
-    headers.forEach(header => {
-        header.addEventListener('click', () => {
-            const column = header.dataset.column;
-            sortTable(table, column);
-        });
-    });
-}
-
-function initializeTableExport(table) {
-    // Add export buttons and functionality
-    const exportBtn = table.parentElement.querySelector('.export-btn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-            exportTableData(table);
-        });
-    }
-}
-
-function exportTableData(table) {
-    // Implement table data export functionality
-    console.log('Exporting table data');
-    // Add your export logic here
-}
-
-async function fetchAndDisplayExamResults() {
-    try {
-        const res = await fetch('/api/exam-results');
-        const results = await res.json();
-        const reportContent = document.getElementById('reportContent');
-        if (!Array.isArray(results) || results.length === 0) {
-            reportContent.innerHTML = '<div class="report-section">No exam results found.</div>';
-            return;
-        }
-        let html = `<div class='report-section'><h2 class='text-2xl font-bold mb-4'>Exam Results</h2><table class='min-w-full bg-white border border-gray-200'><thead><tr><th class='px-4 py-2 border'>User ID</th><th class='px-4 py-2 border'>Test Name</th><th class='px-4 py-2 border'>Score</th><th class='px-4 py-2 border'>Total</th><th class='px-4 py-2 border'>Date</th><th class='px-4 py-2 border'>Download</th></tr></thead><tbody>`;
-        results.forEach((r, idx) => {
-            html += `<tr>
-                <td class='border px-4 py-2'>${r.userId}</td>
-                <td class='border px-4 py-2'>${r.testName}</td>
-                <td class='border px-4 py-2'>${r.takenAt ? new Date(r.takenAt).toLocaleString() : ''}</td>
-                <td class='border px-4 py-2'><button class='download-btn' data-idx='${idx}'>Download</button></td>
-            </tr>`;
-        });
-        html += '</tbody></table></div>';
-        reportContent.innerHTML = html;
-        // Attach download logic
-        document.querySelectorAll('.download-btn').forEach(btn => {
-            btn.onclick = function() {
-                const idx = this.getAttribute('data-idx');
-                const result = results[idx];
-                const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${result.testName}_result_${result.userId}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-            };
-        });
-    } catch (err) {
-        document.getElementById('reportContent').innerHTML = '<div class="report-section">Failed to load exam results.</div>';
-    }
+function backToReports() {
+  document.getElementById("reportContent").style.display = "block";
+  const individualReport = document.getElementById("individualReport");
+  individualReport.style.display = "none";
+  // also remove the back button
+  const backButton = individualReport.querySelector('button');
+  if (backButton) {
+    individualReport.removeChild(backButton);
+  }
 }
 
 async function showReport(userId) {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
+  const user = users.find(u => u.id === userId);
+  if (!user) return;
 
-    const reportContent = document.getElementById("reportContent");
-    const individualReport = document.getElementById("individualReport");
+  document.getElementById("reportContent").style.display = "none";
+  document.getElementById("individualReport").style.display = "block";
 
-    // Hide list, show individual report
-    reportContent.style.display = "none";
-    individualReport.style.display = "block";
+  const personalInfoSection = document.getElementById("personalInfoSection");
+  personalInfoSection.innerHTML = `
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold">${user.name} - Detailed Report</h2>
+      <span class="text-lg text-gray-500">${user.id}</span>
+    </div>
+    <div class="report-section">
+      <h3 class="text-xl font-semibold mb-2">Personal Information</h3>
+      <p><strong>ID:</strong> ${user.id}</p>
+      <p><strong>Name:</strong> ${user.name}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Education:</strong> ${user.education}</p>
+    </div>
+  `;
 
-    // Personal Info
-    document.getElementById("personalInfoSection").innerHTML = `
-        <div class="report-section">
-            <h3 class="text-xl font-semibold mb-2">Personal Information</h3>
-            <p><strong>ID:</strong> ${user.id}</p>
-            <p><strong>Name:</strong> ${user.name}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>Education:</strong> ${user.education}</p>
-        </div>
-    `;
+  const individualReport = document.getElementById("individualReport");
+  const backButton = document.createElement('button');
+  backButton.innerHTML = '← Back to Reports';
+  backButton.className = 'px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300';
+  backButton.onclick = backToReports;
+  individualReport.appendChild(backButton);
 
-    // Exam Results Section (formerly Interview Assessment)
-    // Exam Results Section (formerly Interview Assessment)
-const dropdownContainer = document.getElementById('examResultsDropdownContainer');
-let examResults = [];
+  const dropdownContainer = document.getElementById('examResultsDropdownContainer');
+  let examResults = [];
 
-try {
+  try {
     const res = await fetch(`/api/exam-results/${userId}`);
     examResults = await res.json();
-} catch (err) {
+    console.log('examResults', examResults);
+  } catch (err) {
     dropdownContainer.innerHTML = '<span class="text-red-600">Failed to load exam results.</span>';
     return;
-}
+  }
 
-if (!Array.isArray(examResults) || examResults.length === 0) {
+  if (!Array.isArray(examResults) || examResults.length === 0) {
     dropdownContainer.innerHTML = '<span class="text-gray-600">No exam results found for this user.</span>';
     return;
+  }
+
+  let resultsHtml = '<ul class="space-y-2">';
+  examResults.forEach((result, idx) => {
+    resultsHtml += `
+      <li class="flex items-center justify-between bg-gray-100 p-3 rounded-md">
+        <span class="font-semibold">${result.testName}</span>
+        <button class="download-btn" data-result='${JSON.stringify(result)}'>Download</button>
+      </li>
+    `;
+  });
+  resultsHtml += '</ul>';
+  dropdownContainer.innerHTML = resultsHtml;
+  dropdownContainer.style.display = 'block';
+
+  dropdownContainer.querySelectorAll('.download-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const resultData = JSON.parse(this.getAttribute('data-result'));
+      const blob = new Blob([JSON.stringify(resultData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${resultData.testName}_result.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  });
 }
 
-// Render each exam result
-let resultsHtml = '<ul class="space-y-2">';
-examResults.forEach((result, idx) => {
-    resultsHtml += `<li class="flex items-center justify-between bg-white border rounded p-3">
-        <div>
-            <strong>${result.testName}</strong> — Score: ${result.score}/${result.total} — ${result.takenAt ? new Date(result.takenAt).toLocaleString() : 'No date'}
-        </div>
-        <button class="download-btn px-3 py-1 bg-black text-white rounded" data-idx="${idx}">Download</button>
-    </li>`;
-});
-resultsHtml += '</ul>';
-dropdownContainer.innerHTML = resultsHtml;
+window.onload = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('id');
 
-// Attach download logic
-dropdownContainer.querySelectorAll('.download-btn').forEach(btn => {
-    btn.onclick = function () {
-        const idx = this.getAttribute('data-idx');
-        const result = examResults[idx];
-        const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${result.testName}_result_${result.userId}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-});
+  await fetchUsersFromDB();
+
+  if (userId) {
+    showReport(userId);
+  } else {
+    populateReports();
+  }
 };
+
+document.getElementById('logoutBtn').addEventListener('click', function() {
+  localStorage.removeItem('token');
+  window.location.href = '/login-page/login.html';
+});
