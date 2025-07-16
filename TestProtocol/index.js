@@ -1,5 +1,7 @@
 const startScreen = document.getElementById('start-screen');
 const examContainer = document.getElementById('exam-container');
+
+const startExamBtn = document.getElementById('start-exam-btn');
 const webcamFeed = document.getElementById('webcam-feed');
 const audioLevel = document.getElementById('audio-level');
 const violationPopup = document.getElementById('violation-popup');
@@ -18,7 +20,7 @@ let questions = [];
 let current = 0;
 let answers = [];
 let score = 0;
-let examInProgress = false;
+
 
 function getQueryParam(param) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -71,23 +73,22 @@ function hideViolation() {
   violationPopup.style.display = 'none';
 }
 
-function enforceFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  }
-}
 
 async function startExam() {
+  startScreen.style.display = 'none';
+  examContainer.style.display = 'block';
+  document.documentElement.requestFullscreen();
+
+
   await fetchQuestions();
   if (questions.length > 0) {
     questionSection.style.display = 'block';
     showQuestion();
-    examInProgress = true;
-    enforceFullscreen();
   } else {
     questionSection.innerHTML = '<p>No questions found for this test.</p>';
   }
 }
+
 
 function showPopupMessage(message, type = 'info') {
   const popup = document.createElement('div');
@@ -130,9 +131,11 @@ async function postResult() {
         answers
       })
     });
+
     showPopupMessage('Your result has been submitted!', 'info');
   } catch (err) {
     showPopupMessage('Failed to submit result to server.', 'error');
+
     console.error('Failed to post result:', err);
   }
 }
@@ -145,40 +148,19 @@ function showResult() {
     document.getElementById('exit-btn').style.display = 'block';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const startScreen = document.getElementById('start-screen');
-  const examContainer = document.getElementById('exam-container');
-  const startExamBtn = document.getElementById('start-exam-btn');
-
-  testHeader.innerHTML = `<h2>Test: ${testName}</h2>`;
-
-  if (startExamBtn) {
-    startExamBtn.addEventListener('click', async () => {
-      const granted = await requestPermissions();
-      if (!granted) return;
-      startScreen.style.display = 'none';
-      examContainer.style.display = 'block';
-      document.documentElement.requestFullscreen();
-      await startExam();
-      startProctoring();
-    });
-  }
+startExamBtn.addEventListener('click', async () => {
+  await startExam();
+  startProctoring();
 });
 
 closePopupBtn.addEventListener('click', () => {
   hideViolation();
-  enforceFullscreen();
+
 });
 
 document.addEventListener('fullscreenchange', () => {
-  if (examInProgress && !document.fullscreenElement) {
+  if (!document.fullscreenElement) {
     showViolation('You have exited fullscreen mode. Please resume fullscreen to continue.');
-    nextBtn.disabled = true;
-    submitBtn.disabled = true;
-  } else if (examInProgress && document.fullscreenElement) {
-    hideViolation();
-    nextBtn.disabled = false;
-    submitBtn.disabled = false;
   }
 });
 
@@ -291,4 +273,10 @@ async function startProctoring() {
     console.error('Error starting proctoring:', error);
     showViolation('Could not start proctoring. Please ensure you have a webcam and microphone connected and have granted the necessary permissions.');
   }
+
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    testHeader.innerHTML = `<h2>Test: ${testName}</h2>`;
+});
+

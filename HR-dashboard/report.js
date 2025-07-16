@@ -59,8 +59,11 @@ async function showReport(userId) {
   const user = users.find(u => u.id === userId);
   if (!user) return;
 
-  document.getElementById("reportContent").style.display = "none";
-  document.getElementById("individualReport").style.display = "block";
+  const reportContent = document.getElementById("reportContent");
+  const individualReport = document.getElementById("individualReport");
+
+  reportContent.style.display = "none";
+  individualReport.style.display = "block";
 
   const personalInfoSection = document.getElementById("personalInfoSection");
   personalInfoSection.innerHTML = `
