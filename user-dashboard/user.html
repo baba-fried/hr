@@ -1,1129 +1,1129 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POSSPOLE AI MEETING ADVISOR</title>
-    <link rel="icon" href="/components/Asset 2posspole_logo_svg.png" type="image/png">
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>POSSPOLE AI MEETING ADVISOR</title>
+        <link rel="icon" href="/components/Asset 2posspole_logo_svg.png" type="image/png">
 
-    <script src="chart.umd.js"></script>
-    <meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  connect-src 'self' http://localhost:5001;
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
-  font-src https://fonts.gstatic.com;">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        <script src="chart.umd.js"></script>
+        <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    connect-src 'self' http://localhost:5001;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
+    font-src https://fonts.gstatic.com;">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f8f9fa;
-            color: #333;
-            margin: 0;
-            overflow-x: hidden;
-        }
+            body {
+                font-family: 'Inter', sans-serif;
+                background: #f8f9fa;
+                color: #333;
+                margin: 0;
+                overflow-x: hidden;
+            }
 
-        .sidebar {
-            background-color: #000000;
-            color: white;
-            height: 100vh;
-            width: 240px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 10;
-        }
+            .sidebar {
+                background-color: #000000;
+                color: white;
+                height: 100vh;
+                width: 240px;
+                position: fixed;
+                left: 0;
+                top: 0;
+                z-index: 10;
+            }
 
-        .sidebar-logo {
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+            .sidebar-logo {
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
 
-        .sidebar-menu {
-            padding: 20px 0;
-        }
+            .sidebar-menu {
+                padding: 20px 0;
+            }
 
-        .menu-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+            .menu-item {
+                padding: 12px 20px;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
 
-        .menu-item:hover, .menu-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
+            .menu-item:hover, .menu-item.active {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
 
-        .menu-item svg {
-            margin-right: 12px;
-        }
+            .menu-item svg {
+                margin-right: 12px;
+            }
 
-        .content-area {
-            margin-left: 240px;
-            padding: 0 30px 20px 30px;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
+            .content-area {
+                margin-left: 240px;
+                padding: 0 30px 20px 30px;
+                min-height: 100vh;
+                box-sizing: border-box;
+            }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            margin-bottom: 30px;
-        }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 0;
+                margin-bottom: 30px;
+            }
 
-        .search-bar {
-            background: white;
-            border-radius: 8px;
-            padding: 8px 15px;
-            display: flex;
-            align-items: center;
-            width: 300px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+            .search-bar {
+                background: white;
+                border-radius: 8px;
+                padding: 8px 15px;
+                display: flex;
+                align-items: center;
+                width: 300px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
 
-        .search-bar input {
-            border: none;
-            outline: none;
-            width: 100%;
-            margin-left: 8px;
-        }
+            .search-bar input {
+                border: none;
+                outline: none;
+                width: 100%;
+                margin-left: 8px;
+            }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 50px;
-            transition: all 0.2s;
-            gap: 8px;
-            background-color: #f0f0f0; /* Light background for the oval shape */
-        }
+            .user-profile {
+                display: flex;
+                align-items: center;
+                position: relative;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 50px;
+                transition: all 0.2s;
+                gap: 8px;
+                background-color: #f0f0f0; /* Light background for the oval shape */
+            }
 
-        .user-profile:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
+            .user-profile:hover {
+                background-color: rgba(0, 0, 0, 0.1);
+            }
 
-        .user-profile #user-greeting {
-            font-size: 16px;
-            font-weight: 500;
-        }
+            .user-profile #user-greeting {
+                font-size: 16px;
+                font-weight: 500;
+            }
 
-        .user-profile .profile-placeholder {
-            width: 40px;
-            height: 40px;
-            background-color: #007bff; /* Blue background for the placeholder */
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-        }
+            .user-profile .profile-placeholder {
+                width: 40px;
+                height: 40px;
+                background-color: #007bff; /* Blue background for the placeholder */
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                font-weight: bold;
+            }
 
-        .user-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            min-width: 180px;
-            display: none;
-            z-index: 1000;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 4px;
-        }
+            .user-dropdown {
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                min-width: 180px;
+                display: none;
+                z-index: 1000;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                padding: 4px;
+            }
 
-        .user-dropdown.active {
-            display: block;
-            animation: dropdownFade 0.2s ease;
-        }
+            .user-dropdown.active {
+                display: block;
+                animation: dropdownFade 0.2s ease;
+            }
 
-        @keyframes dropdownFade {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+            @keyframes dropdownFade {
+                from { opacity: 0; transform: translateY(-8px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
 
-        .dropdown-item {
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #333;
-            text-decoration: none;
-            transition: all 0.2s;
-            border-radius: 8px;
-            font-size: 14px;
-        }
+            .dropdown-item {
+                padding: 8px 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #333;
+                text-decoration: none;
+                transition: all 0.2s;
+                border-radius: 8px;
+                font-size: 14px;
+            }
 
-        .dropdown-item:hover {
-            background-color: #f5f5f5;
-        }
+            .dropdown-item:hover {
+                background-color: #f5f5f5;
+            }
 
-        .dropdown-item svg {
-            width: 16px;
-            height: 16px;
-            color: #666;
-        }
+            .dropdown-item svg {
+                width: 16px;
+                height: 16px;
+                color: #666;
+            }
 
-        .dropdown-divider {
-            height: 1px;
-            background-color: rgba(0, 0, 0, 0.1);
-            margin: 4px 0;
-        }
+            .dropdown-divider {
+                height: 1px;
+                background-color: rgba(0, 0, 0, 0.1);
+                margin: 4px 0;
+            }
 
-        /* Fix alignment for stats sections */
-        .grid-cols-1.md\:grid-cols-2 {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
+            /* Fix alignment for stats sections */
+            .grid-cols-1.md\:grid-cols-2 {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
 
-        .grid-cols-1.md\:grid-cols-2 > div {
-            flex: 1 1 45%;
-            min-width: 300px;
-        }
+            .grid-cols-1.md\:grid-cols-2 > div {
+                flex: 1 1 45%;
+                min-width: 300px;
+            }
 
-        /* Fix chart section alignment */
-        .grid-cols-1.md\:grid-cols-2 .bg-white {
-            width: 100%;
-        }
+            /* Fix chart section alignment */
+            .grid-cols-1.md\:grid-cols-2 .bg-white {
+                width: 100%;
+            }
 
-        /* Ensure footer alignment */
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            margin-top: 40px;
-        }
+            /* Ensure footer alignment */
+            .footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px 0;
+                border-top: 1px solid rgba(0, 0, 0, 0.1);
+                margin-top: 40px;
+            }
 
-        .footer div {
-            flex: 1;
-            text-align: center;
-        }
+            .footer div {
+                flex: 1;
+                text-align: center;
+            }
 
-        .footer div:first-child {
-            text-align: left;
-        }
+            .footer div:first-child {
+                text-align: left;
+            }
 
-        .footer div:last-child {
-            text-align: right;
-        }
+            .footer div:last-child {
+                text-align: right;
+            }
 
-        /* Loader styles */
-        #loader {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            background: rgba(255, 255, 255, 0.8);
-            justify-content: center;
-            align-items: center;
-        }
+            /* Loader styles */
+            #loader {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 50;
+                background: rgba(255, 255, 255, 0.8);
+                justify-content: center;
+                align-items: center;
+            }
 
-        #loader div {
-            border-top-color: #000000;
-            border-right-color: transparent;
-            border-bottom-color: transparent;
-            border-left-color: transparent;
-        }
-    </style>
-</head>
-<body>
-  <!-- Loader (reuse this block on every page) -->
-  <div id="loader" class="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center">
-    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-  </div>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-logo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            </svg>
-            <span style="margin-left: 10px; font-weight: 600;">POSSPOLE</span>
-        </div>
-        <div class="sidebar-menu">
-            <div class="menu-item active" data-section="dashboard-content">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-                <span>Dashboard</span>
-            </div>
-            <div class="menu-item" data-section="exam-content">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                    <path d="M12 8v4l3 3"></path>
-                </svg>
-                <span>Exams</span>
-            </div>
-        </div>
+            #loader div {
+                border-top-color: #000000;
+                border-right-color: transparent;
+                border-bottom-color: transparent;
+                border-left-color: transparent;
+            }
+        </style>
+    </head>
+    <body>
+    <!-- Loader (reuse this block on every page) -->
+    <div id="loader" class="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
     </div>
-
-        <!-- Main Content -->
-    <div class="content-area">
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 class="text-2xl font-bold" id="welcome-heading" style="margin:0;">'Welcome' </h1>
-                <p class="text-gray-600">Here's your Dashboard</p>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span style="margin-left: 10px; font-weight: 600;">POSSPOLE</span>
             </div>
-            <div class="user-profile" id="userProfileButton">
-                <span id="user-greeting"></span>
-                <div class="profile-placeholder avatar-initials"></div>
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="/user-dashboard/profile.html" class="dropdown-item">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"><path><circle cx="12" cy="7" r="4"></circle></svg>
-                        Profile
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item" id="logoutBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                        Log Out
-                    </a>
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-section="dashboard-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item" data-section="exam-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                        <path d="M12 8v4l3 3"></path>
+                    </svg>
+                    <span>Exams</span>
                 </div>
             </div>
-            <!-- ...existing code... -->
-            
-            <script>
-                document.addEventListener('DOMContentLoaded', async function () {
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
+        </div>
 
-    try {
-        const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
-        if (!res.ok) throw new Error('Failed to fetch user test results');
+            <!-- Main Content -->
+        <div class="content-area">
+            <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="text-2xl font-bold" id="welcome-heading" style="margin:0;">'Welcome' </h1>
+                    <p class="text-gray-600">Here's your Dashboard</p>
+                </div>
+                <div class="user-profile" id="userProfileButton">
+                    <span id="user-greeting"></span>
+                    <div class="profile-placeholder avatar-initials"></div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="/user-dashboard/profile.html" class="dropdown-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"><path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Profile
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="logoutBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            Log Out
+                        </a>
+                    </div>
+                </div>
+                <!-- ...existing code... -->
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', async function () {
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
 
-        const results = await res.json();
-        updateMockTestStats(results);
-        disableCompletedTests(results);
+        try {
+            const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
+            if (!res.ok) throw new Error('Failed to fetch user test results');
 
-    } catch (err) {
-        console.error('Error disabling tests:', err);
-    }
-});
+            const results = await res.json();
+            updateMockTestStats(results);
+            disableCompletedTests(results);
 
-                // Dropdown logic
-                document.addEventListener('DOMContentLoaded', function() {
-                    const userProfileButton = document.getElementById('userProfileButton');
-                    const userDropdown = document.getElementById('userDropdown');
-                    const logoutBtn = document.getElementById('logoutBtn');
-            
+        } catch (err) {
+            console.error('Error disabling tests:', err);
+        }
+    });
 
-                        document.addEventListener('click', function(e) {
-                        if (!userProfileButton.contains(e.target)) {
-                            userDropdown.classList.remove('active');
+                    // Dropdown logic
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const userProfileButton = document.getElementById('userProfileButton');
+                        const userDropdown = document.getElementById('userDropdown');
+                        const logoutBtn = document.getElementById('logoutBtn');
+                
+
+                            document.addEventListener('click', function(e) {
+                            if (!userProfileButton.contains(e.target)) {
+                                userDropdown.classList.remove('active');
+                            }
+                        });
+                
+                        if (logoutBtn) {
+                            logoutBtn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                localStorage.removeItem('userName');
+                                localStorage.removeItem('token');
+                                window.location.href = '/login-page/login.html';
+                            });
                         }
                     });
-            
-                    if (logoutBtn) {
-                        logoutBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            localStorage.removeItem('userName');
-                            localStorage.removeItem('token');
-                            window.location.href = '/login-page/login.html';
-                        });
-                    }
-                });
-            </script>
-        </div>
+                </script>
+            </div>
 
-        <!-- Dashboard Content Section -->
-        <div id="dashboard-content" class="content-section active">
-            <!-- Informative Stats Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow">
+            <!-- Dashboard Content Section -->
+            <div id="dashboard-content" class="content-section active">
+                <!-- Informative Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow">
+                        <h3 class="font-semibold text-blue-700 mb-2 flex items-center">
+                            <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><rect x="3" y="3" width="14" height="14" rx="2" stroke-width="2"/><path d="M8 9h4M8 13h4" stroke-width="2"/></svg>
+                            Mock Test Progress
+                        </h3>
+                        <ul class="text-gray-700 text-sm">
+                            <li>Total Mock Tests Attempted: <span id="stat-mock-attempted" class="font-bold">--</span></li>
+                            <li>Best Mock Test Score: <span id="stat-mock-best" class="font-bold">--</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
+                        <h3 class="font-semibold text-green-700 mb-2 flex items-center">
+                            <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><circle cx="10" cy="10" r="9" stroke-width="2"/><path d="M10 6v4l2 2" stroke-width="2"/></svg>
+                            Exam Performance
+                        </h3>
+                        <ul class="text-gray-700 text-sm">
+                            <li>Total Exams Completed: <span id="stat-exam-completed" class="font-bold">--</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Status Report Section -->
+                <div class="border border-blue-400 rounded-lg p-6 mb-8 bg-white">
+                    <h2 class="text-xl font-semibold mb-4">Detailed Performance</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <!-- Mock Tests Stats -->
+                        <div class="border-r border-gray-200 pr-8">
+                            <h3 class="text-lg font-semibold mb-4">Mock Tests</h3>
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-medium text-gray-800 mb-2">Tests Completed</h4>
+                                    <p class="text-3xl font-bold" id="mock-tests-completed">--</p>
+                                    <p class="text-xs text-gray-500 mt-1">Last 30 days</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-medium text-gray-800 mb-2">Average Score</h4>
+                                    <p class="text-3xl font-bold" id="mock-tests-avg-score">--</p>
+                                    <p class="text-xs text-gray-500 mt-1">All mock tests</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Exams Stats -->
+                        <div class="pl-8">
+                            <h3 class="text-lg font-semibold mb-4">Exams</h3>
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-medium text-gray-800 mb-2">Exams Completed</h4>
+                                    <p class="text-3xl font-bold" id="exams-completed">--</p>
+                                    <p class="text-xs text-gray-500 mt-1">Last 30 days</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Mock Test Performance Chart -->
+                <div class="bg-white rounded-lg p-6 shadow mb-8">
+                    <h3 class="text-lg font-semibold mb-4">Your Mock Test Performance</h3>
+                    <canvas id="mockTestPerformanceChart" height="260"></canvas>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <ul class="list-disc ml-6">
+                            <li>Each point represents your score in a mock test.</li>
+                            <li>Hover to see details for each attempt.</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- End Status Report Section -->
+            </div>
+            <!-- End Dashboard Content Section -->
+
+            <!-- Mock Tests Content Section -->
+            <div id="mock-tests-content" class="content-section" style="display: none;">
+                <h1 class="text-2xl font-bold mb-6">Mock Tests Portal</h1>
+                <p class="text-gray-600 mb-8">Practice with our mock tests to improve your skills</p>
+                
+                <!-- Mock Test Statistics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h3 class="text-lg font-semibold mb-4">Tests Completed</h3>
+                        <canvas id="mockTestsCompletedChart" height="200"></canvas>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h3 class="text-lg font-semibold mb-4">Average Performance</h3>
+                        <canvas id="mockTestsPerformanceChart" height="200"></canvas>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 shadow-md">
+                        <h3 class="text-lg font-semibold mb-4">Topic Distribution</h3>
+                        <canvas id="mockTestsTopicsChart" height="200"></canvas>
+                    </div>
+                </div>
+            
+                <!-- Available Mock Tests -->
+                <div class="bg-white rounded-lg p-6 shadow-md mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Available Mock Tests</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- SDE Mock Test Card -->
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <h3 class="font-semibold mb-2">SDE Mock Test</h3>
+                            <p class="text-gray-600 mb-4">Questions: 40</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Difficulty: Hard</span>
+                                <button class="start-test-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" data-test="sde">Start Test</button>
+                            </div>
+                        </div>
+                        <!-- BA Mock Test Card -->
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <h3 class="font-semibold mb-2">BA Mock Test</h3>
+                            <p class="text-gray-600 mb-4">Questions: 30</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Difficulty: Medium</span>
+                                <button class="start-test-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" data-test="ba">Start Test</button>
+                            </div>
+                        </div>
+                        <!-- DevOps Mock Test Card -->
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <h3 class="font-semibold mb-2">DevOps Mock Test</h3>
+                            <p class="text-gray-600 mb-4">Questions: 35</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Difficulty: Medium</span>
+                                <button class="start-test-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" data-test="devops">Start Test</button>
+                            </div>
+                        </div>
+                        <!-- UI/UX Designer Mock Test Card -->
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <h3 class="font-semibold mb-2">UI/UX Designer Mock Test</h3>
+                            <p class="text-gray-600 mb-4">Questions: 25</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Difficulty: Medium</span>
+                                <button class="start-test-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" data-test="uiux">Start Test</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Exam & Mock Test Section (Merged) -->
+            <div id="exam-content" class="content-section" style="display: none;">
+                <h1 class="text-2xl font-bold mb-6">Exam Portal</h1>
+                <p class="text-gray-600 mb-8">Manage your exams, view upcoming tests, and practice with mock tests in one place.</p>
+            
+                <!-- Informative Overview -->
+                <div class="mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow">
                     <h3 class="font-semibold text-blue-700 mb-2 flex items-center">
-                        <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><rect x="3" y="3" width="14" height="14" rx="2" stroke-width="2"/><path d="M8 9h4M8 13h4" stroke-width="2"/></svg>
-                        Mock Test Progress
+                        <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
+                        <circle cx="10" cy="10" r="9" stroke-width="2" />
+                        <path d="M10 6v4l2 2" stroke-width="2" />
+                        </svg>
+                        Upcoming Exams
                     </h3>
-                    <ul class="text-gray-700 text-sm">
-                        <li>Total Mock Tests Attempted: <span id="stat-mock-attempted" class="font-bold">--</span></li>
-                        <li>Best Mock Test Score: <span id="stat-mock-best" class="font-bold">--</span></li>
-                    </ul>
-                </div>
-                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
+                    <p class="text-gray-700">Stay updated with your scheduled exams and never miss a deadline. Check the table below for your next assessments.</p>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
                     <h3 class="font-semibold text-green-700 mb-2 flex items-center">
-                        <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><circle cx="10" cy="10" r="9" stroke-width="2"/><path d="M10 6v4l2 2" stroke-width="2"/></svg>
-                        Exam Performance
+                        <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
+                        <rect x="3" y="3" width="14" height="14" rx="2" stroke-width="2" />
+                        <path d="M8 9h4M8 13h4" stroke-width="2" />
+                        </svg>
+                        Exam Tips
                     </h3>
-                    <ul class="text-gray-700 text-sm">
-                        <li>Total Exams Completed: <span id="stat-exam-completed" class="font-bold">--</span></li>
+                    <ul class="list-disc ml-5 text-gray-700 text-sm">
+                        <li>Review your syllabus and focus on weak areas.</li>
+                        <li>Practice with mock tests for better time management.</li>
+                        <li>Read instructions carefully before starting any exam.</li>
                     </ul>
-                </div>
-            </div>
-
-            <!-- Status Report Section -->
-            <div class="border border-blue-400 rounded-lg p-6 mb-8 bg-white">
-                <h2 class="text-xl font-semibold mb-4">Detailed Performance</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <!-- Mock Tests Stats -->
-                    <div class="border-r border-gray-200 pr-8">
-                        <h3 class="text-lg font-semibold mb-4">Mock Tests</h3>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-800 mb-2">Tests Completed</h4>
-                                <p class="text-3xl font-bold" id="mock-tests-completed">--</p>
-                                <p class="text-xs text-gray-500 mt-1">Last 30 days</p>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-800 mb-2">Average Score</h4>
-                                <p class="text-3xl font-bold" id="mock-tests-avg-score">--</p>
-                                <p class="text-xs text-gray-500 mt-1">All mock tests</p>
-                            </div>
-                        </div>
                     </div>
-                    <!-- Exams Stats -->
-                    <div class="pl-8">
-                        <h3 class="text-lg font-semibold mb-4">Exams</h3>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-medium text-gray-800 mb-2">Exams Completed</h4>
-                                <p class="text-3xl font-bold" id="exams-completed">--</p>
-                                <p class="text-xs text-gray-500 mt-1">Last 30 days</p>
-                            </div>
-                        </div>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
+                    <h3 class="font-semibold text-yellow-700 mb-2 flex items-center">
+                        <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
+                        <path d="M12 8v4l3 3" stroke-width="2" />
+                        <circle cx="12" cy="12" r="9" stroke-width="2" />
+                        </svg>
+                        Results & Feedback
+                    </h3>
+                    <p class="text-gray-700">After your exams, check back here for results and personalized feedback to help you improve further.</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- User Mock Test Performance Chart -->
-            <div class="bg-white rounded-lg p-6 shadow mb-8">
-                <h3 class="text-lg font-semibold mb-4">Your Mock Test Performance</h3>
-                <canvas id="mockTestPerformanceChart" height="260"></canvas>
-                <div class="mt-4 text-sm text-gray-600">
-                    <ul class="list-disc ml-6">
-                        <li>Each point represents your score in a mock test.</li>
-                        <li>Hover to see details for each attempt.</li>
-                    </ul>
                 </div>
-            </div>
-            <!-- End Status Report Section -->
-        </div>
-        <!-- End Dashboard Content Section -->
-
-        <!-- Mock Tests Content Section -->
-        <div id="mock-tests-content" class="content-section" style="display: none;">
-            <h1 class="text-2xl font-bold mb-6">Mock Tests Portal</h1>
-            <p class="text-gray-600 mb-8">Practice with our mock tests to improve your skills</p>
             
-            <!-- Mock Test Statistics -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">Tests Completed</h3>
-                    <canvas id="mockTestsCompletedChart" height="200"></canvas>
-                </div>
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">Average Performance</h3>
-                    <canvas id="mockTestsPerformanceChart" height="200"></canvas>
-                </div>
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <h3 class="text-lg font-semibold mb-4">Topic Distribution</h3>
-                    <canvas id="mockTestsTopicsChart" height="200"></canvas>
-                </div>
-            </div>
-        
-            <!-- Available Mock Tests -->
-            <div class="bg-white rounded-lg p-6 shadow-md mb-8">
-                <h2 class="text-xl font-semibold mb-4">Available Mock Tests</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- SDE Mock Test Card -->
-                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <h3 class="font-semibold mb-2">SDE Mock Test</h3>
-                        <p class="text-gray-600 mb-4">Questions: 40</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Difficulty: Hard</span>
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="sde">Start Test</button>
-                        </div>
-                    </div>
-                    <!-- BA Mock Test Card -->
-                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <h3 class="font-semibold mb-2">BA Mock Test</h3>
-                        <p class="text-gray-600 mb-4">Questions: 30</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Difficulty: Medium</span>
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="ba">Start Test</button>
-                        </div>
-                    </div>
-                    <!-- DevOps Mock Test Card -->
-                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <h3 class="font-semibold mb-2">DevOps Mock Test</h3>
-                        <p class="text-gray-600 mb-4">Questions: 35</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Difficulty: Medium</span>
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="devops">Start Test</button>
-                        </div>
-                    </div>
-                    <!-- UI/UX Designer Mock Test Card -->
-                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <h3 class="font-semibold mb-2">UI/UX Designer Mock Test</h3>
-                        <p class="text-gray-600 mb-4">Questions: 25</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Difficulty: Medium</span>
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition start-test-btn" data-test="uiux">Start Test</button>
-                        </div>
+                <!-- ✅ WORKING Upcoming Tests Section from OLD -->
+                <div class="border border-red-400 rounded-lg p-6 mb-8 bg-white">
+                <h2 class="text-xl font-semibold mb-4">Exam Information</h2>
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-2">Upcoming Tests</h3>
+                    <table class="w-full" id="upcoming-tests-table">
+                    <thead>
+                        <tr class="border-b border-gray-200 bg-gray-50">
+                        <th class="text-left py-2">Test Name</th>
+                        <th class="text-left py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                    </table>
+                    <div class="mt-2 text-xs text-gray-500">
+                    <span class="font-semibold">Note:</span> Please arrive 5 minutes before the scheduled time.
                     </div>
                 </div>
-            </div>
-        </div>
-        <!-- Exam & Mock Test Section (Merged) -->
-        <div id="exam-content" class="content-section" style="display: none;">
-            <h1 class="text-2xl font-bold mb-6">Exam Portal</h1>
-            <p class="text-gray-600 mb-8">Manage your exams, view upcoming tests, and practice with mock tests in one place.</p>
-          
-            <!-- Informative Overview -->
-            <div class="mb-8">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow">
-                  <h3 class="font-semibold text-blue-700 mb-2 flex items-center">
-                    <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
-                      <circle cx="10" cy="10" r="9" stroke-width="2" />
-                      <path d="M10 6v4l2 2" stroke-width="2" />
-                    </svg>
-                    Upcoming Exams
-                  </h3>
-                  <p class="text-gray-700">Stay updated with your scheduled exams and never miss a deadline. Check the table below for your next assessments.</p>
                 </div>
-                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
-                  <h3 class="font-semibold text-green-700 mb-2 flex items-center">
-                    <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
-                      <rect x="3" y="3" width="14" height="14" rx="2" stroke-width="2" />
-                      <path d="M8 9h4M8 13h4" stroke-width="2" />
-                    </svg>
-                    Exam Tips
-                  </h3>
-                  <ul class="list-disc ml-5 text-gray-700 text-sm">
-                    <li>Review your syllabus and focus on weak areas.</li>
-                    <li>Practice with mock tests for better time management.</li>
-                    <li>Read instructions carefully before starting any exam.</li>
-                  </ul>
-                </div>
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
-                  <h3 class="font-semibold text-yellow-700 mb-2 flex items-center">
-                    <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor">
-                      <path d="M12 8v4l3 3" stroke-width="2" />
-                      <circle cx="12" cy="12" r="9" stroke-width="2" />
-                    </svg>
-                    Results & Feedback
-                  </h3>
-                  <p class="text-gray-700">After your exams, check back here for results and personalized feedback to help you improve further.</p>
-                </div>
-              </div>
-            </div>
-          
-            <!-- ✅ WORKING Upcoming Tests Section from OLD -->
-            <div class="border border-red-400 rounded-lg p-6 mb-8 bg-white">
-              <h2 class="text-xl font-semibold mb-4">Exam Information</h2>
-              <div class="mb-6">
-                <h3 class="text-lg font-semibold mb-2">Upcoming Tests</h3>
-                <table class="w-full" id="upcoming-tests-table">
-                  <thead>
-                    <tr class="border-b border-gray-200 bg-gray-50">
-                      <th class="text-left py-2">Test Name</th>
-                      <th class="text-left py-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-                <div class="mt-2 text-xs text-gray-500">
-                  <span class="font-semibold">Note:</span> Please arrive 5 minutes before the scheduled time.
-                </div>
-              </div>
-            </div>
-          
-            <!-- 🔄 Retain this if you have mock test cards under exam-content -->
-            <div class="border border-yellow-400 rounded-lg p-6 mb-8 bg-white">
-              <h2 class="text-xl font-semibold mb-4">Mock Tests</h2>
-              <p class="text-gray-700 mb-2 text-sm">Practice with mock tests to boost your confidence before the real exam.</p>
-          
-              <!-- Mock Test History Table -->
-              <table class="w-full mb-8" id="mock-tests-table">
-                <tbody>
-                  <!-- Populated by JS -->
-                </tbody>
-              </table>
-          
-              <!-- Available Mock Tests Cards -->
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="exam-mock-test-cards"></div>
-            </div>
-          </div>
-          
+            
+                <!-- 🔄 Retain this if you have mock test cards under exam-content -->
+                <div class="border border-yellow-400 rounded-lg p-6 mb-8 bg-white">
+                <h2 class="text-xl font-semibold mb-4">Mock Tests</h2>
+                <p class="text-gray-700 mb-2 text-sm">Practice with mock tests to boost your confidence before the real exam.</p>
             
                 <!-- Mock Test History Table -->
                 <table class="w-full mb-8" id="mock-tests-table">
                     <tbody>
-                        <!-- Populated by JS -->
+                    <!-- Populated by JS -->
                     </tbody>
                 </table>
             
                 <!-- Available Mock Tests Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="exam-mock-test-cards"></div>
+                </div>
             </div>
-            </div>
-            <!-- End Combined Exam Section -->
-        </div>
-
-        <!-- Modal for Mock Test -->
-        <div id="mockTestModal" class="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center hidden">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative max-h-[90vh] overflow-y-auto">
-                <button id="closeMockTestModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-                <h2 id="mockTestTitle" class="text-xl font-bold mb-4"></h2>
-                <form id="mockTestForm" class="space-y-4">
-                    <!-- Questions will be injected here -->
-                </form>
-                <button id="submitMockTest" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Submit</button>
-            </div>
-        </div>
-
-        <!-- Modal for Mock Test Result -->
-        <div id="mockTestResultModal" class="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center hidden">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative max-h-[90vh] overflow-y-auto">
-                <button id="closeMockTestResultModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-                <h2 class="text-xl font-bold mb-4">Mock Test Result</h2>
-                <div id="mockTestResultContent" class="mb-4"></div>
-                <button id="closeResultBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Close</button>
-            </div>
-        </div>
-    <script>
-    // Hide loader when page is fully loaded
-    window.addEventListener('load', function() {
-      document.getElementById('loader').classList.add('hidden');
-      document.getElementById('loader').classList.remove('flex');
-    });
-    </script>
-    <script src="loader.js"></script>
-    <script>
-      window.addEventListener('load', hideLoader);
-    </script>
-    <script src="user-page.js"></script>
-</body>
-<script>
-    // Add section switching functionality
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', function() {
-            // Remove active class from all menu items
-            document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active'));
             
-            // Add active class to clicked menu item
-            this.classList.add('active');
-            
-            // Hide all content sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-                section.classList.remove('active');
+                
+                    <!-- Mock Test History Table -->
+                    <table class="w-full mb-8" id="mock-tests-table">
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                
+                    <!-- Available Mock Tests Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="exam-mock-test-cards"></div>
+                </div>
+                </div>
+                <!-- End Combined Exam Section -->
+            </div>
+
+            <!-- Modal for Mock Test -->
+            <div id="mockTestModal" class="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative max-h-[90vh] overflow-y-auto">
+                    <button id="closeMockTestModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+                    <h2 id="mockTestTitle" class="text-xl font-bold mb-4"></h2>
+                    <form id="mockTestForm" class="space-y-4">
+                        <!-- Questions will be injected here -->
+                    </form>
+                    <button id="submitMockTest" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Submit</button>
+                </div>
+            </div>
+
+            <!-- Modal for Mock Test Result -->
+            <div id="mockTestResultModal" class="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative max-h-[90vh] overflow-y-auto">
+                    <button id="closeMockTestResultModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+                    <h2 class="text-xl font-bold mb-4">Mock Test Result</h2>
+                    <div id="mockTestResultContent" class="mb-4"></div>
+                    <button id="closeResultBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Close</button>
+                </div>
+            </div>
+        <script>
+        // Hide loader when page is fully loaded
+        window.addEventListener('load', function() {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('loader').classList.remove('flex');
+        });
+        </script>
+        <script src="loader.js"></script>
+        <script>
+        window.addEventListener('load', hideLoader);
+        </script>
+        <script src="user-page.js"></script>
+    </body>
+    <script>
+        // Add section switching functionality
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all menu items
+                document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active'));
+                
+                // Add active class to clicked menu item
+                this.classList.add('active');
+                
+                // Hide all content sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.style.display = 'none';
+                    section.classList.remove('active');
+                });
+                
+                // Show the selected content section
+                const sectionId = this.getAttribute('data-section');
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.style.display = 'block';
+                    section.classList.add('active');
+                }
             });
-            
-            // Show the selected content section
-            const sectionId = this.getAttribute('data-section');
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.style.display = 'block';
-                section.classList.add('active');
+        });
+
+        // Toggle user dropdown
+        const userProfileButton = document.getElementById('userProfileButton');
+        const userDropdown = document.getElementById('userDropdown');
+        userProfileButton.addEventListener('click', () => {
+            userDropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userProfileButton.contains(e.target)) {
+                userDropdown.classList.remove('active');
             }
         });
-    });
 
-    // Toggle user dropdown
-    const userProfileButton = document.getElementById('userProfileButton');
-    const userDropdown = document.getElementById('userDropdown');
-    userProfileButton.addEventListener('click', () => {
-        userDropdown.classList.toggle('active');
-    });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set user greeting and avatar initial dynamically
+            const userName = localStorage.getItem('userName') || 'User';
+            document.getElementById('user-greeting').textContent = 'Hi, ' + userName;
+            document.getElementById('welcome-heading').textContent = 'Welcome ' + userName;
+            const avatarInitial = document.querySelector('.avatar-initials');
+            if (avatarInitial) avatarInitial.textContent = userName.charAt(0).toUpperCase();
+        });
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!userProfileButton.contains(e.target)) {
-            userDropdown.classList.remove('active');
-        }
-    });
+        const mockTestData = {
+            SDE: {
+                title: "SDE Mock Test",
+                questions: [
+                    { q: "Which data structure is used to implement a LIFO order?", options: ["Queue", "Stack", "Tree", "Graph"], answer: 1 },
+                    { q: "Which SQL query finds the second highest salary?", options: [
+                        "SELECT MAX(salary) FROM Employee;",
+                        "SELECT salary FROM Employee ORDER BY salary DESC LIMIT 2;",
+                        "SELECT MAX(salary) FROM Employee WHERE salary < (SELECT MAX(salary) FROM Employee);",
+                        "SELECT TOP 2 salary FROM Employee;"
+                    ], answer: 2 },
+                    { q: "Which of the following is NOT a programming language?", options: ["Python", "HTML", "Java", "C++"], answer: 1 },
+                    { q: "What is the time complexity of binary search?", options: ["O(n)", "O(log n)", "O(n log n)", "O(1)"], answer: 1 },
+                    { q: "Which sorting algorithm has the best average case time complexity?", options: ["Bubble Sort", "Selection Sort", "Merge Sort", "Insertion Sort"], answer: 2 },
+                    { q: "Which keyword is used to inherit a class in Java?", options: ["extends", "implements", "inherits", "instanceof"], answer: 0 },
+                    { q: "Which of the following is a NoSQL database?", options: ["MySQL", "MongoDB", "Oracle", "PostgreSQL"], answer: 1 },
+                    { q: "Which HTTP method is idempotent?", options: ["POST", "GET", "PATCH", "CONNECT"], answer: 1 },
+                    { q: "Which of the following is a stable sorting algorithm?", options: ["Quick Sort", "Heap Sort", "Merge Sort", "Selection Sort"], answer: 2 },
+                    { q: "Which data structure is used for BFS traversal?", options: ["Stack", "Queue", "Tree", "Heap"], answer: 1 }
+                ]
+            },
+            ba: {
+                title: "BA Mock Test",
+                questions: [
+                    { q: "What does SWOT stand for?", options: ["Strengths, Weaknesses, Opportunities, Threats", "System, Workflow, Output, Testing", "Software, Web, Operations, Technology", "Strategy, Work, Organization, Team"], answer: 0 },
+                    { q: "Which is a non-functional requirement?", options: ["System must allow user login", "System must respond within 2 seconds", "System must allow password reset", "System must generate reports"], answer: 1 },
+                    { q: "Which diagram is used for requirement gathering?", options: ["Use-case diagram", "Class diagram", "Sequence diagram", "Deployment diagram"], answer: 0 },
+                    { q: "Which method is commonly used to prioritize requirements?", options: ["MoSCoW", "CRUD", "UML", "HTML"], answer: 0 },
+                    { q: "Which of the following is a stakeholder in a project?", options: ["Customer", "Developer", "Project Manager", "All of the above"], answer: 3 },
+                    { q: "What is the main purpose of a business case?", options: ["To describe technical requirements", "To justify the investment in a project", "To design the UI", "To write code"], answer: 1 },
+                    { q: "Which document describes the scope of a project?", options: ["Business Requirements Document", "Test Plan", "Release Notes", "User Manual"], answer: 0 },
+                    { q: "Which analysis technique is used to break down a system into its components?", options: ["SWOT Analysis", "Gap Analysis", "Decomposition", "Root Cause Analysis"], answer: 2 },
+                    { q: "Which tool is used for process modeling?", options: ["BPMN", "HTML", "CSS", "SQL"], answer: 0 },
+                    { q: "What is a use case?", options: ["A test scenario", "A description of system behavior", "A database schema", "A UI mockup"], answer: 1 }
+                ]
+            },
+            devops: {
+                title: "DevOps Mock Test",
+                questions: [
+                    { q: "What does CI/CD stand for?", options: ["Continuous Integration/Continuous Deployment", "Code Integration/Code Development", "Continuous Improvement/Continuous Delivery", "Code Inspection/Continuous Delivery"], answer: 0 },
+                    { q: "Which tool is used for containerization?", options: ["Jenkins", "Docker", "Nagios", "Git"], answer: 1 },
+                    { q: "Which file is used to define a GitHub Actions workflow?", options: ["Dockerfile", "Makefile", ".github/workflows/*.yml", "package.json"], answer: 2 },
+                    { q: "Which is a monitoring tool?", options: ["Ansible", "Prometheus", "Terraform", "Kubernetes"], answer: 1 },
+                    { q: "Which command is used to check running containers in Docker?", options: ["docker ps", "docker run", "docker build", "docker images"], answer: 0 },
+                    { q: "Which tool is used for configuration management?", options: ["Ansible", "Grafana", "Jira", "Slack"], answer: 0 },
+                    { q: "Which of the following is a cloud service provider?", options: ["AWS", "Linux", "Git", "Jenkins"], answer: 0 },
+                    { q: "Which protocol is used for secure file transfer?", options: ["FTP", "SFTP", "SMTP", "HTTP"], answer: 1 },
+                    { q: "What is Infrastructure as Code?", options: ["Manual server setup", "Automating infrastructure with code", "Writing code for applications", "None of the above"], answer: 1 },
+                    { q: "Which tool is used for log management?", options: ["ELK Stack", "Docker", "Kubernetes", "Jenkins"], answer: 0 }
+                ]
+            },
+            uiux: {
+                title: "UI/UX Designer Mock Test",
+                questions: [
+                    { q: "What does UX stand for?", options: ["User Experience", "User Extension", "Universal Experience", "User Example"], answer: 0 },
+                    { q: "Which is a wireframing tool?", options: ["Figma", "Photoshop", "Excel", "Word"], answer: 0 },
+                    { q: "Which is NOT an accessibility consideration?", options: ["Color contrast", "Keyboard navigation", "Font size", "Server uptime"], answer: 3 },
+                    { q: "What is the main goal of UI design?", options: ["Make interfaces beautiful", "Make interfaces usable and intuitive", "Increase server speed", "Reduce code size"], answer: 1 },
+                    { q: "Which color combination is best for readability?", options: ["Red on green", "Blue on black", "Black on white", "Yellow on white"], answer: 2 },
+                    { q: "Which is a principle of good UX?", options: ["Consistency", "Ambiguity", "Complexity", "Delay"], answer: 0 },
+                    { q: "What is a persona in UX design?", options: ["A type of font", "A fictional user profile", "A color palette", "A wireframe"], answer: 1 },
+                    { q: "Which of the following is a usability test method?", options: ["A/B Testing", "Unit Testing", "Integration Testing", "Load Testing"], answer: 0 },
+                    { q: "What is a user journey map?", options: ["A map of the office", "A diagram showing user steps", "A database schema", "A UI mockup"], answer: 1 },
+                    { q: "Which is a tool for prototyping?", options: ["Figma", "Excel", "Jira", "Slack"], answer: 0 }
+                ]
+            },
+            solution: {
+                title: "Solution Engineer Mock Test",
+                questions: [
+                    { q: "What is the primary responsibility of a Solution Engineer?", options: ["Writing backend code", "Designing scalable solutions for clients", "Managing HR tasks", "Testing UI components"], answer: 1 },
+                    { q: "Which protocol is commonly used for secure API communication?", options: ["HTTP", "FTP", "HTTPS", "SMTP"], answer: 2 },
+                    { q: "What is a common tool for cloud infrastructure automation?", options: ["Terraform", "Excel", "Photoshop", "Notepad"], answer: 0 },
+                    { q: "Which is a key skill for a Solution Engineer?", options: ["Client communication", "Machine learning", "Graphic design", "Accounting"], answer: 0 },
+                    { q: "Which cloud provider offers AWS Lambda?", options: ["Google Cloud", "Azure", "AWS", "IBM Cloud"], answer: 2 },
+                    { q: "What is a load balancer used for?", options: ["Storing data", "Distributing traffic", "Encrypting data", "Testing code"], answer: 1 },
+                    { q: "Which is a popular API documentation tool?", options: ["Swagger", "Excel", "Jira", "Photoshop"], answer: 0 },
+                    { q: "What is the main benefit of microservices?", options: ["Monolithic codebase", "Scalability", "Single point of failure", "Manual deployment"], answer: 1 },
+                    { q: "Which is a DevOps practice?", options: ["Continuous Integration", "Manual Testing", "Waterfall Model", "None"], answer: 0 },
+                    { q: "What is a CDN?", options: ["Content Delivery Network", "Central Data Node", "Cloud Data Network", "Continuous Data Network"], answer: 0 }
+                ]
+            },
+            fullstack: {
+                title: "Full Stack Developer Mock Test",
+                questions: [
+                    { q: "Which stack uses MongoDB, Express, React, and Node.js?", options: ["LAMP", "MEAN", "MERN", "JAMstack"], answer: 2 },
+                    { q: "What does REST stand for?", options: ["Representational State Transfer", "Random Event State Transfer", "Remote Execution State Transfer", "None of the above"], answer: 0 },
+                    { q: "Which is a frontend framework?", options: ["Django", "React", "Flask", "Spring"], answer: 1 },
+                    { q: "Which command installs a package in Node.js?", options: ["npm install", "node install", "install npm", "npm get"], answer: 0 },
+                    { q: "Which database is NoSQL?", options: ["MySQL", "MongoDB", "Oracle", "PostgreSQL"], answer: 1 },
+                    { q: "Which is a CSS preprocessor?", options: ["Sass", "HTML", "JSX", "SQL"], answer: 0 },
+                    { q: "Which HTTP status code means 'Not Found'?", options: ["200", "404", "500", "301"], answer: 1 },
+                    { q: "Which is a state management library for React?", options: ["Redux", "Jest", "Mocha", "Express"], answer: 0 },
+                    { q: "Which is a backend framework for Node.js?", options: ["Express", "React", "Vue", "Angular"], answer: 0 },
+                    { q: "Which command creates a new React app?", options: ["npx create-react-app", "npm start", "npm install react", "node create-app"], answer: 0 }
+                ]
+            },
+            ml: {
+                title: "Machine Learning Engineer Mock Test",
+                questions: [
+                    { q: "Which library is used for deep learning in Python?", options: ["NumPy", "TensorFlow", "Pandas", "Matplotlib"], answer: 1 },
+                    { q: "What is overfitting?", options: ["Model fits training data too well", "Model fits test data only", "Model never trains", "Model is always accurate"], answer: 0 },
+                    { q: "Which algorithm is used for classification?", options: ["Linear Regression", "K-Means", "Logistic Regression", "PCA"], answer: 2 },
+                    { q: "What is the output of a sigmoid function?", options: ["Any real number", "0 or 1", "A probability between 0 and 1", "A class label"], answer: 2 },
+                    { q: "Which is a supervised learning algorithm?", options: ["K-Means", "Linear Regression", "PCA", "t-SNE"], answer: 1 },
+                    { q: "Which metric is used for classification accuracy?", options: ["MSE", "RMSE", "Accuracy", "MAE"], answer: 2 },
+                    { q: "Which is a dimensionality reduction technique?", options: ["PCA", "SVM", "CNN", "RNN"], answer: 0 },
+                    { q: "Which library is used for data manipulation in Python?", options: ["Pandas", "TensorFlow", "Keras", "NumPy"], answer: 0 },
+                    { q: "Which is a type of neural network?", options: ["CNN", "SVM", "KNN", "PCA"], answer: 0 },
+                    { q: "What is the purpose of a validation set?", options: ["To train the model", "To test the model", "To tune hyperparameters", "To deploy the model"], answer: 2 }
+                ]
+            },
+            ai: {
+                title: "AI Engineer Mock Test",
+                questions: [
+                    { q: "What does AI stand for?", options: ["Artificial Intelligence", "Automated Interface", "Advanced Integration", "Applied Informatics"], answer: 0 },
+                    { q: "Which is a popular AI framework?", options: ["TensorFlow", "React", "Spring", "Laravel"], answer: 0 },
+                    { q: "What is the Turing Test used for?", options: ["Testing intelligence in machines", "Testing software bugs", "Testing network speed", "Testing databases"], answer: 0 },
+                    { q: "Which is a type of AI learning?", options: ["Supervised", "Unsupervised", "Reinforcement", "All of the above"], answer: 3 },
+                    { q: "Which language is commonly used for AI?", options: ["Python", "HTML", "CSS", "PHP"], answer: 0 },
+                    { q: "What is NLP?", options: ["Natural Language Processing", "Neural Language Programming", "Network Layer Protocol", "None"], answer: 0 },
+                    { q: "Which is a search algorithm in AI?", options: ["A*", "Bubble Sort", "Quick Sort", "Merge Sort"], answer: 0 },
+                    { q: "What is a neural network?", options: ["A network of computers", "A network of neurons in the brain", "A computational model inspired by the brain", "A type of database"], answer: 2 },
+                    { q: "Which is a type of neural network?", options: ["CNN", "SVM", "KNN", "PCA"], answer: 0 },
+                    { q: "What is the main goal of AI?", options: ["To create intelligent agents", "To design websites", "To manage databases", "To write code"], answer: 0 }
+                ]
+            }
+        };
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set user greeting and avatar initial dynamically
-        const userName = localStorage.getItem('userName') || 'User';
-        document.getElementById('user-greeting').textContent = 'Hi, ' + userName;
-        document.getElementById('welcome-heading').textContent = 'Welcome ' + userName;
-        const avatarInitial = document.querySelector('.avatar-initials');
-        if (avatarInitial) avatarInitial.textContent = userName.charAt(0).toUpperCase();
-    });
-
-    const mockTestData = {
-        SDE: {
-            title: "SDE Mock Test",
-            questions: [
-                { q: "Which data structure is used to implement a LIFO order?", options: ["Queue", "Stack", "Tree", "Graph"], answer: 1 },
-                { q: "Which SQL query finds the second highest salary?", options: [
-                    "SELECT MAX(salary) FROM Employee;",
-                    "SELECT salary FROM Employee ORDER BY salary DESC LIMIT 2;",
-                    "SELECT MAX(salary) FROM Employee WHERE salary < (SELECT MAX(salary) FROM Employee);",
-                    "SELECT TOP 2 salary FROM Employee;"
-                ], answer: 2 },
-                { q: "Which of the following is NOT a programming language?", options: ["Python", "HTML", "Java", "C++"], answer: 1 },
-                { q: "What is the time complexity of binary search?", options: ["O(n)", "O(log n)", "O(n log n)", "O(1)"], answer: 1 },
-                { q: "Which sorting algorithm has the best average case time complexity?", options: ["Bubble Sort", "Selection Sort", "Merge Sort", "Insertion Sort"], answer: 2 },
-                { q: "Which keyword is used to inherit a class in Java?", options: ["extends", "implements", "inherits", "instanceof"], answer: 0 },
-                { q: "Which of the following is a NoSQL database?", options: ["MySQL", "MongoDB", "Oracle", "PostgreSQL"], answer: 1 },
-                { q: "Which HTTP method is idempotent?", options: ["POST", "GET", "PATCH", "CONNECT"], answer: 1 },
-                { q: "Which of the following is a stable sorting algorithm?", options: ["Quick Sort", "Heap Sort", "Merge Sort", "Selection Sort"], answer: 2 },
-                { q: "Which data structure is used for BFS traversal?", options: ["Stack", "Queue", "Tree", "Heap"], answer: 1 }
-            ]
-        },
-        ba: {
-            title: "BA Mock Test",
-            questions: [
-                { q: "What does SWOT stand for?", options: ["Strengths, Weaknesses, Opportunities, Threats", "System, Workflow, Output, Testing", "Software, Web, Operations, Technology", "Strategy, Work, Organization, Team"], answer: 0 },
-                { q: "Which is a non-functional requirement?", options: ["System must allow user login", "System must respond within 2 seconds", "System must allow password reset", "System must generate reports"], answer: 1 },
-                { q: "Which diagram is used for requirement gathering?", options: ["Use-case diagram", "Class diagram", "Sequence diagram", "Deployment diagram"], answer: 0 },
-                { q: "Which method is commonly used to prioritize requirements?", options: ["MoSCoW", "CRUD", "UML", "HTML"], answer: 0 },
-                { q: "Which of the following is a stakeholder in a project?", options: ["Customer", "Developer", "Project Manager", "All of the above"], answer: 3 },
-                { q: "What is the main purpose of a business case?", options: ["To describe technical requirements", "To justify the investment in a project", "To design the UI", "To write code"], answer: 1 },
-                { q: "Which document describes the scope of a project?", options: ["Business Requirements Document", "Test Plan", "Release Notes", "User Manual"], answer: 0 },
-                { q: "Which analysis technique is used to break down a system into its components?", options: ["SWOT Analysis", "Gap Analysis", "Decomposition", "Root Cause Analysis"], answer: 2 },
-                { q: "Which tool is used for process modeling?", options: ["BPMN", "HTML", "CSS", "SQL"], answer: 0 },
-                { q: "What is a use case?", options: ["A test scenario", "A description of system behavior", "A database schema", "A UI mockup"], answer: 1 }
-            ]
-        },
-        devops: {
-            title: "DevOps Mock Test",
-            questions: [
-                { q: "What does CI/CD stand for?", options: ["Continuous Integration/Continuous Deployment", "Code Integration/Code Development", "Continuous Improvement/Continuous Delivery", "Code Inspection/Continuous Delivery"], answer: 0 },
-                { q: "Which tool is used for containerization?", options: ["Jenkins", "Docker", "Nagios", "Git"], answer: 1 },
-                { q: "Which file is used to define a GitHub Actions workflow?", options: ["Dockerfile", "Makefile", ".github/workflows/*.yml", "package.json"], answer: 2 },
-                { q: "Which is a monitoring tool?", options: ["Ansible", "Prometheus", "Terraform", "Kubernetes"], answer: 1 },
-                { q: "Which command is used to check running containers in Docker?", options: ["docker ps", "docker run", "docker build", "docker images"], answer: 0 },
-                { q: "Which tool is used for configuration management?", options: ["Ansible", "Grafana", "Jira", "Slack"], answer: 0 },
-                { q: "Which of the following is a cloud service provider?", options: ["AWS", "Linux", "Git", "Jenkins"], answer: 0 },
-                { q: "Which protocol is used for secure file transfer?", options: ["FTP", "SFTP", "SMTP", "HTTP"], answer: 1 },
-                { q: "What is Infrastructure as Code?", options: ["Manual server setup", "Automating infrastructure with code", "Writing code for applications", "None of the above"], answer: 1 },
-                { q: "Which tool is used for log management?", options: ["ELK Stack", "Docker", "Kubernetes", "Jenkins"], answer: 0 }
-            ]
-        },
-        uiux: {
-            title: "UI/UX Designer Mock Test",
-            questions: [
-                { q: "What does UX stand for?", options: ["User Experience", "User Extension", "Universal Experience", "User Example"], answer: 0 },
-                { q: "Which is a wireframing tool?", options: ["Figma", "Photoshop", "Excel", "Word"], answer: 0 },
-                { q: "Which is NOT an accessibility consideration?", options: ["Color contrast", "Keyboard navigation", "Font size", "Server uptime"], answer: 3 },
-                { q: "What is the main goal of UI design?", options: ["Make interfaces beautiful", "Make interfaces usable and intuitive", "Increase server speed", "Reduce code size"], answer: 1 },
-                { q: "Which color combination is best for readability?", options: ["Red on green", "Blue on black", "Black on white", "Yellow on white"], answer: 2 },
-                { q: "Which is a principle of good UX?", options: ["Consistency", "Ambiguity", "Complexity", "Delay"], answer: 0 },
-                { q: "What is a persona in UX design?", options: ["A type of font", "A fictional user profile", "A color palette", "A wireframe"], answer: 1 },
-                { q: "Which of the following is a usability test method?", options: ["A/B Testing", "Unit Testing", "Integration Testing", "Load Testing"], answer: 0 },
-                { q: "What is a user journey map?", options: ["A map of the office", "A diagram showing user steps", "A database schema", "A UI mockup"], answer: 1 },
-                { q: "Which is a tool for prototyping?", options: ["Figma", "Excel", "Jira", "Slack"], answer: 0 }
-            ]
-        },
-        solution: {
-            title: "Solution Engineer Mock Test",
-            questions: [
-                { q: "What is the primary responsibility of a Solution Engineer?", options: ["Writing backend code", "Designing scalable solutions for clients", "Managing HR tasks", "Testing UI components"], answer: 1 },
-                { q: "Which protocol is commonly used for secure API communication?", options: ["HTTP", "FTP", "HTTPS", "SMTP"], answer: 2 },
-                { q: "What is a common tool for cloud infrastructure automation?", options: ["Terraform", "Excel", "Photoshop", "Notepad"], answer: 0 },
-                { q: "Which is a key skill for a Solution Engineer?", options: ["Client communication", "Machine learning", "Graphic design", "Accounting"], answer: 0 },
-                { q: "Which cloud provider offers AWS Lambda?", options: ["Google Cloud", "Azure", "AWS", "IBM Cloud"], answer: 2 },
-                { q: "What is a load balancer used for?", options: ["Storing data", "Distributing traffic", "Encrypting data", "Testing code"], answer: 1 },
-                { q: "Which is a popular API documentation tool?", options: ["Swagger", "Excel", "Jira", "Photoshop"], answer: 0 },
-                { q: "What is the main benefit of microservices?", options: ["Monolithic codebase", "Scalability", "Single point of failure", "Manual deployment"], answer: 1 },
-                { q: "Which is a DevOps practice?", options: ["Continuous Integration", "Manual Testing", "Waterfall Model", "None"], answer: 0 },
-                { q: "What is a CDN?", options: ["Content Delivery Network", "Central Data Node", "Cloud Data Network", "Continuous Data Network"], answer: 0 }
-            ]
-        },
-        fullstack: {
-            title: "Full Stack Developer Mock Test",
-            questions: [
-                { q: "Which stack uses MongoDB, Express, React, and Node.js?", options: ["LAMP", "MEAN", "MERN", "JAMstack"], answer: 2 },
-                { q: "What does REST stand for?", options: ["Representational State Transfer", "Random Event State Transfer", "Remote Execution State Transfer", "None of the above"], answer: 0 },
-                { q: "Which is a frontend framework?", options: ["Django", "React", "Flask", "Spring"], answer: 1 },
-                { q: "Which command installs a package in Node.js?", options: ["npm install", "node install", "install npm", "npm get"], answer: 0 },
-                { q: "Which database is NoSQL?", options: ["MySQL", "MongoDB", "Oracle", "PostgreSQL"], answer: 1 },
-                { q: "Which is a CSS preprocessor?", options: ["Sass", "HTML", "JSX", "SQL"], answer: 0 },
-                { q: "Which HTTP status code means 'Not Found'?", options: ["200", "404", "500", "301"], answer: 1 },
-                { q: "Which is a state management library for React?", options: ["Redux", "Jest", "Mocha", "Express"], answer: 0 },
-                { q: "Which is a backend framework for Node.js?", options: ["Express", "React", "Vue", "Angular"], answer: 0 },
-                { q: "Which command creates a new React app?", options: ["npx create-react-app", "npm start", "npm install react", "node create-app"], answer: 0 }
-            ]
-        },
-        ml: {
-            title: "Machine Learning Engineer Mock Test",
-            questions: [
-                { q: "Which library is used for deep learning in Python?", options: ["NumPy", "TensorFlow", "Pandas", "Matplotlib"], answer: 1 },
-                { q: "What is overfitting?", options: ["Model fits training data too well", "Model fits test data only", "Model never trains", "Model is always accurate"], answer: 0 },
-                { q: "Which algorithm is used for classification?", options: ["Linear Regression", "K-Means", "Logistic Regression", "PCA"], answer: 2 },
-                { q: "What is the output of a sigmoid function?", options: ["Any real number", "0 or 1", "A probability between 0 and 1", "A class label"], answer: 2 },
-                { q: "Which is a supervised learning algorithm?", options: ["K-Means", "Linear Regression", "PCA", "t-SNE"], answer: 1 },
-                { q: "Which metric is used for classification accuracy?", options: ["MSE", "RMSE", "Accuracy", "MAE"], answer: 2 },
-                { q: "Which is a dimensionality reduction technique?", options: ["PCA", "SVM", "CNN", "RNN"], answer: 0 },
-                { q: "Which library is used for data manipulation in Python?", options: ["Pandas", "TensorFlow", "Keras", "NumPy"], answer: 0 },
-                { q: "Which is a type of neural network?", options: ["CNN", "SVM", "KNN", "PCA"], answer: 0 },
-                { q: "What is the purpose of a validation set?", options: ["To train the model", "To test the model", "To tune hyperparameters", "To deploy the model"], answer: 2 }
-            ]
-        },
-        ai: {
-            title: "AI Engineer Mock Test",
-            questions: [
-                { q: "What does AI stand for?", options: ["Artificial Intelligence", "Automated Interface", "Advanced Integration", "Applied Informatics"], answer: 0 },
-                { q: "Which is a popular AI framework?", options: ["TensorFlow", "React", "Spring", "Laravel"], answer: 0 },
-                { q: "What is the Turing Test used for?", options: ["Testing intelligence in machines", "Testing software bugs", "Testing network speed", "Testing databases"], answer: 0 },
-                { q: "Which is a type of AI learning?", options: ["Supervised", "Unsupervised", "Reinforcement", "All of the above"], answer: 3 },
-                { q: "Which language is commonly used for AI?", options: ["Python", "HTML", "CSS", "PHP"], answer: 0 },
-                { q: "What is NLP?", options: ["Natural Language Processing", "Neural Language Programming", "Network Layer Protocol", "None"], answer: 0 },
-                { q: "Which is a search algorithm in AI?", options: ["A*", "Bubble Sort", "Quick Sort", "Merge Sort"], answer: 0 },
-                { q: "What is a neural network?", options: ["A network of computers", "A network of neurons in the brain", "A computational model inspired by the brain", "A type of database"], answer: 2 },
-                { q: "Which is a type of neural network?", options: ["CNN", "SVM", "KNN", "PCA"], answer: 0 },
-                { q: "What is the main goal of AI?", options: ["To create intelligent agents", "To design websites", "To manage databases", "To write code"], answer: 0 }
-            ]
-        }
-    };
-
-    document.querySelectorAll('.start-test-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const test = btn.getAttribute('data-test');
-            lastTest = test;
-            const modal = document.getElementById('mockTestModal');
-            const form = document.getElementById('mockTestForm');
-            const title = document.getElementById('mockTestTitle');
-            title.textContent = mockTestData[test].title;
-            form.innerHTML = '';
-            mockTestData[test].questions.forEach((q, idx) => {
-                let optionsHtml = '';
-                q.options.forEach((opt, oidx) => {
-                    optionsHtml += `
-                        <label class="block mb-1">
-                            <input type="radio" name="q${idx+1}" value="${oidx}" required class="mr-2">
-                            ${opt}
-                        </label>
+        document.querySelectorAll('.start-test-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const test = btn.getAttribute('data-test');
+                lastTest = test;
+                const modal = document.getElementById('mockTestModal');
+                const form = document.getElementById('mockTestForm');
+                const title = document.getElementById('mockTestTitle');
+                title.textContent = mockTestData[test].title;
+                form.innerHTML = '';
+                mockTestData[test].questions.forEach((q, idx) => {
+                    let optionsHtml = '';
+                    q.options.forEach((opt, oidx) => {
+                        optionsHtml += `
+                            <label class="block mb-1">
+                                <input type="radio" name="q${idx+1}" value="${oidx}" required class="mr-2">
+                                ${opt}
+                            </label>
+                        `;
+                    });
+                    form.innerHTML += `
+                        <div>
+                            <div class="font-medium mb-1">${idx + 1}. ${q.q}</div>
+                            <div class="ml-4">${optionsHtml}</div>
+                        </div>
                     `;
                 });
-                form.innerHTML += `
-                    <div>
-                        <div class="font-medium mb-1">${idx + 1}. ${q.q}</div>
-                        <div class="ml-4">${optionsHtml}</div>
-                    </div>
-                `;
+                modal.classList.remove('hidden');
             });
-            modal.classList.remove('hidden');
         });
-    });
 
-    document.getElementById('closeMockTestModal').onclick = function() {
-        document.getElementById('mockTestModal').classList.add('hidden');
-    };
+        document.getElementById('closeMockTestModal').onclick = function() {
+            document.getElementById('mockTestModal').classList.add('hidden');
+        };
 
-    document.getElementById('submitMockTest').onclick = function(e) {
-        e.preventDefault();
-        const form = document.getElementById('mockTestForm');
-        const test = lastTest;
-        const questions = mockTestData[test].questions;
-        let score = 0;
-        let total = questions.length;
-        const userId = localStorage.getItem('userId'); // Make sure to set this at login
+        document.getElementById('submitMockTest').onclick = function(e) {
+            e.preventDefault();
+            const form = document.getElementById('mockTestForm');
+            const test = lastTest;
+            const questions = mockTestData[test].questions;
+            let score = 0;
+            let total = questions.length;
+            const userId = localStorage.getItem('userId'); // Make sure to set this at login
 
-if (!userId) {
-    alert('User not identified. Please log in again.');
-    return;
-}
+    if (!userId) {
+        alert('User not identified. Please log in again.');
+        return;
+    }
 
-        let resultHtml = '<ul class="mb-4">';
-        questions.forEach((q, idx) => {
-            const selected = form.querySelector(`input[name="q${idx+1}"]:checked`);
-            const selectedIdx = selected ? parseInt(selected.value) : -1;
-            const isCorrect = selectedIdx === q.answer;
-            if (isCorrect) score++;
-            resultHtml += `<li class="mb-2">
-                <span class="font-medium">${idx+1}. ${q.q}</span><br>
-                <span>Your answer: <span class="${isCorrect ? 'text-green-600' : 'text-red-600'}">${selected ? q.options[selectedIdx] : 'No answer'}</span></span><br>
-                <span>Correct answer: <span class="text-green-600">${q.options[q.answer]}</span></span>
-            </li>`;
-        });
-        resultHtml += '</ul>';
-        resultHtml = `<div class="mb-4 text-lg font-semibold">Score: ${score} / ${total}</div>` + resultHtml;
-        fetch('http://localhost:5001/api/mock-results', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        userId,
-        testName: test,
-        score,
-        total
+            let resultHtml = '<ul class="mb-4">';
+            questions.forEach((q, idx) => {
+                const selected = form.querySelector(`input[name="q${idx+1}"]:checked`);
+                const selectedIdx = selected ? parseInt(selected.value) : -1;
+                const isCorrect = selectedIdx === q.answer;
+                if (isCorrect) score++;
+                resultHtml += `<li class="mb-2">
+                    <span class="font-medium">${idx+1}. ${q.q}</span><br>
+                    <span>Your answer: <span class="${isCorrect ? 'text-green-600' : 'text-red-600'}">${selected ? q.options[selectedIdx] : 'No answer'}</span></span><br>
+                    <span>Correct answer: <span class="text-green-600">${q.options[q.answer]}</span></span>
+                </li>`;
+            });
+            resultHtml += '</ul>';
+            resultHtml = `<div class="mb-4 text-lg font-semibold">Score: ${score} / ${total}</div>` + resultHtml;
+            fetch('http://localhost:5001/api/mock-results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userId,
+            testName: test,
+            score,
+            total
+        })
     })
-})
-.then(res => {
-    if (!res.ok) throw new Error('Error submitting score or test already taken.');
-    return res.json();
-})
-.then(data => {
-    console.log('✅ Score saved to MongoDB:', data);
-    // Optionally refresh dashboard stats
-    return fetch(`http://localhost:5001/api/mock-results/${userId}`);
-})
-.then(res => res.json())
-.then(results => {
-    updateMockTestStats(results);
-    disableCompletedTests(results);
-})
-.catch(err => {
-    console.error('❌ Failed to save score:', err);
-});
-
-        document.getElementById('mockTestModal').classList.add('hidden');
-        document.getElementById('mockTestResultContent').innerHTML = resultHtml;
-        document.getElementById('mockTestResultModal').classList.remove('hidden');
-    };
-
-    document.getElementById('closeMockTestResultModal').onclick = function() {
-        document.getElementById('mockTestResultModal').classList.add('hidden');
-    };
-    document.getElementById('closeResultBtn').onclick = async function() {
-    document.getElementById('mockTestResultModal').classList.add('hidden');
-    
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
-
-    try {
-        const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
-        if (!res.ok) throw new Error('Failed to fetch updated test results');
-        const results = await res.json();
+    .then(res => {
+        if (!res.ok) throw new Error('Error submitting score or test already taken.');
+        return res.json();
+    })
+    .then(data => {
+        console.log('✅ Score saved to MongoDB:', data);
+        // Optionally refresh dashboard stats
+        return fetch(`http://localhost:5001/api/mock-results/${userId}`);
+    })
+    .then(res => res.json())
+    .then(results => {
+        updateMockTestStats(results);
         disableCompletedTests(results);
-    } catch (err) {
-        console.error('Error marking test completed after close:', err);
-    }
-    };
-
-    function disableCompletedTests(results) {
-    const completedTests = new Set(results.map(r => r.testName));
-    document.querySelectorAll('.start-test-btn').forEach(btn => {
-        const testName = btn.getAttribute('data-test');
-        if (completedTests.has(testName)) {
-            btn.disabled = true;
-            btn.classList.remove('hover:bg-blue-700', 'bg-blue-600');
-            btn.classList.add('bg-gray-400', 'cursor-not-allowed');
-            btn.textContent = 'Completed';
-        }
+    })
+    .catch(err => {
+        console.error('❌ Failed to save score:', err);
     });
-}
-    function updateMockTestStats(results) {
-    const scores = results.map(r => Number(r.score));
-    const totals = results.map(r => Number(r.total));
 
-    const attempted = results.length;
-    const bestScore = scores.length ? Math.max(...scores) : 0;
-    const avgScore = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) : 0;
+            document.getElementById('mockTestModal').classList.add('hidden');
+            document.getElementById('mockTestResultContent').innerHTML = resultHtml;
+            document.getElementById('mockTestResultModal').classList.remove('hidden');
+        };
 
-    let passed = 0;
-    for (let i = 0; i < results.length; i++) {
-        const percent = (results[i].score / results[i].total) * 100;
-        if (percent >= 60) passed++;
-        disableCompletedTests(results);
-    }
-    const successRate = scores.length ? Math.round((passed / scores.length) * 100) : 0;
+        document.getElementById('closeMockTestResultModal').onclick = function() {
+            document.getElementById('mockTestResultModal').classList.add('hidden');
+        };
+        document.getElementById('closeResultBtn').onclick = async function() {
+        document.getElementById('mockTestResultModal').classList.add('hidden');
+        
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
 
-
-
-    // Update dashboard elements
-    let el;
-    el = document.getElementById('stat-mock-attempted');
-    if (el) el.textContent = attempted;
-    el = document.getElementById('stat-mock-best');
-    if (el) el.textContent = bestScore;
-    el = document.getElementById('mock-tests-completed');
-    if (el) el.textContent = attempted;
-    el = document.getElementById('mock-tests-avg-score');
-    if (el) el.textContent = avgScore;
-    el = document.getElementById('mock-tests-success-rate');
-    if (el) el.textContent = successRate + '%';
-}
-
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Chart rendering function
-async function renderMockTestPerformanceChart() {
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
-    try {
-        const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
-        if (!res.ok) throw new Error('Failed to fetch user test results');
-        const results = await res.json();
-        // Prepare data for chart
-        const labels = results.map(r => `${r.testName} (${r.takenAt ? new Date(r.takenAt).toLocaleDateString() : ''})`);
-        const data = results.map(r => ((r.score / r.total) * 100).toFixed(2));
-        // Remove old chart if exists
-        if (window.mockTestPerformanceChartInstance) {
-            window.mockTestPerformanceChartInstance.destroy();
+        try {
+            const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
+            if (!res.ok) throw new Error('Failed to fetch updated test results');
+            const results = await res.json();
+            disableCompletedTests(results);
+        } catch (err) {
+            console.error('Error marking test completed after close:', err);
         }
-        // Render chart
-        const ctx = document.getElementById('mockTestPerformanceChart').getContext('2d');
-        window.mockTestPerformanceChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Score (%)',
-                    data: data,
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'top' },
-                    title: {
-                        display: true,
-                        text: 'Mock Test Scores by Attempt',
-                        font: { size: 18 }
-                    },
-                    subtitle: {
-                        display: true,
-                        text: 'Hover over a point to see test name, date, score, and percentage.'
-                    },
-                    tooltip: {
-                        enabled: true,
-                        callbacks: {
-                            title: function(context) {
-                                return context[0].label;
-                            },
-                            label: function(context) {
-                                const idx = context.dataIndex;
-                                const r = results[idx];
-                                return [
-                                    `Score: ${r.score} / ${r.total}`,
-                                    `Percentage: ${((r.score / r.total) * 100).toFixed(2)}%`,
-                                    r.takenAt ? `Date: ${new Date(r.takenAt).toLocaleString()}` : ''
-                                ];
+        };
+
+        function disableCompletedTests(results) {
+        const completedTests = new Set(results.map(r => r.testName));
+        document.querySelectorAll('.start-test-btn').forEach(btn => {
+            const testName = btn.getAttribute('data-test');
+            if (completedTests.has(testName)) {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-700', 'bg-blue-600');
+                btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                btn.textContent = 'Completed';
+            }
+        });
+    }
+        function updateMockTestStats(results) {
+        const scores = results.map(r => Number(r.score));
+        const totals = results.map(r => Number(r.total));
+
+        const attempted = results.length;
+        const bestScore = scores.length ? Math.max(...scores) : 0;
+        const avgScore = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) : 0;
+
+        let passed = 0;
+        for (let i = 0; i < results.length; i++) {
+            const percent = (results[i].score / results[i].total) * 100;
+            if (percent >= 60) passed++;
+            disableCompletedTests(results);
+        }
+        const successRate = scores.length ? Math.round((passed / scores.length) * 100) : 0;
+
+
+
+        // Update dashboard elements
+        let el;
+        el = document.getElementById('stat-mock-attempted');
+        if (el) el.textContent = attempted;
+        el = document.getElementById('stat-mock-best');
+        if (el) el.textContent = bestScore;
+        el = document.getElementById('mock-tests-completed');
+        if (el) el.textContent = attempted;
+        el = document.getElementById('mock-tests-avg-score');
+        if (el) el.textContent = avgScore;
+        el = document.getElementById('mock-tests-success-rate');
+        if (el) el.textContent = successRate + '%';
+    }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Chart rendering function
+    async function renderMockTestPerformanceChart() {
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+        try {
+            const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
+            if (!res.ok) throw new Error('Failed to fetch user test results');
+            const results = await res.json();
+            // Prepare data for chart
+            const labels = results.map(r => `${r.testName} (${r.takenAt ? new Date(r.takenAt).toLocaleDateString() : ''})`);
+            const data = results.map(r => ((r.score / r.total) * 100).toFixed(2));
+            // Remove old chart if exists
+            if (window.mockTestPerformanceChartInstance) {
+                window.mockTestPerformanceChartInstance.destroy();
+            }
+            // Render chart
+            const ctx = document.getElementById('mockTestPerformanceChart').getContext('2d');
+            window.mockTestPerformanceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Score (%)',
+                        data: data,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: {
+                            display: true,
+                            text: 'Mock Test Scores by Attempt',
+                            font: { size: 18 }
+                        },
+                        subtitle: {
+                            display: true,
+                            text: 'Hover over a point to see test name, date, score, and percentage.'
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label;
+                                },
+                                label: function(context) {
+                                    const idx = context.dataIndex;
+                                    const r = results[idx];
+                                    return [
+                                        `Score: ${r.score} / ${r.total}`,
+                                        `Percentage: ${((r.score / r.total) * 100).toFixed(2)}%`,
+                                        r.takenAt ? `Date: ${new Date(r.takenAt).toLocaleString()}` : ''
+                                    ];
+                                }
                             }
                         }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        title: { display: true, text: 'Score Percentage' }
                     },
-                    x: {
-                        title: { display: true, text: 'Test Name (Date)' }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Score Percentage' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Test Name (Date)' }
+                        }
                     }
                 }
-            }
-        });
-    } catch (err) {
-        console.error('Error rendering performance chart:', err);
+            });
+        } catch (err) {
+            console.error('Error rendering performance chart:', err);
+        }
     }
-}
-// Initial chart render on page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderMockTestPerformanceChart);
-} else {
-    renderMockTestPerformanceChart();
-}
-</script>
-<script>
-// Patch the mock test submission handler to update the chart after submission
-const submitBtn = document.getElementById('submitMockTest');
-if (submitBtn) {
-    const originalHandler = submitBtn.onclick;
-    submitBtn.onclick = function(e) {
-        if (originalHandler) originalHandler.call(this, e);
-        // After the modal closes, update the chart
-        setTimeout(renderMockTestPerformanceChart, 1000); // slight delay to ensure DB update
-    };
-}
-</script>
-<script>
-function getUserMockTestScore(results, testName) {
-    const res = results.find(r => r.testName.toLowerCase() === testName.toLowerCase());
-    return res ? `${res.score} / ${res.total}` : null;
-}
-
-document.addEventListener('DOMContentLoaded', async function () {
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
-    let results = [];
-    try {
-        const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
-        if (res.ok) results = await res.json();
-    } catch (err) { results = []; }
-
-    const testCards = [
-        { key: 'SDE', title: 'SDE Mock Test', difficulty: 'Hard' },
-        { key: 'ba', title: 'BA Mock Test', difficulty: 'Medium' },
-        { key: 'devops', title: 'DevOps Mock Test', difficulty: 'Medium' },
-        { key: 'uiux', title: 'UI/UX Designer Mock Test', difficulty: 'Medium' },
-        { key: 'solution', title: 'Solution Engineer Mock Test', difficulty: 'Medium' },
-        { key: 'fullstack', title: 'Full Stack Developer Mock Test', difficulty: 'Hard' },
-        { key: 'ml', title: 'Machine Learning Engineer Mock Test', difficulty: 'Hard' },
-        { key: 'ai', title: 'AI Engineer Mock Test', difficulty: 'Hard' }
-    ];
-    const container = document.getElementById('exam-mock-test-cards');
-    if (container) {
-        container.innerHTML = '';
-        testCards.forEach(card => {
-            const score = getUserMockTestScore(results, card.key);
-            const completed = !!score;
-            const numQuestions = mockTestData[card.key]?.questions?.length || 0;
-            container.innerHTML += `
-                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <h3 class="font-semibold mb-2">${card.title}</h3>
-                    <p class="text-gray-600 mb-4">Questions: ${numQuestions}</p>
-                    <div class="text-sm text-gray-700 mb-2">Difficulty: ${card.difficulty}</div>
-                    ${score ? `<div class='mb-2 font-semibold text-green-700'>Score: ${score}</div>` : ''}
-                    <div class="flex justify-end items-center">
-                        <button class="${completed ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded transition start-test-btn" data-test="${card.key}" ${completed ? 'disabled' : ''}>${completed ? 'Completed' : 'Start Test'}</button>
-                    </div>
-                </div>
-            `;
-        });
+    // Initial chart render on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderMockTestPerformanceChart);
+    } else {
+        renderMockTestPerformanceChart();
     }
-    // Re-attach event listeners for start-test-btn
-    document.querySelectorAll('.start-test-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const test = btn.getAttribute('data-test');
-            lastTest = test;
-            const modal = document.getElementById('mockTestModal');
-            const form = document.getElementById('mockTestForm');
-            const title = document.getElementById('mockTestTitle');
-            title.textContent = mockTestData[test].title;
-            form.innerHTML = '';
-            mockTestData[test].questions.forEach((q, idx) => {
-                let optionsHtml = '';
-                q.options.forEach((opt, oidx) => {
-                    optionsHtml += `
-                        <label class="block mb-1">
-                            <input type="radio" name="q${idx+1}" value="${oidx}" required class="mr-2">
-                            ${opt}
-                        </label>
-                    `;
-                });
-                form.innerHTML += `
-                    <div>
-                        <div class="font-medium mb-1">${idx + 1}. ${q.q}</div>
-                        <div class="ml-4">${optionsHtml}</div>
+    </script>
+    <script>
+    // Patch the mock test submission handler to update the chart after submission
+    const submitBtn = document.getElementById('submitMockTest');
+    if (submitBtn) {
+        const originalHandler = submitBtn.onclick;
+        submitBtn.onclick = function(e) {
+            if (originalHandler) originalHandler.call(this, e);
+            // After the modal closes, update the chart
+            setTimeout(renderMockTestPerformanceChart, 1000); // slight delay to ensure DB update
+        };
+    }
+    </script>
+    <script>
+    function getUserMockTestScore(results, testName) {
+        const res = results.find(r => r.testName.toLowerCase() === testName.toLowerCase());
+        return res ? `${res.score} / ${res.total}` : null;
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+        let results = [];
+        try {
+            const res = await fetch(`http://localhost:5001/api/mock-results/${userId}`);
+            if (res.ok) results = await res.json();
+        } catch (err) { results = []; }
+
+        const testCards = [
+            { key: 'SDE', title: 'SDE Mock Test', difficulty: 'Hard' },
+            { key: 'ba', title: 'BA Mock Test', difficulty: 'Medium' },
+            { key: 'devops', title: 'DevOps Mock Test', difficulty: 'Medium' },
+            { key: 'uiux', title: 'UI/UX Designer Mock Test', difficulty: 'Medium' },
+            { key: 'solution', title: 'Solution Engineer Mock Test', difficulty: 'Medium' },
+            { key: 'fullstack', title: 'Full Stack Developer Mock Test', difficulty: 'Hard' },
+            { key: 'ml', title: 'Machine Learning Engineer Mock Test', difficulty: 'Hard' },
+            { key: 'ai', title: 'AI Engineer Mock Test', difficulty: 'Hard' }
+        ];
+        const container = document.getElementById('exam-mock-test-cards');
+        if (container) {
+            container.innerHTML = '';
+            testCards.forEach(card => {
+                const score = getUserMockTestScore(results, card.key);
+                const completed = !!score;
+                const numQuestions = mockTestData[card.key]?.questions?.length || 0;
+                container.innerHTML += `
+                    <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-semibold mb-2">${card.title}</h3>
+                        <p class="text-gray-600 mb-4">Questions: ${numQuestions}</p>
+                        <div class="text-sm text-gray-700 mb-2">Difficulty: ${card.difficulty}</div>
+                        ${score ? `<div class='mb-2 font-semibold text-green-700'>Score: ${score}</div>` : ''}
+                        <div class="flex justify-end items-center">
+                            <button class="${completed ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded transition start-test-btn" data-test="${card.key}" ${completed ? 'disabled' : ''}>${completed ? 'Completed' : 'Start Test'}</button>
+                        </div>
                     </div>
                 `;
             });
-            modal.classList.remove('hidden');
+        }
+        // Re-attach event listeners for start-test-btn
+        document.querySelectorAll('.start-test-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const test = btn.getAttribute('data-test');
+                lastTest = test;
+                const modal = document.getElementById('mockTestModal');
+                const form = document.getElementById('mockTestForm');
+                const title = document.getElementById('mockTestTitle');
+                title.textContent = mockTestData[test].title;
+                form.innerHTML = '';
+                mockTestData[test].questions.forEach((q, idx) => {
+                    let optionsHtml = '';
+                    q.options.forEach((opt, oidx) => {
+                        optionsHtml += `
+                            <label class="block mb-1">
+                                <input type="radio" name="q${idx+1}" value="${oidx}" required class="mr-2">
+                                ${opt}
+                            </label>
+                        `;
+                    });
+                    form.innerHTML += `
+                        <div>
+                            <div class="font-medium mb-1">${idx + 1}. ${q.q}</div>
+                            <div class="ml-4">${optionsHtml}</div>
+                        </div>
+                    `;
+                });
+                modal.classList.remove('hidden');
+            });
         });
     });
-});
-</script>
+    </script>
 

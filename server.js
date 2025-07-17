@@ -10,6 +10,7 @@ const fs = require('fs');
 const authRoutes = require('./routes/auth');
 const testRoutes = require('./routes/testRoutes'); // <-- Add this after other route imports
 const userRoutes = require('./routes/users');
+const examResultsRouter = require('./routes/examResults');
 
 
 
@@ -43,6 +44,7 @@ fs.mkdirSync(uploadDir, { recursive: true });
 app.use('/components', express.static(path.join(__dirname, 'components')));
 app.use('/HR-dashboard', express.static(path.join(__dirname, 'HR-dashboard')));
 app.use('/user-dashboard', express.static(path.join(__dirname, 'user-dashboard')));
+app.use('/TestProtocol', express.static(path.join(__dirname, 'TestProtocol')));
 app.use('/login-page', express.static(path.join(__dirname, 'login-page')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/users', userRoutes); // 👈 THIS LINE IS MISSING
@@ -54,6 +56,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tests', testRoutes);
 // Mock results route
 app.use('/api/mock-results', mockResultsRoute); // <-- Add this after examRoutes
+app.use('/api/exam-results', examResultsRouter);
 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'login-page', 'login.html'));

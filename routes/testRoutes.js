@@ -272,8 +272,9 @@ router.post('/:testId/assign', async (req, res) => {
             }
         );
 
-        // Build test link
-        const link = `http://localhost:5000/take-test/${testId}/${userId}`;
+        // Build secure test link for direct exam access
+        const uniqueToken = Math.random().toString(36).substr(2, 12) + Date.now();
+        const link = `http://localhost:5000/TestProtocol/index.html?testName=${encodeURIComponent(test.name)}&userId=${user._id}&role=${user.role}&token=${uniqueToken}`;
 
         // Send email notification
         await sendTestAssignmentMail(
@@ -314,4 +315,16 @@ router.post('/:testId/remove', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+// ✅ GET TEST BY NAME (for exam window)
+router.get('/by-name/:testName', async (req, res) => {
+    try {
+        const test = await Test.findOne({ name: req.params.testName });
+        if (!test) return res.status(404).json({ message: 'Test not found.' });
+        res.json(test);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching test by name' });
+    }
+});
+
 module.exports = router;
