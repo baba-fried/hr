@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         prevBtn.style.display = currentQuestionIndex === 0 ? 'none' : 'inline-block';
         nextBtn.style.display = currentQuestionIndex === questions.length - 1 ? 'none' : 'inline-block';
-        submitExamBtn.style.display = currentQuestionIndex === questions.length - 1 ? 'inline-block' : 'none';
+        submitExamBtn.style.display = 'inline-block';
 
         // Add event listener for the radio buttons to save the answer
         document.querySelectorAll(`input[name="question-${currentQuestionIndex}"]`).forEach(input => {
