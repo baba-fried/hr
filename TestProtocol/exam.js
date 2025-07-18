@@ -2,6 +2,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const videoFeed = document.getElementById('video-feed');
     const questionContainer = document.getElementById('question-container');
     const submitExamBtn = document.getElementById('submit-exam-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
 
     // Get user media
     try {
@@ -18,30 +24,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         const res = await fetch(`/api/tests/questions?testName=${encodeURIComponent(testName)}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
-        const questions = await res.json();
-        displayQuestions(questions);
+        questions = await res.json();
+        displayQuestion();
     } catch (error) {
         console.error('Error fetching questions.', error);
         questionContainer.innerHTML = '<p>Error loading questions. Please try again later.</p>';
     }
 
-    function displayQuestions(questions) {
-        let questionsHTML = '';
-        questions.forEach((q, index) => {
-            questionsHTML += `
-                <div class="question">
-                    <p>${index + 1}. ${q.questionText}</p>
-                    ${q.options.map(opt => `
-                        <label>
-                            <input type="radio" name="question-${index}" value="${opt}">
-                            ${opt}
-                        </label>
-                    `).join('<br>')}
-                </div>
-            `;
+    function displayQuestion() {
+        if (questions.length === 0) {
+            questionContainer.innerHTML = '<p>No questions available for this test.</p>';
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            submitExamBtn.style.display = 'none';
+            return;
+        }
+
+        const question = questions[currentQuestionIndex];
+        let questionHTML = `
+            <div class="question">
+                <p>${currentQuestionIndex + 1}. ${question.questionText}</p>
+                ${question.options.map(opt => `
+                    <label>
+                        <input type="radio" name="question-${currentQuestionIndex}" value="${opt}" ${userAnswers[currentQuestionIndex] === opt ? 'checked' : ''}>
+                        ${opt}
+                    </label>
+                `).join('<br>')}
+            </div>
+        `;
+        questionContainer.innerHTML = questionHTML;
+
+        prevBtn.style.display = currentQuestionIndex === 0 ? 'none' : 'inline-block';
+        nextBtn.style.display = currentQuestionIndex === questions.length - 1 ? 'none' : 'inline-block';
+        submitExamBtn.style.display = currentQuestionIndex === questions.length - 1 ? 'inline-block' : 'none';
+
+        // Add event listener for the radio buttons to save the answer
+        document.querySelectorAll(`input[name="question-${currentQuestionIndex}"]`).forEach(input => {
+            input.addEventListener('change', (e) => {
+                userAnswers[currentQuestionIndex] = e.target.value;
+            });
         });
-        questionContainer.innerHTML = questionsHTML;
     }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            displayQuestion();
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+    });
 
     submitExamBtn.addEventListener('click', () => {
         // Placeholder for submission logic
