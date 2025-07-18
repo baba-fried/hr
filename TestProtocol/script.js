@@ -1,97 +1,6 @@
-const examData = {
-    duration: 30 * 60, // 30 minutes in seconds
-    questions: [
-        {
-            question: "What does the 4P's of marketing stand for?",
-            options: ["Product, Price, Place, Promotion", "Plan, Process, People, Performance", "Push, Pull, Promote, Price"],
-            answer: 0,
-            originalIndex: 0
-        },
-        {
-            question: "Which platform is best suited for B2B marketing?",
-            options: ["Instagram", "LinkedIn", "Snapchat"],
-            answer: 1,
-            originalIndex: 1
-        },
-        {
-            question: "SEO stands for?",
-            options: ["Search Engine Optimization", "Sales Engagement Optimization", "Social Engagement Operations"],
-            answer: 0,
-            originalIndex: 2
-        },
-        {
-            question: "What is a common metric to measure email campaign success?",
-            options: ["Bounce Rate", "Open Rate", "Ad Impressions"],
-            answer: 1,
-            originalIndex: 3
-        },
-        {
-            question: "Which color is often associated with trust in branding?",
-            options: ["Red", "Blue", "Orange"],
-            answer: 1,
-            originalIndex: 4
-        },
-        {
-            question: "Which tool is used for tracking website analytics?",
-            options: ["Google Docs", "Google Analytics", "Google Slides"],
-            answer: 1,
-            originalIndex: 5
-        },
-        {
-            question: "Which marketing funnel stage comes first?",
-            options: ["Conversion", "Awareness", "Decision"],
-            answer: 1,
-            originalIndex: 6
-        },
-        {
-            question: "What does 'CTR' stand for in digital marketing?",
-            options: ["Click Through Rate", "Customer Trust Ratio", "Content Targeting Reach"],
-            answer: 0,
-            originalIndex: 7
-        },
-        {
-            question: "Which of these is a type of paid marketing?",
-            options: ["Organic SEO", "PPC", "Content Marketing"],
-            answer: 1,
-            originalIndex: 8
-        },
-        {
-            question: "A/B testing is primarily used to:",
-            options: ["Build brand identity", "Compare marketing strategies", "Test performance of two versions"],
-            answer: 2,
-            originalIndex: 9
-        },
-        {
-            question: "Describe a successful marketing campaign you've seen recently and why it worked.",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 10
-        },
-        {
-            question: "How would you market a new app for college students?",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 11
-        },
-        {
-            question: "What strategies would you use to improve customer retention?",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 12
-        },
-        {
-            question: "Explain how you would measure the success of a social media campaign.",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 13
-        },
-        {
-            question: "Write a sample email pitch to promote a new product to potential customers.",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 14
-        }
-    ]
+let examData = {
+    duration: 0,
+    questions: []
 };
 
 // ===== DOM Elements =====
@@ -289,7 +198,6 @@ let lastScreenshotAttempt = 0;
 let lastWindowSwitchAttempt = 0;
 let lastViolationAttempt = 0;
 let lastFaceDetectionIssue = 0;
-const sessionID = Math.random().toString(36).substr(2, 12).toUpperCase();
 const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 let mediaStream = null;
 let faceDetectionInterval = null;
@@ -318,6 +226,24 @@ const audioConfig = {
 };
 
 // ===== Utility Functions =====
+async function fetchTestByName(testName) {
+    try {
+        const response = await fetch(`/api/tests/by-name/${testName}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching test data:', error);
+        return null;
+    }
+}
+
+function getTestNameFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('testName');
+}
+
 function shuffleArray(array, shuffleOptions = false) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -675,7 +601,7 @@ function showAudioPermissionPopup() {
 }
 
 // ===== Initialize Exam =====
-function initExam() {
+async function initExam() {
     if (!startScreen || !examContainer || !questionsContainer) {
         console.error('Required DOM elements are missing');
         return;
@@ -683,6 +609,37 @@ function initExam() {
 
     if (!/Chrome/.test(navigator.userAgent)) {
         examContainer.innerHTML = '<p style="text-align: center;">This exam requires Google Chrome.</p>';
+        startScreen.style.display = 'none';
+        examContainer.style.display = 'block';
+        return;
+    }
+
+    const testName = getTestNameFromUrl();
+    if (!testName) {
+        examContainer.innerHTML = '<p style="text-align: center;">Test name not found in URL.</p>';
+        startScreen.style.display = 'none';
+        examContainer.style.display = 'block';
+        return;
+    }
+
+    try {
+        const test = await fetchTestByName(testName);
+        if (!test) {
+            throw new Error('Test data is null or undefined');
+        }
+
+        examData.duration = test.duration * 60;
+        examData.questions = test.questions.map((q, index) => ({
+            question: q.questionText,
+            options: q.options,
+            answer: q.correctAnswer,
+            type: q.questionType === 'mcq' ? undefined : 'written',
+            originalIndex: index
+        }));
+
+    } catch (error) {
+        console.error('Failed to initialize exam:', error);
+        examContainer.innerHTML = `<p style="text-align: center;">Error loading test. Please try again later.</p>`;
         startScreen.style.display = 'none';
         examContainer.style.display = 'block';
         return;
@@ -1242,7 +1199,7 @@ function endExam(force = false) {
     }));
 
     const resultData = {
-        sessionID,
+        sessionID: getTestNameFromUrl() + '-' + document.getElementById('user-roll')?.value,
         rollNumber: document.getElementById('user-roll')?.value,
         score,
         total: examData.questions.filter(q => !q.type).length,
