@@ -52,6 +52,21 @@ router.get('/my-tests', auth, async (req, res) => {
     }
 });
 
+// ✅ GET QUESTIONS FOR A TEST
+router.get('/questions', auth, async (req, res) => {
+    try {
+        console.log('Fetching questions for test:', req.query.testName);
+        const test = await Test.findOne({ name: req.query.testName });
+        if (!test) {
+            console.log('Test not found');
+            return res.status(404).json({ message: 'Test not found' });
+        }
+        res.json(test.questions);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching questions', error: err.message });
+    }
+});
+
 // ✅ GET SPECIFIC TEST
 router.get('/:testId', async (req, res) => {
     try {
@@ -324,6 +339,21 @@ router.get('/by-name/:testName', async (req, res) => {
         res.json(test);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching test by name' });
+    }
+});
+
+// ✅ GET QUESTIONS FOR A TEST
+router.get('/questions', auth, async (req, res) => {
+    try {
+        console.log('Fetching questions for test:', req.query.testName);
+        const test = await Test.findOne({ name: req.query.testName });
+        if (!test) {
+            console.log('Test not found');
+            return res.status(404).json({ message: 'Test not found' });
+        }
+        res.json(test.questions);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching questions', error: err.message });
     }
 });
 
