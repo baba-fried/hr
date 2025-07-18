@@ -1,97 +1,6 @@
-const examData = {
-    duration: 30 * 60, // 30 minutes in seconds
-    questions: [
-        {
-            question: "What does the 4P's of marketing stand for?",
-            options: ["Product, Price, Place, Promotion", "Plan, Process, People, Performance", "Push, Pull, Promote, Price"],
-            answer: 0,
-            originalIndex: 0
-        },
-        {
-            question: "Which platform is best suited for B2B marketing?",
-            options: ["Instagram", "LinkedIn", "Snapchat"],
-            answer: 1,
-            originalIndex: 1
-        },
-        {
-            question: "SEO stands for?",
-            options: ["Search Engine Optimization", "Sales Engagement Optimization", "Social Engagement Operations"],
-            answer: 0,
-            originalIndex: 2
-        },
-        {
-            question: "What is a common metric to measure email campaign success?",
-            options: ["Bounce Rate", "Open Rate", "Ad Impressions"],
-            answer: 1,
-            originalIndex: 3
-        },
-        {
-            question: "Which color is often associated with trust in branding?",
-            options: ["Red", "Blue", "Orange"],
-            answer: 1,
-            originalIndex: 4
-        },
-        {
-            question: "Which tool is used for tracking website analytics?",
-            options: ["Google Docs", "Google Analytics", "Google Slides"],
-            answer: 1,
-            originalIndex: 5
-        },
-        {
-            question: "Which marketing funnel stage comes first?",
-            options: ["Conversion", "Awareness", "Decision"],
-            answer: 1,
-            originalIndex: 6
-        },
-        {
-            question: "What does 'CTR' stand for in digital marketing?",
-            options: ["Click Through Rate", "Customer Trust Ratio", "Content Targeting Reach"],
-            answer: 0,
-            originalIndex: 7
-        },
-        {
-            question: "Which of these is a type of paid marketing?",
-            options: ["Organic SEO", "PPC", "Content Marketing"],
-            answer: 1,
-            originalIndex: 8
-        },
-        {
-            question: "A/B testing is primarily used to:",
-            options: ["Build brand identity", "Compare marketing strategies", "Test performance of two versions"],
-            answer: 2,
-            originalIndex: 9
-        },
-        {
-            question: "Describe a successful marketing campaign you've seen recently and why it worked.",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 10
-        },
-        {
-            question: "How would you market a new app for college students?",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 11
-        },
-        {
-            question: "What strategies would you use to improve customer retention?",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 12
-        },
-        {
-            question: "Explain how you would measure the success of a social media campaign.",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 13
-        },
-        {
-            question: "Write a sample email pitch to promote a new product to potential customers.",
-            type: "written",
-            maxLength: 500,
-            originalIndex: 14
-        }
-    ]
+let examData = {
+    duration: 0,
+    questions: []
 };
 
 // ===== DOM Elements =====
@@ -289,7 +198,7 @@ let lastScreenshotAttempt = 0;
 let lastWindowSwitchAttempt = 0;
 let lastViolationAttempt = 0;
 let lastFaceDetectionIssue = 0;
-const sessionID = Math.random().toString(36).substr(2, 12).toUpperCase();
+let sessionID = '';
 const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 let mediaStream = null;
 let faceDetectionInterval = null;
@@ -675,7 +584,7 @@ function showAudioPermissionPopup() {
 }
 
 // ===== Initialize Exam =====
-function initExam() {
+async function initExam() {
     if (!startScreen || !examContainer || !questionsContainer) {
         console.error('Required DOM elements are missing');
         return;
@@ -687,6 +596,43 @@ function initExam() {
         examContainer.style.display = 'block';
         return;
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const testName = urlParams.get('testName');
+
+    if (!testName) {
+        examContainer.innerHTML = '<p style="text-align: center;">Test name not specified.</p>';
+        startScreen.style.display = 'none';
+        examContainer.style.display = 'block';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/tests/by-name/${testName}`);
+        const test = await response.json();
+
+        if (response.status !== 200) {
+            throw new Error(test.message);
+        }
+
+        examData.duration = test.duration * 60;
+        examData.questions = test.questions.map((q, index) => ({
+            question: q.questionText,
+            options: q.options,
+            answer: q.correctAnswer,
+            type: q.questionType === 'subjective' || q.questionType === 'reasoning' ? 'written' : 'mcq',
+            originalIndex: index
+        }));
+        timeLeft = examData.duration;
+        sessionID = test._id;
+
+    } catch (error) {
+        examContainer.innerHTML = `<p style="text-align: center;">Error loading test: ${error.message}</p>`;
+        startScreen.style.display = 'none';
+        examContainer.style.display = 'block';
+        return;
+    }
+
 
     examData.questions = shuffleArray(examData.questions, true);
     examData.questions.forEach((_, index) => {
@@ -765,57 +711,6 @@ async function startExam() {
     startBtn.disabled = true;
     startBtn.textContent = 'Launching...';
 
-    const userName = document.getElementById('user-name')?.value.trim();
-    const userDob = document.getElementById('user-dob')?.value;
-    const userRoll = document.getElementById('user-roll')?.value.trim();
-    
-    if (!userName || !userDob || !userRoll) {
-        alert('Please fill in all required fields');
-        startBtn.disabled = false;
-        startBtn.textContent = 'Begin Examination';
-        return;
-    }
-
-    // Calculate age based on DOB
-    const age = calculateAge(userDob);
-    console.log(`User age: ${age}`);
-
-    // Check if the DOB is invalid
-    if (age === -1) {
-        alert('Invalid date of birth. Please select a valid date using the calendar.');
-        startBtn.disabled = false;
-        startBtn.textContent = 'Begin Examination';
-        return;
-    }
-
-    // Check if the user is under 18 or over 80
-    if (age < 18) {
-        alert('You must be 18 or older to take this exam.\nIf you believe this is an error, please contact support at support@examapp.com.');
-        startBtn.disabled = false;
-        startBtn.textContent = 'Begin Examination';
-        return;
-    }
-
-    if (age > 80) {
-        alert('You must be 80 or younger to take this exam.\nIf you believe this is an error, please contact support at support@examapp.com.');
-        startBtn.disabled = false;
-        startBtn.textContent = 'Begin Examination';
-        return;
-    }
-
-    try {
-        await initDatabase();
-        await saveUserData({
-            name: userName,
-            dob: userDob,
-            rollNumber: userRoll,
-            age: age, // Store the calculated age
-            timestamp: new Date().toISOString()
-        });
-    } catch (err) {
-        console.error('Database error:', err);
-    }
-    
     const webcamSuccess = await startWebcam();
     if (!webcamSuccess) {
         startBtn.disabled = false;
@@ -842,10 +737,9 @@ async function startExam() {
         violationLog.push({
             type: "EXAM STARTED",
             time: new Date().toLocaleTimeString(),
-            details: `Session ID: ${sessionID}, Age: ${age}`,
+            details: `Session ID: ${sessionID}`,
             platform: navigator.platform,
             userAgent: navigator.userAgent,
-            rollNumber: userRoll,
             isInformational: true
         });
     } catch (err) {
