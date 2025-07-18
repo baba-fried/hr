@@ -43,6 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   `;
 
   document.getElementById('begin-exam-btn').addEventListener('click', () => {
-    window.location.href = `/TestProtocol/index.html?testName=${encodeURIComponent(testName)}`;
+    window.location.href = `../TestProtocol/index.html?testName=${encodeURIComponent(testName)}`;
   });
 }); 
