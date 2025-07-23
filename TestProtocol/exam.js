@@ -8,15 +8,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     let questions = [];
     let currentQuestionIndex = 0;
     let userAnswers = {};
+    let stream;
+
+    // Load face-api models
+    await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+        faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+        faceapi.nets.faceExpressionNet.loadFromUri('/models')
+    ]);
 
     // Get user media
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         videoFeed.srcObject = stream;
     } catch (error) {
         console.error('Error accessing media devices.', error);
         alert('Error accessing media devices. Please ensure you have a webcam and microphone enabled.');
     }
+
+    // Face detection
+    videoFeed.addEventListener('play', () => {
+        const canvas = faceapi.createCanvasFromMedia(videoFeed);
+        document.body.append(canvas);
+        const displaySize = { width: videoFeed.width, height: videoFeed.height };
+        faceapi.matchDimensions(canvas, displaySize);
+
+        setInterval(async () => {
+            const detections = await faceapi.detectAllFaces(videoFeed, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+            const resizedDetections = faceapi.resizeResults(detections, displaySize);
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            faceapi.draw.drawDetections(canvas, resizedDetections);
+
+            if (detections.length === 0) {
+                console.log('No face detected');
+            } else if (detections.length > 1) {
+                console.log('Multiple faces detected');
+            }
+
+        }, 100);
+    });
+
+    // Audio proctoring
+    const audioContext = new AudioContext();
+    const analyser = audioContext.createAnalyser();
+    const microphone = audioContext.createMediaStreamSource(stream);
+    microphone.connect(analyser);
+    analyser.fftSize = 512;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function checkAudio() {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            sum += dataArray[i];
+        }
+        let average = sum / bufferLength;
+
+        if (average > 50) { // Threshold for noise detection
+            console.log('High noise detected');
+        }
+
+        requestAnimationFrame(checkAudio);
+    }
+
+    checkAudio();
 
     // Fetch exam questions
     const testName = new URLSearchParams(window.location.search).get('testName');
