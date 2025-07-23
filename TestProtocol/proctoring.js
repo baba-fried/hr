@@ -82,5 +82,8 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Initial fullscreen enforcement
-enterFullscreen();
+document.getElementById('start-exam-btn').addEventListener('click', () => {
+    enterFullscreen();
+    document.getElementById('exam-container').style.display = 'block';
+    document.getElementById('start-exam-btn').style.display = 'none';
+});
