@@ -52,20 +52,6 @@ router.get('/my-tests', auth, async (req, res) => {
     }
 });
 
-// ✅ GET QUESTIONS FOR A TEST
-router.get('/questions', auth, async (req, res) => {
-    try {
-        console.log('Fetching questions for test:', req.query.testName);
-        const test = await Test.findOne({ name: req.query.testName });
-        if (!test) {
-            console.log('Test not found');
-            return res.status(404).json({ message: 'Test not found' });
-        }
-        res.json(test.questions);
-    } catch (err) {
-        res.status(500).json({ message: 'Error fetching questions', error: err.message });
-    }
-});
 
 // ✅ GET SPECIFIC TEST
 router.get('/:testId', async (req, res) => {
@@ -116,26 +102,34 @@ router.post('/:testId/submit', auth, async (req, res) => {
             return res.status(404).json({ message: 'Test not found' });
         }
 
-        const participantIndex = test.participants?.findIndex(
-            p => p.user?.toString() === req.user._id.toString()
-        );
-
-        if (participantIndex === -1 || participantIndex === undefined) {
+        // Check if the user is a candidate for the test
+        const isCandidate = test.candidates.some(candidateId => candidateId.toString() === req.user._id.toString());
+        if (!isCandidate) {
             return res.status(403).json({ message: 'Not authorized to take this test' });
         }
 
         const answers = req.body.answers;
         let score = 0;
 
-        answers.forEach((answer, index) => {
-            if (test.questions[index] && answer === test.questions[index].correctAnswer) {
-                score += test.questions[index].points || 1;
+        test.questions.forEach((question, index) => {
+            if (answers[index] && answers[index] === question.correctAnswer) {
+                score += question.points || 1;
             }
         });
 
-        test.participants[participantIndex].score = score;
-        test.participants[participantIndex].status = 'completed';
-        test.participants[participantIndex].submittedAt = new Date();
+        // Check if the user has already submitted
+        const existingSubmission = test.participants.find(p => p.user.toString() === req.user._id.toString());
+        if (existingSubmission) {
+            return res.status(400).json({ message: 'You have already submitted this test.' });
+        }
+
+        // Add new submission
+        test.participants.push({
+            user: req.user._id,
+            score,
+            answers,
+            submittedAt: new Date()
+        });
 
         await test.save();
 

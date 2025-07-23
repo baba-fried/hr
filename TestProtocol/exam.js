@@ -77,11 +77,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fetch exam questions
     const testName = new URLSearchParams(window.location.search).get('testName');
+    let testId;
     try {
-        const res = await fetch(`/api/tests/questions?testName=${encodeURIComponent(testName)}`, {
+        const res = await fetch(`/api/tests/by-name/${encodeURIComponent(testName)}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
-        questions = await res.json();
+        const test = await res.json();
+        questions = test.questions;
+        testId = test._id;
         displayQuestion();
     } catch (error) {
         console.error('Error fetching questions.', error);
@@ -137,9 +140,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    submitExamBtn.addEventListener('click', () => {
-        // Placeholder for submission logic
-        alert('Exam submitted successfully!');
-        window.location.href = '/user-dashboard/user.html';
+    submitExamBtn.addEventListener('click', async () => {
+        const answers = questions.map((_, index) => userAnswers[index] || null);
+        try {
+            const res = await fetch(`/api/tests/${testId}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ answers })
+            });
+            if (res.ok) {
+                alert('Exam submitted successfully!');
+                window.location.href = '/user-dashboard/user.html';
+            } else {
+                const errorData = await res.json();
+                alert(`Error submitting exam: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.error('Error submitting exam.', error);
+            alert('An error occurred while submitting the exam. Please try again later.');
+        }
     });
 });
