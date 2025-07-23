@@ -45,6 +45,7 @@ app.use('/components', express.static(path.join(__dirname, 'components')));
 app.use('/HR-dashboard', express.static(path.join(__dirname, 'HR-dashboard')));
 app.use('/user-dashboard', express.static(path.join(__dirname, 'user-dashboard')));
 app.use('/TestProtocol', express.static(path.join(__dirname, 'TestProtocol')));
+app.use('/models', express.static(path.join(__dirname, 'TestProtocol/models')));
 app.use('/login-page', express.static(path.join(__dirname, 'login-page')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/users', userRoutes); // 👈 THIS LINE IS MISSING
