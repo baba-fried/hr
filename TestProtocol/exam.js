@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let questions = [];
     let currentQuestionIndex = 0;
     let userAnswers = {};
-
     // Get user media
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
