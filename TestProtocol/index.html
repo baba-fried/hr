@@ -201,12 +201,64 @@
     </div>
   </div>
 
+  <!-- Core Libraries -->
   <script src="face-api.min.js"></script>
+  
+  <!-- Proctoring Components -->
   <script src="faceUI.js"></script>
   <script src="faceLogic.js"></script>
   <script src="alerts.js"></script>
-  <!-- Add this before exam.js -->
   <script src="fullscreen.js"></script>
+  
+  <!-- Error Handling (Load First) -->
+  <script type="module" src="errorHandler.js"></script>
+  
+  <!-- New Proctoring Modules -->
+  <script type="module" src="violationLogger.js"></script>
+  <script type="module" src="behaviorMonitor.js"></script>
+  <script type="module" src="examInitializer.js"></script>
+  
+  <!-- Main Exam Module -->
   <script type="module" src="exam.js"></script>
+  
+  <!-- Integration Testing (Development Only) -->
+  <script type="module" src="integrationTest.js"></script>
+  
+  <!-- Initialize Error Handler -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.errorHandler) {
+        window.errorHandler.initialize();
+        console.log('🛡️ Error handling system activated');
+      }
+      
+      // Add test controls for development
+      if (window.location.search.includes('debug=true')) {
+        setTimeout(() => {
+          const testButton = document.createElement('button');
+          testButton.textContent = '🧪 Run Integration Tests';
+          testButton.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1003;
+            font-size: 12px;
+          `;
+          testButton.onclick = () => {
+            if (window.proctoringTest) {
+              window.proctoringTest.runAllTests();
+            }
+          };
+          document.body.appendChild(testButton);
+        }, 3000);
+      }
+    });
+  </script>
 </body>
 </html>

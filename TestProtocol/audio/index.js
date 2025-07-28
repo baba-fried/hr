@@ -2,6 +2,7 @@ import MicrophoneManager from './mic.js';
 import AudioAnalyzer from './analyzer.js';
 import AudioMonitor from './monitor.js';
 import AudioAlerts from './alerts.js';
+import VoiceSeparation from './voiceSeparation.js';
 
 class AudioProctoring {
     constructor() {
@@ -9,7 +10,9 @@ class AudioProctoring {
         this.analyzer = null;
         this.monitor = null;
         this.alerts = null;
+        this.voiceSeparation = null;
         this.isInitialized = false;
+        this.stream = null;
     }
 
     /**
@@ -25,6 +28,13 @@ class AudioProctoring {
                 return false;
             }
             
+            // Get the audio stream
+            this.stream = this.micManager.getStream();
+            if (!this.stream) {
+                console.error('Failed to get audio stream');
+                return false;
+            }
+            
             // Initialize analyzer
             this.analyzer = new AudioAnalyzer(this.micManager);
             const analyzerInitialized = this.analyzer.initialize();
@@ -35,6 +45,14 @@ class AudioProctoring {
             
             // Initialize monitor
             this.monitor = new AudioMonitor(this.analyzer);
+            window.audioMonitor = this.monitor; // Make available globally
+            
+            // Initialize voice separation
+            this.voiceSeparation = new VoiceSeparation();
+            const voiceInitialized = await this.voiceSeparation.initialize(this.stream);
+            if (!voiceInitialized) {
+                console.warn('Voice separation initialization failed, continuing without it');
+            }
             
             // Initialize alerts
             const visualizerContainer = document.getElementById('audio-visualizer');
@@ -46,7 +64,13 @@ class AudioProctoring {
             // Start analyzing
             this.analyzer.startAnalyzing();
             
+            // Start voice monitoring if available
+            if (this.voiceSeparation) {
+                this.voiceSeparation.startMonitoring();
+            }
+            
             this.isInitialized = true;
+            console.log('Audio proctoring system fully initialized');
             return true;
         } catch (error) {
             console.error('Error initializing audio proctoring:', error);
@@ -93,11 +117,35 @@ class AudioProctoring {
             this.analyzer.stopAnalyzing();
         }
         
+        if (this.voiceSeparation) {
+            this.voiceSeparation.cleanup();
+        }
+        
         if (this.micManager) {
             this.micManager.cleanup();
         }
         
         this.isInitialized = false;
+        console.log('Audio proctoring system cleaned up');
+    }
+
+    /**
+     * Get voice separation statistics
+     * @returns {Object} Voice statistics
+     */
+    getVoiceStatistics() {
+        if (this.voiceSeparation) {
+            return this.voiceSeparation.getVoiceStatistics();
+        }
+        return null;
+    }
+
+    /**
+     * Check if voice separation is active
+     * @returns {boolean} Voice separation status
+     */
+    isVoiceSeparationActive() {
+        return this.voiceSeparation && this.voiceSeparation.isRecording;
     }
 }
 

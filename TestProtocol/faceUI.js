@@ -52,7 +52,7 @@ class FaceUI {
       .join('');
   }
 
-  drawFaceBox(detection) {
+  drawFaceBox(detection, color = '#2ecc71') {
     const ctx = this.faceOverlay.getContext('2d');
     ctx.clearRect(0, 0, this.faceOverlay.width, this.faceOverlay.height);
 
@@ -63,15 +63,74 @@ class FaceUI {
     this.faceOverlay.width = video.videoWidth;
     this.faceOverlay.height = video.videoHeight;
 
-    // Draw face box
-    ctx.strokeStyle = '#2ecc71';
-    ctx.lineWidth = 2;
+    // Draw face box with dynamic color
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
     ctx.strokeRect(
       detection.box.x,
       detection.box.y,
       detection.box.width,
       detection.box.height
     );
+
+    // Draw center guide lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    
+    // Vertical center line
+    ctx.beginPath();
+    ctx.moveTo(video.videoWidth / 2, 0);
+    ctx.lineTo(video.videoWidth / 2, video.videoHeight);
+    ctx.stroke();
+    
+    // Horizontal center line
+    ctx.beginPath();
+    ctx.moveTo(0, video.videoHeight / 2);
+    ctx.lineTo(video.videoWidth, video.videoHeight / 2);
+    ctx.stroke();
+    
+    ctx.setLineDash([]); // Reset line dash
+  }
+
+  drawMultipleFaces(detections) {
+    const ctx = this.faceOverlay.getContext('2d');
+    ctx.clearRect(0, 0, this.faceOverlay.width, this.faceOverlay.height);
+
+    if (!detections || detections.length === 0) return;
+
+    // Match canvas size to video
+    const video = document.getElementById('video-feed');
+    this.faceOverlay.width = video.videoWidth;
+    this.faceOverlay.height = video.videoHeight;
+
+    // Draw all face boxes in red
+    detections.forEach((detection, index) => {
+      ctx.strokeStyle = '#e74c3c'; // Red for violations
+      ctx.lineWidth = 3;
+      ctx.strokeRect(
+        detection.box.x,
+        detection.box.y,
+        detection.box.width,
+        detection.box.height
+      );
+
+      // Add face number
+      ctx.fillStyle = '#e74c3c';
+      ctx.font = '16px Arial';
+      ctx.fillText(
+        `${index + 1}`,
+        detection.box.x + 5,
+        detection.box.y + 20
+      );
+    });
+
+    // Add warning text
+    ctx.fillStyle = 'rgba(231, 76, 60, 0.8)';
+    ctx.fillRect(10, 10, 200, 30);
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText(`${detections.length} faces detected!`, 15, 30);
   }
 }
 

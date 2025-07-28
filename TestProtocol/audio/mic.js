@@ -57,6 +57,14 @@ class MicrophoneManager {
     }
 
     /**
+     * Get the media stream
+     * @returns {MediaStream|null} - The media stream or null if not initialized
+     */
+    getStream() {
+        return this.isInitialized ? this.stream : null;
+    }
+
+    /**
      * Set error handler
      * @param {Function} callback - Function to call on error
      */
