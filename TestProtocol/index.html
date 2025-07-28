@@ -4,15 +4,194 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Exam Protocol</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --success-color: #2ecc71;
+      --warning-color: #f1c40f;
+      --danger-color: #e74c3c;
+      --bg-color: #f5f5f5;
+      --card-bg: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--primary-color);
+    }
+
+    #exam-container {
+      display: flex;
+      flex-direction: column;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    #monitoring-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      #monitoring-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .monitoring-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #video-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #video-feed {
+      width: 100%;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+
+    #face-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #status-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .status-icon {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .status-active {
+      background: var(--success-color);
+      animation: pulse 2s infinite;
+    }
+
+    .status-warning {
+      background: var(--warning-color);
+    }
+
+    .status-error {
+      background: var(--danger-color);
+    }
+
+    #rec-indicator {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .rec-dot {
+      width: 8px;
+      height: 8px;
+      background: #ff0000;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
+    #event-log {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .log-entry {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    /* Preserve existing exam content styles */
+    #exam-content {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
   <div id="exam-container">
     <div id="monitoring-container">
-      <video id="video-feed" autoplay muted></video>
-      <div id="audio-visualizer"></div>
+      <div class="monitoring-card" id="video-container">
+        <video id="video-feed" autoplay muted></video>
+        <canvas id="face-overlay"></canvas>
+        <div id="rec-indicator">
+          <div class="rec-dot"></div>
+          <span>REC</span>
+        </div>
+      </div>
+      <div class="monitoring-card" id="status-container">
+        <h3>Monitoring Status</h3>
+        <div class="status-indicator">
+          <div class="status-icon status-active"></div>
+          <span>Face Detection Active</span>
+        </div>
+        <div id="face-status" class="status-indicator">
+          <div class="status-icon"></div>
+          <span>Checking face position...</span>
+        </div>
+        <div id="event-log">
+          <h4>Recent Events</h4>
+          <div class="log-entries"></div>
+        </div>
+      </div>
     </div>
 
     <div id="exam-content">
+      <!-- Existing exam content -->
       <div id="question-container"></div>
       <div id="navigation-buttons">
         <button id="prev-btn">Previous</button>
@@ -22,8 +201,12 @@
     </div>
   </div>
 
-  <!-- ✅ Load face-api.js BEFORE exam.js -->
   <script src="face-api.min.js"></script>
-  <script src="exam.js"></script>
+  <script src="faceUI.js"></script>
+  <script src="faceLogic.js"></script>
+  <script src="alerts.js"></script>
+  <!-- Add this before exam.js -->
+  <script src="fullscreen.js"></script>
+  <script type="module" src="exam.js"></script>
 </body>
 </html>

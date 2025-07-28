@@ -26,23 +26,39 @@ document.addEventListener('DOMContentLoaded', () => {
       await faceapi.nets.tinyFaceDetector.loadFromUri('./faceModels');
       await faceapi.nets.faceLandmark68Net.loadFromUri('./faceModels');
   
+      // Initialize audio proctoring
+      try {
+        // Import the audio proctoring module
+        const audioProctoring = await import('./audio/index.js');
+        
+        // Initialize audio proctoring
+        const initialized = await audioProctoring.default.initialize();
+        if (!initialized) {
+          console.error('Failed to initialize audio proctoring');
+          alert('Warning: Audio monitoring could not be initialized. Please check your microphone permissions.');
+        }
+      } catch (error) {
+        console.error('Error initializing audio proctoring:', error);
+      }
+  
       // Start face detection + brightness checks every 3s
+      // Replace the existing face detection interval with this:
       setInterval(async () => {
-        if (!videoFeed || videoFeed.readyState !== 4) return;
-  
-        const detections = await faceapi.detectAllFaces(videoFeed, new faceapi.TinyFaceDetectorOptions());
-  
-        if (detections.length === 0) {
-          alert("⚠️ Face not detected. Please stay in the frame.");
-        } else if (detections.length > 1) {
-          alert("🚫 Multiple faces detected! Only one person allowed.");
+        const status = await window.faceLogic.detectFace();
+        
+        // Show alerts for critical issues
+        if (status === 'not_detected') {
+          window.alerts.showAlert('Face not detected. Please stay in frame.', 'error');
+        } else if (status === 'multiple') {
+          window.alerts.showAlert('Multiple faces detected! Only one person allowed.', 'error');
         }
   
+        // Check brightness
         const brightness = detectBrightness(videoFeed);
         if (brightness < 50) {
-          alert("💡 Too dark. Please move to a well-lit place.");
+          window.alerts.showAlert('Too dark. Please move to a well-lit place.', 'warning');
         } else if (brightness > 200) {
-          alert("☀️ Too bright. Please reduce lighting.");
+          window.alerts.showAlert('Too bright. Please reduce lighting.', 'warning');
         }
       }, 3000);
   
@@ -127,6 +143,16 @@ document.addEventListener('DOMContentLoaded', () => {
       submitExamBtn.addEventListener('click', () => {
         alert('Exam submitted successfully!');
         window.location.href = '/user-dashboard/user.html';
+      });
+
+      // Clean up resources when page is unloaded
+      window.addEventListener('beforeunload', async () => {
+        try {
+          const audioProctoring = await import('./audio/index.js');
+          audioProctoring.default.cleanup();
+        } catch (error) {
+          console.error('Error cleaning up audio proctoring:', error);
+        }
       });
     })(); // end of async IIFE
   });
