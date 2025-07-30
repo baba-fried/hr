@@ -35,6 +35,12 @@ class FaceUI {
   }
 
   addEvent(event) {
+    // Skip logging violation-related events
+    if (event.toLowerCase().includes('violation') || 
+        event.toLowerCase().includes('warning') || 
+        event.toLowerCase().includes('detected')) {
+      return;
+    }
     const timestamp = new Date().toLocaleTimeString();
     this.events.unshift({ timestamp, message: event });
     this.events = this.events.slice(0, 3); // Keep only last 3 events

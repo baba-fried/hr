@@ -38,9 +38,8 @@ class ViolationLogger {
      * @param {Object} metadata - Additional metadata
      * @param {boolean} showAlert - Whether to show real-time alert
      */
-    async logViolation(violationType, severity, description, metadata = {}, showAlert = true) {
+    async logViolation(violationType, severity, description, metadata = {}, showAlert = false) {
         if (!this.isInitialized) {
-            console.error('ViolationLogger not initialized');
             return false;
         }
 
@@ -86,13 +85,7 @@ class ViolationLogger {
             if (result.success) {
                 console.log(`✅ Violation logged: ${violationType} (${severity})`);
                 
-                // Show real-time alert if requested
-                if (showAlert) {
-                    await this.sendAlert(violationType, severity, description);
-                }
-                
-                // Update UI
-                this.updateViolationUI(violation);
+                // Silently log violation without UI updates
                 
                 return true;
             } else {
@@ -186,33 +179,11 @@ class ViolationLogger {
     }
 
     /**
-     * Update violation counter in UI
+     * Update violation counter in UI (disabled)
      */
     updateViolationCounter() {
-        let counter = document.getElementById('violation-counter');
-        if (!counter) {
-            // Create counter if it doesn't exist
-            counter = document.createElement('div');
-            counter.id = 'violation-counter';
-            counter.style.cssText = `
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background: rgba(231, 76, 60, 0.9);
-                color: white;
-                padding: 8px 12px;
-                border-radius: 20px;
-                font-size: 14px;
-                font-weight: bold;
-                z-index: 1001;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            `;
-            document.body.appendChild(counter);
-        }
-
-        const count = this.violations.length;
-        counter.textContent = `Violations: ${count}`;
-        counter.style.display = count > 0 ? 'block' : 'none';
+        // Violation counter UI removed
+        return;
     }
 
     /**
