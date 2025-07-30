@@ -1,25 +1,308 @@
 [
   {
-    "id": "175386120969911a7nu4xe",
+    "id": "1753861533119smjd7ft8h",
     "userId": "685b8b593d22dc5a567e3289",
     "userEmail": "vennelakothari98@gmail.com",
     "userName": "VEN",
     "testId": "unknown",
     "testName": "hello",
-    "violationType": "system_error",
-    "severity": "low",
-    "description": "System error: Error logged: [object Object]",
+    "violationType": "fullscreen_exit",
+    "severity": "high",
+    "description": "Fullscreen exit detected (1 times)",
     "metadata": {
-      "errorType": "console_error",
-      "errorCount": 2,
+      "exitCount": 1,
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
-      "timestamp": "2025-07-30T07:40:09.483Z",
+      "timestamp": "2025-07-30T07:45:33.046Z",
       "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
       "screenResolution": "1536x864",
       "viewportSize": "1661x786"
     },
-    "timestamp": "2025-07-30T07:40:09.699Z",
+    "timestamp": "2025-07-30T07:45:33.119Z",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
     "ipAddress": "::1"
+  },
+  {
+    "id": "1753861535430mlqenbsil",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "face_too_small",
+    "severity": "medium",
+    "description": "Please move closer to the camera",
+    "metadata": {
+      "faceRatio": "0.060",
+      "minRequired": 0.1,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:45:33.205Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:35.430Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::1"
+  },
+  {
+    "id": "1753861535659rna6kdh9x",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "window_blur",
+    "severity": "high",
+    "description": "Window lost focus",
+    "metadata": {
+      "timestamp": "2025-07-30T07:45:34.263Z",
+      "totalViolations": 8,
+      "behaviorPattern": [
+        {
+          "key": "Alt",
+          "timestamp": 1753861532509,
+          "modifiers": {
+            "alt": true,
+            "ctrl": false,
+            "shift": false,
+            "meta": false
+          }
+        },
+        {
+          "key": "Alt",
+          "timestamp": 1753861534147,
+          "modifiers": {
+            "alt": true,
+            "ctrl": false,
+            "shift": false,
+            "meta": false
+          }
+        }
+      ],
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:35.659Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::ffff:127.0.0.1"
+  },
+  {
+    "id": "1753861535677thxcznp3g",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "tab_switch",
+    "severity": "high",
+    "description": "Tab switched away from exam",
+    "metadata": {
+      "hidden": true,
+      "visibilityState": "hidden",
+      "totalViolations": 9,
+      "behaviorPattern": [
+        {
+          "key": "Alt",
+          "timestamp": 1753861532509,
+          "modifiers": {
+            "alt": true,
+            "ctrl": false,
+            "shift": false,
+            "meta": false
+          }
+        },
+        {
+          "key": "Alt",
+          "timestamp": 1753861534147,
+          "modifiers": {
+            "alt": true,
+            "ctrl": false,
+            "shift": false,
+            "meta": false
+          }
+        }
+      ],
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:45:34.358Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:35.677Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::ffff:127.0.0.1"
+  },
+  {
+    "id": "1753861538199972cjxkxc",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "inactivity",
+    "severity": "medium",
+    "description": "Extended period of inactivity detected",
+    "metadata": {
+      "lastActivity": 1753861462111,
+      "inactiveDuration": 33037,
+      "totalViolations": 13,
+      "behaviorPattern": [
+        {
+          "key": "Alt",
+          "timestamp": 1753861462111,
+          "modifiers": {
+            "alt": true,
+            "ctrl": false,
+            "shift": false,
+            "meta": false
+          }
+        },
+        {
+          "key": "Alt",
+          "timestamp": 1753861462111,
+          "modifiers": {
+            "alt": true,
+            "ctrl": false,
+            "shift": false,
+            "meta": false
+          }
+        },
+        {
+          "key": "Alt",
+          "timestamp": 1753861462111,
+          "modifiers": {
+            "alt": true,
+            "ctrl": false,
+            "shift": false,
+            "meta": false
+          }
+        }
+      ],
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:44:55.148Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:38.200Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::1"
+  },
+  {
+    "id": "17538615403084mk32su95",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "face_too_small",
+    "severity": "medium",
+    "description": "Please move closer to the camera",
+    "metadata": {
+      "faceRatio": "0.044",
+      "minRequired": 0.1,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:45:40.201Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:40.308Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::1"
+  },
+  {
+    "id": "1753861542212vwlrw91dz",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "face_too_small",
+    "severity": "medium",
+    "description": "Please move closer to the camera",
+    "metadata": {
+      "faceRatio": "0.043",
+      "minRequired": 0.1,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:45:41.184Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:42.212Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::ffff:127.0.0.1"
+  },
+  {
+    "id": "1753861547214gwu3q1afy",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "face_too_small",
+    "severity": "medium",
+    "description": "Please move closer to the camera",
+    "metadata": {
+      "faceRatio": "0.052",
+      "minRequired": 0.1,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:45:47.164Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:47.215Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::1"
+  },
+  {
+    "id": "1753861549132edzknslet",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "face_too_small",
+    "severity": "medium",
+    "description": "Please move closer to the camera",
+    "metadata": {
+      "faceRatio": "0.051",
+      "minRequired": 0.1,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:45:48.173Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:49.132Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::1"
+  },
+  {
+    "id": "175386155098200hl73v7u",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "face_too_small",
+    "severity": "medium",
+    "description": "Please move closer to the camera",
+    "metadata": {
+      "faceRatio": "0.057",
+      "minRequired": 0.1,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:45:50.198Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:45:50.982Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::ffff:127.0.0.1"
   }
 ]
