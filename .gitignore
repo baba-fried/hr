@@ -7,3 +7,4 @@ uploads/
 Thumbs.db
 package-lock.json
 violation-report.json/
+logs/
