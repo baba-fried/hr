@@ -160,6 +160,55 @@
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .modal {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal h3 {
+      margin: 0 0 16px;
+      color: var(--danger-color);
+    }
+    
+    .modal p {
+      margin: 0 0 20px;
+      line-height: 1.5;
+    }
+    
+    .modal button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    
+    .modal button:hover {
+      background: #34495e;
+    }
   </style>
 </head>
 <body>
@@ -183,6 +232,10 @@
           <div class="status-icon"></div>
           <span>Checking face position...</span>
         </div>
+        <div id="fullscreen-status" class="status-indicator">
+          <div class="status-icon"></div>
+          <span>Fullscreen Mode</span>
+        </div>
         <div id="event-log">
           <h4>Recent Events</h4>
           <div class="log-entries"></div>
@@ -198,6 +251,15 @@
         <button id="next-btn">Next</button>
       </div>
       <button id="submit-exam-btn">Submit Exam</button>
+    </div>
+  </div>
+
+  <!-- Modal Container -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3>⚠️ Warning</h3>
+      <p id="modal-message">Please remain in fullscreen mode during the exam.</p>
+      <button id="modal-ok">Return to Fullscreen</button>
     </div>
   </div>
 
@@ -262,3 +324,10 @@
   </script>
 </body>
 </html>
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3>⚠️ Warning</h3>
+    <p id="modal-message">Please remain in fullscreen mode during the exam.</p>
+    <button id="modal-ok">Return to Fullscreen</button>
+  </div>
+</div>

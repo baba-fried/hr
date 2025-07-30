@@ -33,8 +33,7 @@ class ExamInitializer {
             await this.initializeMicrophone();
             await this.initializeFaceDetection();
             await this.initializeAudioProcessing();
-            await this.initializeBehaviorMonitoring();
-            await this.initializeFullscreen();
+               await this.initializeBehaviorMonitoring();
             
             // Show start exam button
             this.showStartExamButton();
@@ -510,9 +509,34 @@ class ExamInitializer {
             `;
         }
 
-        // Add click handler
-        document.getElementById('start-exam-btn').addEventListener('click', () => {
-            this.startExam();
+        // Add click handler with fullscreen initialization
+        document.getElementById('start-exam-btn').addEventListener('click', async () => {
+            try {
+                // Request fullscreen
+                if (!window.fullscreenManager) {
+                    throw new Error('Fullscreen manager not initialized');
+                }
+
+                // Update UI to show fullscreen initialization
+                this.updateStepStatus('Fullscreen Mode', 'initializing');
+                
+                // Request fullscreen
+                await window.fullscreenManager.requestFullscreen();
+                
+                if (!window.fullscreenManager.isFullscreenSupported) {
+                    throw new Error('Fullscreen mode is not supported');
+                }
+
+                // Mark fullscreen as complete
+                this.updateStepStatus('Fullscreen Mode', 'completed');
+                
+                // Start the exam
+                this.startExam();
+            } catch (error) {
+                console.error('Failed to start exam:', error);
+                this.updateStepStatus('Fullscreen Mode', 'failed');
+                this.showInitializationError(error);
+            }
         });
     }
 

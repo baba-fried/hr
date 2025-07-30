@@ -1,0 +1,25 @@
+[
+  {
+    "id": "175386120969911a7nu4xe",
+    "userId": "685b8b593d22dc5a567e3289",
+    "userEmail": "vennelakothari98@gmail.com",
+    "userName": "VEN",
+    "testId": "unknown",
+    "testName": "hello",
+    "violationType": "system_error",
+    "severity": "low",
+    "description": "System error: Error logged: [object Object]",
+    "metadata": {
+      "errorType": "console_error",
+      "errorCount": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+      "timestamp": "2025-07-30T07:40:09.483Z",
+      "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
+      "screenResolution": "1536x864",
+      "viewportSize": "1661x786"
+    },
+    "timestamp": "2025-07-30T07:40:09.699Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+    "ipAddress": "::1"
+  }
+]
