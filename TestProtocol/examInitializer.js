@@ -58,7 +58,8 @@ class ExamInitializer {
             userId: urlParams.get('userId'),
             testId: urlParams.get('testId') || 'unknown',
             token: urlParams.get('token'),
-            role: urlParams.get('role') || ''
+            role: urlParams.get('role') || '',
+            duration: urlParams.get('duration') || ''
         };
     }
 
@@ -69,12 +70,20 @@ class ExamInitializer {
         try {
             this.updateStepStatus('Violation Logger', 'initializing');
             
+            console.log('🔍 Exam data for violation logger:', this.examData);
+            
             if (window.violationLogger) {
                 window.violationLogger.initialize(
                     this.examData.testId,
                     this.examData.testName,
                     this.examData.userId
                 );
+                
+                console.log('✅ Violation logger initialized with:', {
+                    testId: this.examData.testId,
+                    testName: this.examData.testName,
+                    userId: this.examData.userId
+                });
                 
                 this.updateStepStatus('Violation Logger', 'completed');
                 return true;

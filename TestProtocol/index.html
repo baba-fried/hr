@@ -239,6 +239,15 @@
       margin-bottom: 15px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    .exam-info {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    .exam-info .exam-badge {
+      margin-bottom: 0;
+    }
   </style>
 </head>
 <body>
@@ -248,7 +257,18 @@
         <div id="exam-content">
           <!-- Move the badge here, above the questions section -->
           <div id="exam-badge-row">
-            <span class="exam-badge"><span style='font-weight:normal;font-size:14px;margin-left:10px;'>EXAMINATION ROLE :</span><span id="exam-name"></span><span id="exam-role" style='font-weight:normal;font-size:14px;'></span></span>
+            <div class="exam-info">
+              <span class="exam-badge">
+                <span style='font-weight:normal;font-size:14px;'>Name of Exam: </span><span id="exam-name"></span>
+              </span>
+              <span class="exam-badge">
+                <span style='font-weight:normal;font-size:14px;'>Role: </span><span id="exam-role"></span>
+              </span>
+              <span class="exam-badge">
+                <span style='font-weight:normal;font-size:14px;'>Duration: </span><span id="exam-duration"></span>
+              </span>
+              <!-- Temporary debug button -->
+            </div>
           </div>
           <div id="question-container">
             <!-- Exam questions will be loaded here by exam.js -->

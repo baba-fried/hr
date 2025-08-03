@@ -559,6 +559,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     const examManager = new ExamManager();
     window.examManager = examManager; // Make available globally
     
+    // Function to set exam data in the UI
+    const setExamData = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const examName = urlParams.get('testName') || '';
+        const examRole = urlParams.get('role') || '';
+        const examDuration = urlParams.get('duration') || '';
+        const userId = urlParams.get('userId') || '';
+        
+        console.log('🔍 URL Parameters:', {
+            testName: examName,
+            role: examRole,
+            duration: examDuration,
+            userId: userId
+        });
+        
+        const examNameSpan = document.getElementById('exam-name');
+        const examRoleSpan = document.getElementById('exam-role');
+        const examDurationSpan = document.getElementById('exam-duration');
+        if (examNameSpan) examNameSpan.textContent = examName;
+        if (examRoleSpan) examRoleSpan.textContent = examRole;
+        if (examDurationSpan) examDurationSpan.textContent = examDuration;
+        console.log('✅ Set exam data:', { examName, examRole, examDuration });
+        
+        // Also log the actual DOM elements
+        console.log('🔍 DOM Elements:', {
+            examNameSpan: examNameSpan,
+            examRoleSpan: examRoleSpan,
+            examDurationSpan: examDurationSpan
+        });
+    };
+    
+    // Set exam data immediately
+    setExamData();
+    
+    // Also set exam data when window loads
+    window.addEventListener('load', setExamData);
+    
+    // Make setExamData available globally for debugging
+    window.setExamData = setExamData;
+   
+    // Debug: Log current URL
+    console.log('🔍 Current URL:', window.location.href);
+    console.log('🔍 URL Search:', window.location.search);
+   
+    // Test function to manually set exam data
+    window.testExamData = () => {
+        console.log('🧪 Testing exam data setting...');
+        setExamData();
+    };
+    
     // Initialize the exam
     const initialized = await examManager.initialize();
     
@@ -567,11 +617,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.examInitializer && window.examInitializer.examData) {
             const examName = window.examInitializer.examData.testName || '';
             const examRole = window.examInitializer.examData.role || '';
+            const examDuration = window.examInitializer.examData.duration || '';
             const examNameSpan = document.getElementById('exam-name');
             const examRoleSpan = document.getElementById('exam-role');
+            const examDurationSpan = document.getElementById('exam-duration');
             if (examNameSpan) examNameSpan.textContent = examName;
             if (examRoleSpan) examRoleSpan.textContent = examRole;
+            if (examDurationSpan) examDurationSpan.textContent = examDuration;
+            console.log('✅ Set exam data from examInitializer:', { examName, examRole, examDuration });
+        } else {
+            // Fallback: Get data directly from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const examName = urlParams.get('testName') || '';
+            const examRole = urlParams.get('role') || '';
+            const examDuration = urlParams.get('duration') || '';
+            const examNameSpan = document.getElementById('exam-name');
+            const examRoleSpan = document.getElementById('exam-role');
+            const examDurationSpan = document.getElementById('exam-duration');
+            if (examNameSpan) examNameSpan.textContent = examName;
+            if (examRoleSpan) examRoleSpan.textContent = examRole;
+            if (examDurationSpan) examDurationSpan.textContent = examDuration;
+            console.log('✅ Set exam data from URL params:', { examName, examRole, examDuration });
         }
+        // Set exam data again after a short delay to ensure it's set
+        setTimeout(setExamData, 1000);
         // Get test name from URL
         const urlParams = new URLSearchParams(window.location.search);
         const testName = urlParams.get('testName');

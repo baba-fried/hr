@@ -298,7 +298,7 @@ router.post('/:testId/assign', async (req, res) => {
 
         // Build secure test link for direct exam access
         const uniqueToken = Math.random().toString(36).substr(2, 12) + Date.now();
-        const link = `http://localhost:5000/TestProtocol/index.html?testName=${encodeURIComponent(test.name)}&userId=${user._id}&role=${user.role}&token=${uniqueToken}`;
+        const link = `http://localhost:5000/TestProtocol/index.html?testName=${encodeURIComponent(test.name)}&userId=${user._id}&role=${user.role}&duration=${encodeURIComponent(test.duration)}&token=${uniqueToken}`;
 
         // Send email notification
         await sendTestAssignmentMail(
