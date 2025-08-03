@@ -141,14 +141,7 @@ class ExamManager {
                         margin: 0;
                         font-size: 18px;
                     ">Question ${this.currentQuestionIndex + 1} of ${this.questions.length}</h3>
-                    <div style="
-                        background: #3498db;
-                        color: white;
-                        padding: 4px 12px;
-                        border-radius: 12px;
-                        font-size: 12px;
-                        font-weight: 600;
-                    ">${question.subject || 'General'}</div>
+                    <!-- Removed subject badge here -->
                 </div>
                 
                 <div style="
@@ -570,6 +563,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const initialized = await examManager.initialize();
     
     if (initialized) {
+        // Set exam name and role in the badge/header
+        if (window.examInitializer && window.examInitializer.examData) {
+            const examName = window.examInitializer.examData.testName || '';
+            const examRole = window.examInitializer.examData.role || '';
+            const examNameSpan = document.getElementById('exam-name');
+            const examRoleSpan = document.getElementById('exam-role');
+            if (examNameSpan) examNameSpan.textContent = examName;
+            if (examRoleSpan) examRoleSpan.textContent = examRole;
+        }
         // Get test name from URL
         const urlParams = new URLSearchParams(window.location.search);
         const testName = urlParams.get('testName');

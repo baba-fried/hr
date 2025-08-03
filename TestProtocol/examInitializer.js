@@ -57,7 +57,8 @@ class ExamInitializer {
             testName: urlParams.get('testName'),
             userId: urlParams.get('userId'),
             testId: urlParams.get('testId') || 'unknown',
-            token: urlParams.get('token')
+            token: urlParams.get('token'),
+            role: urlParams.get('role') || ''
         };
     }
 

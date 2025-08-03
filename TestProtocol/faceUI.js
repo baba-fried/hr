@@ -5,9 +5,10 @@ class FaceUI {
     this.faceStatus = document.getElementById('face-status');
     this.logContainer = document.querySelector('.log-entries');
     this.events = [];
-  }
+    this._activeViolations = new Set();
+}
 
-  updateFaceStatus(status) {
+updateFaceStatus(status) {
     const statusIcon = this.faceStatus.querySelector('.status-icon');
     const statusText = this.faceStatus.querySelector('span');
 
@@ -34,10 +35,17 @@ class FaceUI {
   }
 
   addEvent(event) {
-    const timestamp = new Date().toLocaleTimeString();
-    this.events.unshift({ timestamp, message: event, type: this.getEventType(event) });
-    this.events = this.events.slice(0, 10); // Keep last 10 events
-    this.updateEventLog();
+      if (this._activeViolations.has(event.type)) {
+          return;
+      }
+      this._activeViolations.add(event.type);
+      const timestamp = new Date().toLocaleTimeString();
+      this.events.unshift({
+          timestamp,
+          ...event
+      });
+      this.events = this.events.slice(0, 10);
+      this.updateEventLog();
   }
 
   getEventType(event) {
@@ -49,14 +57,19 @@ class FaceUI {
 
   updateEventLog() {
     this.logContainer.innerHTML = this.events
-      .map(event => `
-        <div class="log-entry ${event.type}">
-          <div class="log-time">${event.timestamp}</div>
-          <div class="log-message">${event.message}</div>
-        </div>
-      `)
-      .join('');
-  }
+        .filter(event => !event.message.toLowerCase().includes('system error'))
+        .map(event => `
+            <div class="log-entry ${event.type}">
+                <div class="log-time">${event.timestamp}</div>
+                <div class="log-message">${event.message}</div>
+            </div>
+        `)
+        .join('');
+}
+
+resolveEvent(eventType) {
+    this._activeViolations.delete(eventType);
+}
 
   drawFaceBox(detection, color = '#2ecc71') {
     const ctx = this.faceOverlay.getContext('2d');

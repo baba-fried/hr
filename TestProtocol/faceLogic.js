@@ -24,11 +24,12 @@ class FaceLogic {
     this.consecutiveViolations = {
       noFace: 0,
       multipleFaces: 0
-    };
-  }
+  };
+  this.lastBrightness = null;
+}
 
-  async detectFace() {
-    if (!this.videoFeed || this.videoFeed.readyState !== 4) return;
+async detectFace() {
+  if (!this.videoFeed || this.videoFeed.readyState !== 4) return;
 
     try {
       const detections = await faceapi.detectAllFaces(
@@ -110,28 +111,32 @@ class FaceLogic {
       if (this.lastBrightness !== 'too_dark') {
         this.violationCounts.tooDark++;
         if (window.violationLogger) {
-          window.violationLogger.logViolation(
-            'lighting_too_dark',
-            'medium',
-            'Too dark, please go to a brighter place',
-            { brightness: Math.round(brightness) }
-          );
+            window.violationLogger.logViolation(
+                'lighting_too_dark',
+                'medium',
+                'Too dark, please go to a brighter place',
+                { brightness: Math.round(brightness) }
+            );
         }
-      }
-    } else if (brightness > this.thresholds.brightness.max) {
-      brightnessStatus = 'too_bright';
-      if (this.lastBrightness !== 'too_bright') {
+    }
+} else if (brightness > this.thresholds.brightness.max) {
+    brightnessStatus = 'too_bright';
+    if (this.lastBrightness !== 'too_bright') {
         this.violationCounts.tooBright++;
         if (window.violationLogger) {
-          window.violationLogger.logViolation(
-            'lighting_too_bright',
-            'medium',
-            'Too bright, please go to a dimmer place',
-            { brightness: Math.round(brightness) }
-          );
+            window.violationLogger.logViolation(
+                'lighting_too_bright',
+                'medium',
+                'Too bright, please go to a dimmer place',
+                { brightness: Math.round(brightness) }
+            );
         }
-      }
     }
+} else {
+    if (this.lastBrightness) {
+        window.violationLogger.resolveViolation(`lighting_${this.lastBrightness}`);
+    }
+}
     
     this.lastBrightness = brightnessStatus;
   }
@@ -204,31 +209,34 @@ class FaceLogic {
     const faceRatio = faceArea / videoArea;
 
     if (faceRatio < this.thresholds.face.minSize) {
-      violations.push({
-        type: 'face_too_small',
-        severity: 'medium',
-        description: 'Please move closer to the camera',
-        metadata: {
-          faceRatio: faceRatio.toFixed(3),
-          minRequired: this.thresholds.face.minSize
-        }
-      });
-      color = '#e67e22'; // Orange for medium warning
+        violations.push({
+            type: 'face_too_small',
+            severity: 'medium',
+            description: 'Please move closer to the camera',
+            metadata: {
+                faceRatio: faceRatio.toFixed(3),
+                minRequired: this.thresholds.face.minSize
+            }
+        });
+        color = '#e67e22'; // Orange for medium warning
     } else if (faceRatio > this.thresholds.face.maxSize) {
-      violations.push({
-        type: 'face_too_large',
-        severity: 'medium',
-        description: 'Please move away from the camera',
-        metadata: {
-          faceRatio: faceRatio.toFixed(3),
-          maxAllowed: this.thresholds.face.maxSize
-        }
-      });
-      color = '#e67e22'; // Orange for medium warning
+        violations.push({
+            type: 'face_too_large',
+            severity: 'medium',
+            description: 'Please move away from the camera',
+            metadata: {
+                faceRatio: faceRatio.toFixed(3),
+                maxAllowed: this.thresholds.face.maxSize
+            }
+        });
+        color = '#e67e22'; // Orange for medium warning
+    } else {
+        window.violationLogger.resolveViolation('face_too_small');
+        window.violationLogger.resolveViolation('face_too_large');
     }
 
     return { status, violations, color };
-  }
+}
 
   handleFaceViolations(violations) {
     violations.forEach(violation => {

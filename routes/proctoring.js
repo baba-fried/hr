@@ -23,6 +23,7 @@ router.post('/violations', auth, async (req, res) => {
         const {
             testId,
             testName,
+            userId,
             violationType,
             severity,
             description,
@@ -31,7 +32,7 @@ router.post('/violations', auth, async (req, res) => {
 
         const violation = {
             id: Date.now() + Math.random().toString(36).substr(2, 9),
-            userId: req.user._id,
+            userId,
             userEmail: req.user.email,
             userName: req.user.fullName,
             testId,

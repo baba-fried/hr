@@ -118,3 +118,11 @@ function performQuickAction(actionType) {
     console.log('Performing quick action:', actionType);
     // Add your quick action logic here
 }
+
+const token = localStorage.getItem('token');
+const response = await fetch('/api/tests/my-tests', {
+    headers: {
+        'Authorization': `Bearer ${token}`
+    }
+});
+const myTests = await response.json();
