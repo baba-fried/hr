@@ -11,7 +11,6 @@ class FaceUI {
     const statusIcon = this.faceStatus.querySelector('.status-icon');
     const statusText = this.faceStatus.querySelector('span');
 
-    // Remove all status classes
     statusIcon.classList.remove('status-active', 'status-warning', 'status-error');
 
     switch(status) {
@@ -36,17 +35,24 @@ class FaceUI {
 
   addEvent(event) {
     const timestamp = new Date().toLocaleTimeString();
-    this.events.unshift({ timestamp, message: event });
-    this.events = this.events.slice(0, 3); // Keep only last 3 events
+    this.events.unshift({ timestamp, message: event, type: this.getEventType(event) });
+    this.events = this.events.slice(0, 10); // Keep last 10 events
     this.updateEventLog();
+  }
+
+  getEventType(event) {
+    if (event.includes('🔴') || event.includes('🚨')) return 'critical';
+    if (event.includes('🔶')) return 'warning';
+    if (event.includes('⚠️')) return 'low';
+    return 'info';
   }
 
   updateEventLog() {
     this.logContainer.innerHTML = this.events
       .map(event => `
-        <div class="log-entry">
-          <small>${event.timestamp}</small>
-          <div>${event.message}</div>
+        <div class="log-entry ${event.type}">
+          <div class="log-time">${event.timestamp}</div>
+          <div class="log-message">${event.message}</div>
         </div>
       `)
       .join('');
@@ -60,8 +66,9 @@ class FaceUI {
 
     // Match canvas size to video
     const video = document.getElementById('video-feed');
-    this.faceOverlay.width = video.videoWidth;
-    this.faceOverlay.height = video.videoHeight;
+  const canvas = document.getElementById('face-overlay');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
     // Draw face box with dynamic color
     ctx.strokeStyle = color;

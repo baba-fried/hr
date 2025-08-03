@@ -139,16 +139,12 @@ class ViolationLogger {
      * @param {Object} violation - Violation object
      */
     updateViolationUI(violation) {
-        // Add to event log if available
+        // Add to event log
         if (window.faceUI && typeof window.faceUI.addEvent === 'function') {
             const icon = this.getSeverityIcon(violation.severity);
-            window.faceUI.addEvent(`${icon} ${violation.description}`);
-        }
-
-        // Show alert if available
-        if (window.alerts && typeof window.alerts.showAlert === 'function') {
-            const alertType = this.getAlertType(violation.severity);
-            window.alerts.showAlert(violation.description, alertType);
+            const timestamp = new Date().toLocaleTimeString();
+            const formattedMessage = `${timestamp} - ${icon} ${violation.description}`;
+            window.faceUI.addEvent(formattedMessage);
         }
 
         // Update violation counter
