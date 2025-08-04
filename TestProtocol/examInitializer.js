@@ -72,15 +72,33 @@ class ExamInitializer {
             
             console.log('🔍 Exam data for violation logger:', this.examData);
             
+            // Get actual test ID from database using test name
+            let actualTestId = this.examData.testId;
+            if (this.examData.testName && this.examData.testId === 'unknown') {
+                try {
+                    const response = await fetch(`/api/tests/by-name/${encodeURIComponent(this.examData.testName)}`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    
+                    if (response.ok) {
+                        const test = await response.json();
+                        actualTestId = test._id;
+                        console.log('✅ Got actual test ID:', actualTestId);
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to get test ID:', error);
+                }
+            }
+            
             if (window.violationLogger) {
                 window.violationLogger.initialize(
-                    this.examData.testId,
+                    actualTestId,
                     this.examData.testName,
                     this.examData.userId
                 );
                 
                 console.log('✅ Violation logger initialized with:', {
-                    testId: this.examData.testId,
+                    testId: actualTestId,
                     testName: this.examData.testName,
                     userId: this.examData.userId
                 });

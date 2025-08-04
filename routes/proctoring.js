@@ -48,7 +48,7 @@ router.post('/violations', auth, async (req, res) => {
 
         // Create filename with date
         const date = new Date().toISOString().split('T')[0];
-        const logFile = path.join(logsDir, `violations-${date}.json`);
+        const logFile = path.join(logsDir, `violations-${userId}-${date}.json`);
 
         // Read existing violations or create empty array
         let violations = [];
@@ -104,7 +104,7 @@ router.get('/violations/:testId', auth, async (req, res) => {
         const { date } = req.query;
 
         const targetDate = date || new Date().toISOString().split('T')[0];
-        const logFile = path.join(logsDir, `violations-${targetDate}.json`);
+        const logFile = path.join(logsDir, `violations-${testId}-${targetDate}.json`);
 
         try {
             const data = await fs.readFile(logFile, 'utf8');
@@ -138,6 +138,42 @@ router.get('/violations/:testId', auth, async (req, res) => {
     }
 });
 
+// Get violations for a specific user
+router.get('/user-violations/:userId', auth, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { date } = req.query;
+
+        const targetDate = date || new Date().toISOString().split('T')[0];
+        const logFile = path.join(logsDir, `violations-${userId}-${targetDate}.json`);
+
+        try {
+            const data = await fs.readFile(logFile, 'utf8');
+            const violations = JSON.parse(data);
+            
+            res.json({
+                success: true,
+                violations: violations,
+                count: violations.length
+            });
+        } catch (error) {
+            // File doesn't exist
+            res.json({
+                success: true,
+                violations: [],
+                count: 0
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching user violations:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch user violations',
+            error: error.message
+        });
+    }
+});
+
 // Get violation statistics
 router.get('/stats/:testId', auth, async (req, res) => {
     try {
@@ -145,7 +181,7 @@ router.get('/stats/:testId', auth, async (req, res) => {
         const { date } = req.query;
 
         const targetDate = date || new Date().toISOString().split('T')[0];
-        const logFile = path.join(logsDir, `violations-${targetDate}.json`);
+        const logFile = path.join(logsDir, `violations-${testId}-${targetDate}.json`);
 
         let stats = {
             total: 0,

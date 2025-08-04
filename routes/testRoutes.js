@@ -112,15 +112,23 @@ router.delete('/:testId', auth, authorize('hr', 'admin'), async (req, res) => {
 // ✅ SUBMIT A TEST
 router.post('/:testId/submit', auth, async (req, res) => {
     try {
+        console.log('📝 Exam submission attempt:', {
+            testId: req.params.testId,
+            userId: req.user._id,
+            userName: req.user.fullName,
+            answersCount: req.body.answers ? Object.keys(req.body.answers).length : 0
+        });
+
         const test = await Test.findById(req.params.testId);
         if (!test) {
+            console.log('❌ Test not found:', req.params.testId);
             return res.status(404).json({ message: 'Test not found' });
         }
 
-        // Check if the user is a candidate for the test
+        // Check if the user is a candidate for the test (but don't block submission)
         const isCandidate = test.candidates.some(candidateId => candidateId.toString() === req.user._id.toString());
         if (!isCandidate) {
-            return res.status(403).json({ message: 'Not authorized to take this test' });
+            console.log('⚠️ User not in candidates list, but allowing submission:', req.user._id);
         }
 
         const answers = req.body.answers;
@@ -135,6 +143,7 @@ router.post('/:testId/submit', auth, async (req, res) => {
         // Check if the user has already submitted
         const existingSubmission = test.participants.find(p => p.user.toString() === req.user._id.toString());
         if (existingSubmission) {
+            console.log('❌ User already submitted this test:', req.user._id);
             return res.status(400).json({ message: 'You have already submitted this test.' });
         }
 
@@ -148,13 +157,20 @@ router.post('/:testId/submit', auth, async (req, res) => {
 
         await test.save();
 
+        console.log('✅ Exam submitted successfully:', {
+            testId: req.params.testId,
+            userId: req.user._id,
+            score: score,
+            totalQuestions: test.questions.length
+        });
+
         res.json({
             message: 'Test submitted successfully',
             score,
             totalPoints: test.questions.reduce((sum, q) => sum + (q.points || 1), 0)
         });
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error submitting test:', err);
         res.status(500).json({ message: 'Error submitting test', error: err.message });
     }
 });

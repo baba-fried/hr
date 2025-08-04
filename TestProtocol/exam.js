@@ -12,6 +12,9 @@ class ExamManager {
         this.examEndTime = null;
         this.isExamActive = false;
         this.autoSaveInterval = null;
+        this.examTimer = null;
+        this.examDuration = null;
+        this.timeRemaining = null;
     }
 
     /**
@@ -272,55 +275,84 @@ class ExamManager {
      */
     async submitExam() {
         try {
-            // Show confirmation dialog
-            const confirmed = confirm(
-                `Are you sure you want to submit your exam?\n\n` +
-                `Questions answered: ${Object.keys(this.userAnswers).length} of ${this.questions.length}\n` +
-                `This action cannot be undone.`
-            );
-
-            if (!confirmed) return;
-
-            console.log('📤 Submitting exam...');
-            this.examEndTime = new Date();
-
-            // Log exam submission
-            if (violationLogger) {
-                violationLogger.logViolation(
-                    'exam_submitted',
-                    'low',
-                    'Exam submitted by user',
-                    {
-                        endTime: this.examEndTime.toISOString(),
-                        duration: this.examEndTime - this.examStartTime,
-                        questionsAnswered: Object.keys(this.userAnswers).length,
-                        totalQuestions: this.questions.length,
-                        answers: this.userAnswers
-                    },
-                    false
-                );
+            console.log('📝 Submitting exam...');
+            
+            // Get testId from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const testName = urlParams.get('testName');
+            
+            console.log('🔍 URL Parameters:', {
+                testName: testName,
+                answers: this.userAnswers,
+                questionsCount: this.questions.length
+            });
+            
+            // Get test details to find testId
+            const testResponse = await fetch(`/api/tests/by-name/${encodeURIComponent(testName)}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            
+            if (!testResponse.ok) {
+                console.error('❌ Failed to get test details:', testResponse.status, testResponse.statusText);
+                throw new Error('Failed to get test details');
             }
-
-            // Calculate score (basic implementation)
+            
+            const test = await testResponse.json();
+            const testId = test._id;
+            
+            console.log('✅ Got test details:', { testId, testName: test.name });
+            
+            // Calculate score
             let score = 0;
+            const totalQuestions = this.questions.length;
+            
             this.questions.forEach((question, index) => {
-                if (this.userAnswers[index] === question.correctAnswer) {
-                    score++;
+                const userAnswer = this.userAnswers[index];
+                if (userAnswer && userAnswer === question.correctAnswer) {
+                    score += question.points || 1;
                 }
             });
-
-            // Show submission success
-            this.showSubmissionSuccess(score);
-
-            // Cleanup and redirect
-            setTimeout(() => {
-                this.cleanup();
-                window.location.href = '/user-dashboard/user.html';
-            }, 3000);
-
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            
+            const submissionData = {
+                answers: this.userAnswers,
+                score: percentage,
+                timeTaken: this.examStartTime ? Math.floor((Date.now() - this.examStartTime.getTime()) / 1000) : 0
+            };
+            
+            console.log('📤 Sending submission data:', submissionData);
+            
+            // Submit to server
+            const response = await fetch(`/api/tests/${testId}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(submissionData)
+            });
+            
+            console.log('📥 Response status:', response.status);
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✅ Exam submitted successfully:', result);
+                this.showSubmissionSuccess(percentage);
+                
+                // Redirect to user dashboard after a short delay
+                setTimeout(() => {
+                    window.location.href = '/user-dashboard';
+                }, 3000); // 3 second delay to show submission message
+            } else {
+                const errorData = await response.json();
+                console.error('❌ Submission failed:', errorData);
+                throw new Error(errorData.message || 'Failed to submit exam');
+            }
+            
         } catch (error) {
             console.error('❌ Error submitting exam:', error);
-            this.showError('Failed to submit exam', error.message);
+            this.showError('Submission Failed', 'Failed to submit exam. Please try again.');
         }
     }
 
@@ -495,6 +527,15 @@ class ExamManager {
         this.examStartTime = new Date();
         this.isExamActive = true;
         
+        // Parse exam duration from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const durationStr = urlParams.get('duration') || '';
+        this.examDuration = this.parseDuration(durationStr);
+        
+        if (this.examDuration) {
+            this.startTimer();
+        }
+        
         // Load questions
         this.loadQuestions(testName);
         
@@ -502,6 +543,72 @@ class ExamManager {
         this.loadProgress();
         
         console.log('🎯 Exam started:', testName);
+    }
+   
+    /**
+     * Parse duration string to minutes
+     * @param {string} durationStr - Duration string like "4 minutes" or "N/A minutes"
+     * @returns {number|null} Duration in minutes or null if invalid
+     */
+    parseDuration(durationStr) {
+        if (!durationStr || durationStr.includes('N/A')) {
+            return null;
+        }
+        
+        const match = durationStr.match(/(\d+)\s*minutes?/i);
+        return match ? parseInt(match[1]) : null;
+    }
+    
+    /**
+     * Start the exam timer
+     */
+    startTimer() {
+        if (!this.examDuration) return;
+        
+        this.timeRemaining = this.examDuration * 60; // Convert to seconds
+        
+        // Update timer display immediately
+        this.updateTimerDisplay();
+        
+        this.examTimer = setInterval(() => {
+            this.timeRemaining--;
+            
+            if (this.timeRemaining <= 0) {
+                this.submitExam(); // Auto-submit when time runs out
+                return;
+            }
+            
+            this.updateTimerDisplay();
+        }, 1000);
+        
+        console.log(`⏰ Timer started: ${this.examDuration} minutes`);
+    }
+    
+    /**
+     * Update timer display
+     */
+    updateTimerDisplay() {
+        const timerContainer = document.getElementById('exam-timer');
+        if (!timerContainer) return;
+        
+        const minutes = Math.floor(this.timeRemaining / 60);
+        const seconds = this.timeRemaining % 60;
+        const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Update timer text
+        timerContainer.textContent = timeStr;
+        
+        // Change badge color based on time remaining
+        const timerBadge = document.getElementById('exam-timer-badge');
+        if (timerBadge) {
+            if (this.timeRemaining <= 300) { // 5 minutes or less
+                timerBadge.style.background = '#e74c3c';
+            } else if (this.timeRemaining <= 600) { // 10 minutes or less
+                timerBadge.style.background = '#f39c12';
+            } else {
+                timerBadge.style.background = '#27ae60';
+            }
+        }
     }
 
     /**
@@ -513,6 +620,24 @@ class ExamManager {
         // Clear auto-save interval
         if (this.autoSaveInterval) {
             clearInterval(this.autoSaveInterval);
+        }
+        
+        // Clear exam timer
+        if (this.examTimer) {
+            clearInterval(this.examTimer);
+            this.examTimer = null;
+        }
+        
+        // Reset timer display
+        const timerContainer = document.getElementById('exam-timer');
+        if (timerContainer) {
+            timerContainer.textContent = '--:--';
+        }
+        
+        // Reset timer badge color
+        const timerBadge = document.getElementById('exam-timer-badge');
+        if (timerBadge) {
+            timerBadge.style.background = '#27ae60';
         }
 
         // Cleanup all monitoring systems
