@@ -135,7 +135,21 @@ router.post('/:testId/submit', auth, async (req, res) => {
         let score = 0;
 
         test.questions.forEach((question, index) => {
-            if (answers[index] && answers[index] === question.correctAnswer) {
+            const userAnswer = answers[index];
+            let isCorrect = false;
+            
+            if (userAnswer !== null && userAnswer !== undefined) {
+                if (question.questionType === 'mcq') {
+                    // For MCQ, compare the user's answer text with the correct option text
+                    const correctOptionText = question.options[question.correctAnswer];
+                    isCorrect = userAnswer === correctOptionText;
+                } else {
+                    // For other question types, direct comparison
+                    isCorrect = userAnswer === question.correctAnswer;
+                }
+            }
+            
+            if (isCorrect) {
                 score += question.points || 1;
             }
         });

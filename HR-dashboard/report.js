@@ -28,44 +28,25 @@ async function fetchUsersFromDB() {
 
 async function fetchTestSubmissions() {
   try {
-    console.log('🔍 Fetching test submissions...');
-    const res = await fetch('/api/tests');
-    const tests = await res.json();
-    console.log('📊 Tests fetched:', tests.length);
-    console.log('📋 Tests data:', tests);
-    
-    testSubmissions = [];
-    tests.forEach(test => {
-      console.log(`🔍 Checking test: ${test.name} (ID: ${test._id})`);
-      console.log(`📝 Participants:`, test.participants);
-      
-      if (test.participants && test.participants.length > 0) {
-        console.log(`✅ Found ${test.participants.length} participants for test: ${test.name}`);
-        test.participants.forEach(participant => {
-          const user = users.find(u => u.id === participant.user);
-          console.log(`👤 Participant user:`, participant.user, 'Found user:', user ? user.name : 'Not found');
-          
-          testSubmissions.push({
-            testId: test._id,
-            testName: test.name,
-            userId: participant.user,
-            userName: user ? user.name : 'Unknown User',
-            userEmail: user ? user.email : 'Unknown Email',
-            score: participant.score,
-            totalQuestions: test.questions.length,
-            submittedAt: participant.submittedAt,
-            answers: participant.answers,
-            status: participant.status || 'completed'
-          });
-        });
-      } else {
-        console.log(`❌ No participants found for test: ${test.name}`);
-      }
-    });
-    
+    console.log('🔍 Fetching exam results...');
+    const res = await fetch('/api/exam-results');
+    const results = await res.json();
+    console.log('📊 Exam results fetched:', results.length);
+    testSubmissions = results.map(result => ({
+      testId: result.testId,
+      testName: result.testName,
+      userId: result.userId,
+      userName: result.userName,
+      userEmail: result.userEmail,
+      score: result.score,
+      totalQuestions: result.total,
+      submittedAt: result.takenAt,
+      answers: result.answers,
+      status: 'completed'
+    }));
     console.log('📊 Final test submissions:', testSubmissions);
   } catch (error) {
-    console.error('❌ Failed to fetch test submissions:', error);
+    console.error('❌ Failed to fetch exam results:', error);
   }
 }
 
@@ -202,7 +183,19 @@ async function showReport(userId, testId) {
       
       testData.questions.forEach((question, index) => {
         const userAnswer = submission.answers && submission.answers[index];
-        const isCorrect = userAnswer === question.correctAnswer;
+        let isCorrect = false;
+        
+        if (userAnswer !== null && userAnswer !== undefined) {
+          if (question.questionType === 'mcq') {
+            // For MCQ, compare the user's answer text with the correct option text
+            const correctOptionText = question.options[question.correctAnswer];
+            isCorrect = userAnswer === correctOptionText;
+          } else {
+            // For other question types, direct comparison
+            isCorrect = userAnswer === question.correctAnswer;
+          }
+        }
+        
         const answerStatus = isCorrect ? '✅ Correct' : '❌ Incorrect';
         const answerColor = isCorrect ? 'text-green-600' : 'text-red-600';
         
@@ -226,7 +219,7 @@ async function showReport(userId, testId) {
               <div class="space-y-1">
           `;
           question.options.forEach((option, optIndex) => {
-            const isUserChoice = userAnswer === optIndex;
+            const isUserChoice = userAnswer === option;
             const isCorrectChoice = question.correctAnswer === optIndex;
             let optionClass = 'text-gray-700';
             let optionPrefix = '';
@@ -259,23 +252,19 @@ async function showReport(userId, testId) {
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p class="font-semibold text-gray-800">Student's Answer:</p>
-                <p class="text-gray-700">$${
+                <p class="text-gray-700">${
                   userAnswer !== null && userAnswer !== undefined
-                    ? (
-                        question.questionType === 'mcq'
-                          ? (typeof Number(userAnswer) === 'number' && question.options && question.options[Number(userAnswer)]
-                              ? `${String.fromCharCode(65 + Number(userAnswer))}. ${question.options[Number(userAnswer)]}`
-                              : `Option ${String.fromCharCode(65 + Number(userAnswer))}`)
-                          : userAnswer
-                      )
+                    ? userAnswer
                     : 'Not answered'
                 }</p>
               </div>
               <div>
                 <p class="font-semibold text-gray-800">Correct Answer:</p>
-                <p class="text-green-600">${question.questionType === 'mcq' ? 
-                  `Option ${String.fromCharCode(65 + question.correctAnswer)}` : 
-                  question.correctAnswer}</p>
+                <p class="text-green-600">${
+                  question.questionType === 'mcq' 
+                    ? question.options[question.correctAnswer] 
+                    : question.correctAnswer
+                }</p>
               </div>
             </div>
           </div>

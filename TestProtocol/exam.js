@@ -276,55 +276,63 @@ class ExamManager {
     async submitExam() {
         try {
             console.log('📝 Submitting exam...');
-            
-            // Get testId from URL parameters
+            // Get test and user details
             const urlParams = new URLSearchParams(window.location.search);
             const testName = urlParams.get('testName');
-            
-            console.log('🔍 URL Parameters:', {
-                testName: testName,
-                answers: this.userAnswers,
-                questionsCount: this.questions.length
-            });
-            
+            const userId = localStorage.getItem('userId');
+            const userName = localStorage.getItem('userName');
+            const userEmail = localStorage.getItem('userEmail');
+
             // Get test details to find testId
             const testResponse = await fetch(`/api/tests/by-name/${encodeURIComponent(testName)}`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
-            
             if (!testResponse.ok) {
                 console.error('❌ Failed to get test details:', testResponse.status, testResponse.statusText);
                 throw new Error('Failed to get test details');
             }
-            
             const test = await testResponse.json();
             const testId = test._id;
-            
-            console.log('✅ Got test details:', { testId, testName: test.name });
-            
-            // Calculate score
-            let score = 0;
             const totalQuestions = this.questions.length;
-            
-            this.questions.forEach((question, index) => {
+
+            // Prepare answers array for new schema
+            const answers = this.questions.map((question, index) => {
                 const userAnswer = this.userAnswers[index];
-                if (userAnswer && userAnswer === question.correctAnswer) {
-                    score += question.points || 1;
+                let isCorrect = false;
+                if (userAnswer !== null && userAnswer !== undefined) {
+                    if (question.questionType === 'mcq') {
+                        const correctOptionText = question.options[question.correctAnswer];
+                        isCorrect = userAnswer === correctOptionText;
+                    } else {
+                        isCorrect = userAnswer === question.correctAnswer;
+                    }
                 }
+                return {
+                    questionText: question.questionText,
+                    questionType: question.questionType,
+                    options: question.options,
+                    correctAnswer: question.correctAnswer,
+                    userAnswer,
+                    isCorrect
+                };
             });
-            
-            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
-            
+            const score = answers.filter(a => a.isCorrect).length;
+
+            // Prepare submission data for new schema
             const submissionData = {
-                answers: this.userAnswers,
-                score: percentage,
-                timeTaken: this.examStartTime ? Math.floor((Date.now() - this.examStartTime.getTime()) / 1000) : 0
+                userId,
+                userName,
+                userEmail,
+                testId,
+                testName,
+                score,
+                total: totalQuestions,
+                answers
             };
-            
-            console.log('📤 Sending submission data:', submissionData);
-            
-            // Submit to server
-            const response = await fetch(`/api/tests/${testId}/submit`, {
+            console.log('📤 Sending exam result:', submissionData);
+
+            // Submit to new endpoint
+            const response = await fetch('/api/exam-results', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -332,13 +340,9 @@ class ExamManager {
                 },
                 body: JSON.stringify(submissionData)
             });
-            
             console.log('📥 Response status:', response.status);
-            
             if (response.ok) {
-                // const result = await response.json(); // Don't use score
-                // console.log('✅ Exam submitted successfully:', result);
-                this.showSubmissionSuccess(); // No score passed
+                this.showSubmissionSuccess();
                 setTimeout(() => {
                     window.location.href = '/user-dashboard/user.html';
                 }, 3000);
@@ -347,7 +351,6 @@ class ExamManager {
                 console.error('❌ Submission failed:', errorData);
                 throw new Error(errorData.message || 'Failed to submit exam');
             }
-            
         } catch (error) {
             console.error('❌ Error submitting exam:', error);
             this.showError('Submission Failed', 'Failed to submit exam. Please try again.');
