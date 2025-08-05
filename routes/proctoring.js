@@ -6,7 +6,16 @@ const { auth } = require('../middleware/authMiddleware');
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '..', 'logs');
-fs.mkdir(logsDir, { recursive: true }).catch(console.error);
+// Create logs directory if it doesn't exist
+(async () => {
+    try {
+        await fs.mkdir(logsDir, { recursive: true });
+    } catch (error) {
+        console.error('Error creating logs directory:', error);
+        // Don't throw the error, just log it
+        // The directory might already exist or will be created on next request
+    }
+})().catch(console.error);
 
 // Log violation endpoint
 router.post('/violations', auth, async (req, res) => {
@@ -14,6 +23,7 @@ router.post('/violations', auth, async (req, res) => {
         const {
             testId,
             testName,
+            userId,
             violationType,
             severity,
             description,
@@ -22,7 +32,7 @@ router.post('/violations', auth, async (req, res) => {
 
         const violation = {
             id: Date.now() + Math.random().toString(36).substr(2, 9),
-            userId: req.user._id,
+            userId,
             userEmail: req.user.email,
             userName: req.user.fullName,
             testId,
@@ -38,7 +48,7 @@ router.post('/violations', auth, async (req, res) => {
 
         // Create filename with date
         const date = new Date().toISOString().split('T')[0];
-        const logFile = path.join(logsDir, `violations-${date}.json`);
+        const logFile = path.join(logsDir, `violations-${userId}-${date}.json`);
 
         // Read existing violations or create empty array
         let violations = [];
@@ -53,17 +63,23 @@ router.post('/violations', auth, async (req, res) => {
         // Add new violation
         violations.push(violation);
 
-        // Write back to file
-        await fs.writeFile(logFile, JSON.stringify(violations, null, 2));
+        try {
+            // Write back to file
+            await fs.writeFile(logFile, JSON.stringify(violations, null, 2));
 
-        // Also log to console for immediate monitoring
-        console.log(`🚨 VIOLATION DETECTED:`, {
-            user: violation.userName,
-            test: violation.testName,
-            type: violation.violationType,
-            severity: violation.severity,
-            time: violation.timestamp
-        });
+            // Also log to console for immediate monitoring
+            console.log(`🚨 VIOLATION DETECTED:`, {
+                user: violation.userName,
+                test: violation.testName,
+                type: violation.violationType,
+                severity: violation.severity,
+                time: violation.timestamp
+            });
+        } catch (writeError) {
+            console.error('Error writing violation log:', writeError);
+            // Don't throw the error, just log it and continue
+            // This prevents the server from crashing due to file system issues
+        }
 
         res.status(201).json({
             success: true,
@@ -88,7 +104,7 @@ router.get('/violations/:testId', auth, async (req, res) => {
         const { date } = req.query;
 
         const targetDate = date || new Date().toISOString().split('T')[0];
-        const logFile = path.join(logsDir, `violations-${targetDate}.json`);
+        const logFile = path.join(logsDir, `violations-${testId}-${targetDate}.json`);
 
         try {
             const data = await fs.readFile(logFile, 'utf8');
@@ -122,6 +138,42 @@ router.get('/violations/:testId', auth, async (req, res) => {
     }
 });
 
+// Get violations for a specific user
+router.get('/user-violations/:userId', auth, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { date } = req.query;
+
+        const targetDate = date || new Date().toISOString().split('T')[0];
+        const logFile = path.join(logsDir, `violations-${userId}-${targetDate}.json`);
+
+        try {
+            const data = await fs.readFile(logFile, 'utf8');
+            const violations = JSON.parse(data);
+            
+            res.json({
+                success: true,
+                violations: violations,
+                count: violations.length
+            });
+        } catch (error) {
+            // File doesn't exist
+            res.json({
+                success: true,
+                violations: [],
+                count: 0
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching user violations:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch user violations',
+            error: error.message
+        });
+    }
+});
+
 // Get violation statistics
 router.get('/stats/:testId', auth, async (req, res) => {
     try {
@@ -129,43 +181,61 @@ router.get('/stats/:testId', auth, async (req, res) => {
         const { date } = req.query;
 
         const targetDate = date || new Date().toISOString().split('T')[0];
-        const logFile = path.join(logsDir, `violations-${targetDate}.json`);
+        const logFile = path.join(logsDir, `violations-${testId}-${targetDate}.json`);
+
+        let stats = {
+            total: 0,
+            byType: {},
+            bySeverity: {},
+            byUser: {},
+            timeline: []
+        };
 
         try {
             const data = await fs.readFile(logFile, 'utf8');
-            const violations = JSON.parse(data);
+            let violations = [];
+            
+            try {
+                violations = JSON.parse(data);
+            } catch (parseError) {
+                console.error('Error parsing violations file:', parseError);
+                // Return empty stats if file is corrupted
+                return res.json({ success: true, stats });
+            }
             
             const filteredViolations = testId === 'all' 
                 ? violations 
                 : violations.filter(v => v.testId === testId);
 
-            // Calculate statistics
-            const stats = {
-                total: filteredViolations.length,
-                byType: {},
-                bySeverity: {},
-                byUser: {},
-                timeline: []
-            };
+            stats.total = filteredViolations.length;
 
+            // Use try-catch for each violation processing to prevent crashes
             filteredViolations.forEach(violation => {
-                // By type
-                stats.byType[violation.violationType] = (stats.byType[violation.violationType] || 0) + 1;
-                
-                // By severity
-                stats.bySeverity[violation.severity] = (stats.bySeverity[violation.severity] || 0) + 1;
-                
-                // By user
-                stats.byUser[violation.userName] = (stats.byUser[violation.userName] || 0) + 1;
-                
-                // Timeline (hourly)
-                const hour = new Date(violation.timestamp).getHours();
-                const timeSlot = `${hour}:00`;
-                const existing = stats.timeline.find(t => t.time === timeSlot);
-                if (existing) {
-                    existing.count++;
-                } else {
-                    stats.timeline.push({ time: timeSlot, count: 1 });
+                try {
+                    // By type
+                    stats.byType[violation.violationType] = (stats.byType[violation.violationType] || 0) + 1;
+                    
+                    // By severity
+                    stats.bySeverity[violation.severity] = (stats.bySeverity[violation.severity] || 0) + 1;
+                    
+                    // By user
+                    stats.byUser[violation.userName] = (stats.byUser[violation.userName] || 0) + 1;
+                    
+                    // Timeline (hourly)
+                    const timestamp = new Date(violation.timestamp);
+                    if (!isNaN(timestamp)) {
+                        const hour = timestamp.getHours();
+                        const timeSlot = `${hour}:00`;
+                        const existing = stats.timeline.find(t => t.time === timeSlot);
+                        if (existing) {
+                            existing.count++;
+                        } else {
+                            stats.timeline.push({ time: timeSlot, count: 1 });
+                        }
+                    }
+                } catch (processError) {
+                    console.error('Error processing violation:', processError);
+                    // Continue processing other violations
                 }
             });
 

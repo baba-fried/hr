@@ -9,6 +9,7 @@ class ViolationLogger {
         this.alertEndpoint = '/api/proctoring/alert';
         this.rateLimiter = new Map(); // Rate limiting for violations
         this.maxViolationsPerMinute = 10; // Limit violations per type per minute
+        this._activeViolations = new Set();
     }
 
     /**
@@ -38,20 +39,16 @@ class ViolationLogger {
      * @param {Object} metadata - Additional metadata
      * @param {boolean} showAlert - Whether to show real-time alert
      */
-    async logViolation(violationType, severity, description, metadata = {}, showAlert = false) {
-        if (!this.isInitialized) {
+    async logViolation(violationType, severity, description, metadata = {}, showAlert = true) {
+        if (!this.isInitialized || this._activeViolations.has(violationType)) {
             return false;
         }
-
-        // Rate limiting check
-        if (!this.checkRateLimit(violationType)) {
-            console.warn(`Rate limit exceeded for violation type: ${violationType}`);
-            return false;
-        }
+        this._activeViolations.add(violationType);
 
         const violation = {
             testId: this.testId,
             testName: this.testName,
+            userId: this.userId,
             violationType,
             severity,
             description,
@@ -132,20 +129,35 @@ class ViolationLogger {
      * @param {Object} violation - Violation object
      */
     updateViolationUI(violation) {
-        // Add to event log if available
         if (window.faceUI && typeof window.faceUI.addEvent === 'function') {
             const icon = this.getSeverityIcon(violation.severity);
-            window.faceUI.addEvent(`${icon} ${violation.description}`);
+            const message = `${icon} ${violation.description}`;
+            window.faceUI.addEvent({ type: violation.violationType, message });
         }
-
-        // Show alert if available
-        if (window.alerts && typeof window.alerts.showAlert === 'function') {
-            const alertType = this.getAlertType(violation.severity);
-            window.alerts.showAlert(violation.description, alertType);
-        }
-
-        // Update violation counter
-        this.updateViolationCounter();
+        // Remove or comment out the updateViolationCounter method and its calls
+        // updateViolationCounter() {
+        //     let counter = document.getElementById('violation-counter');
+        //     if (!counter) {
+        //         counter = document.createElement('div');
+        //         counter.id = 'violation-counter';
+        //         counter.style.cssText = `
+        //             position: fixed;
+        //             top: 10px;
+        //             left: 10px;
+        //             background: rgba(231, 76, 60, 0.9);
+        //             color: white;
+        //             padding: 8px 12px;
+        //             border-radius: 20px;
+        //             font-size: 14px;
+        //             font-weight: bold;
+        //             z-index: 1001;
+        //             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        //         `;
+        //         document.body.appendChild(counter);
+        //     }
+        //     counter.textContent = `Violations: ${this.violations.length}`;
+        // }
+        // Also remove any calls to this.updateViolationCounter();
     }
 
     /**
@@ -176,14 +188,6 @@ class ViolationLogger {
             critical: 'error'
         };
         return types[severity] || 'warning';
-    }
-
-    /**
-     * Update violation counter in UI (disabled)
-     */
-    updateViolationCounter() {
-        // Violation counter UI removed
-        return;
     }
 
     /**
@@ -280,9 +284,6 @@ class ViolationLogger {
     }
 
     /**
-     * Clear all violations
-     */
-    /**
      * Check rate limit for violation type
      * @param {string} violationType - Type of violation
      * @returns {boolean} Whether violation can be logged
@@ -315,8 +316,34 @@ class ViolationLogger {
     clearViolations() {
         this.violations = [];
         this.rateLimiter.clear();
-        this.updateViolationCounter();
+        // Remove or comment out the updateViolationCounter method and its calls
+        // updateViolationCounter() {
+        //     let counter = document.getElementById('violation-counter');
+        //     if (!counter) {
+        //         counter = document.createElement('div');
+        //         counter.id = 'violation-counter';
+        //         counter.style.cssText = `
+        //             position: fixed;
+        //             top: 10px;
+        //             left: 10px;
+        //             background: rgba(231, 76, 60, 0.9);
+        //             color: white;
+        //             padding: 8px 12px;
+        //             border-radius: 20px;
+        //             font-size: 14px;
+        //             font-weight: bold;
+        //             z-index: 1001;
+        //             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        //         `;
+        //         document.body.appendChild(counter);
+        //     }
+        //     counter.textContent = `Violations: ${this.violations.length}`;
+        // }
+        // Also remove any calls to this.updateViolationCounter();
         localStorage.removeItem('pendingViolations');
+    }
+    resolveViolation(violationType) {
+        this._activeViolations.delete(violationType);
     }
 }
 

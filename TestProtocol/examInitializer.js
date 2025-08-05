@@ -57,7 +57,9 @@ class ExamInitializer {
             testName: urlParams.get('testName'),
             userId: urlParams.get('userId'),
             testId: urlParams.get('testId') || 'unknown',
-            token: urlParams.get('token')
+            token: urlParams.get('token'),
+            role: urlParams.get('role') || '',
+            duration: urlParams.get('duration') || ''
         };
     }
 
@@ -68,12 +70,38 @@ class ExamInitializer {
         try {
             this.updateStepStatus('Violation Logger', 'initializing');
             
+            console.log('🔍 Exam data for violation logger:', this.examData);
+            
+            // Get actual test ID from database using test name
+            let actualTestId = this.examData.testId;
+            if (this.examData.testName && this.examData.testId === 'unknown') {
+                try {
+                    const response = await fetch(`/api/tests/by-name/${encodeURIComponent(this.examData.testName)}`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    
+                    if (response.ok) {
+                        const test = await response.json();
+                        actualTestId = test._id;
+                        console.log('✅ Got actual test ID:', actualTestId);
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to get test ID:', error);
+                }
+            }
+            
             if (window.violationLogger) {
                 window.violationLogger.initialize(
-                    this.examData.testId,
+                    actualTestId,
                     this.examData.testName,
                     this.examData.userId
                 );
+                
+                console.log('✅ Violation logger initialized with:', {
+                    testId: actualTestId,
+                    testName: this.examData.testName,
+                    userId: this.examData.userId
+                });
                 
                 this.updateStepStatus('Violation Logger', 'completed');
                 return true;

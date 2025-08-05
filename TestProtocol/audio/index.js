@@ -95,17 +95,44 @@ class AudioProctoring {
         // Silence detection
         this.monitor.addEventListener('silence', (duration) => {
             const seconds = Math.floor(duration / 1000);
-            this.alerts.showAlert('silence', `⚠️ No sound detected for ${seconds} seconds. Please check your microphone.`);
+            const message = `⚠️ No sound detected for ${seconds} seconds. Please check your microphone.`;
+            // this.alerts.showAlert('silence', message); // Removed popup
+            if (window.violationLogger) {
+                window.violationLogger.logViolation(
+                    'audio_silence',
+                    'medium',
+                    message,
+                    { duration: seconds }
+                );
+            }
         });
         
         // Spike detection
         this.monitor.addEventListener('spike', (volume) => {
-            this.alerts.showAlert('spike', `⚠️ Loud noise detected (${Math.round(volume)}%). Please maintain a quiet environment.`);
+            const message = `⚠️ Loud noise detected (${Math.round(volume)}%). Please maintain a quiet environment.`;
+            // this.alerts.showAlert('spike', message); // Removed popup
+            if (window.violationLogger) {
+                window.violationLogger.logViolation(
+                    'audio_spike',
+                    'high',
+                    message,
+                    { volume: Math.round(volume) }
+                );
+            }
         });
         
         // Continuous noise detection
         this.monitor.addEventListener('continuousNoise', (volume) => {
-            this.alerts.showAlert('continuousNoise', `⚠️ Continuous background noise detected. Please find a quieter environment.`);
+            const message = `⚠️ Continuous background noise detected. Please find a quieter environment.`;
+            // this.alerts.showAlert('continuousNoise', message); // Removed popup
+            if (window.violationLogger) {
+                window.violationLogger.logViolation(
+                    'audio_continuous_noise',
+                    'medium',
+                    message,
+                    { volume: Math.round(volume) }
+                );
+            }
         });
     }
 

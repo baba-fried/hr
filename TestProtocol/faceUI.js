@@ -5,13 +5,13 @@ class FaceUI {
     this.faceStatus = document.getElementById('face-status');
     this.logContainer = document.querySelector('.log-entries');
     this.events = [];
-  }
+    this._activeViolations = new Set();
+}
 
-  updateFaceStatus(status) {
+updateFaceStatus(status) {
     const statusIcon = this.faceStatus.querySelector('.status-icon');
     const statusText = this.faceStatus.querySelector('span');
 
-    // Remove all status classes
     statusIcon.classList.remove('status-active', 'status-warning', 'status-error');
 
     switch(status) {
@@ -35,28 +35,41 @@ class FaceUI {
   }
 
   addEvent(event) {
-    // Skip logging violation-related events
-    if (event.toLowerCase().includes('violation') || 
-        event.toLowerCase().includes('warning') || 
-        event.toLowerCase().includes('detected')) {
-      return;
-    }
-    const timestamp = new Date().toLocaleTimeString();
-    this.events.unshift({ timestamp, message: event });
-    this.events = this.events.slice(0, 3); // Keep only last 3 events
-    this.updateEventLog();
+      if (this._activeViolations.has(event.type)) {
+          return;
+      }
+      this._activeViolations.add(event.type);
+      const timestamp = new Date().toLocaleTimeString();
+      this.events.unshift({
+          timestamp,
+          ...event
+      });
+      this.events = this.events.slice(0, 10);
+      this.updateEventLog();
+  }
+
+  getEventType(event) {
+    if (event.includes('🔴') || event.includes('🚨')) return 'critical';
+    if (event.includes('🔶')) return 'warning';
+    if (event.includes('⚠️')) return 'low';
+    return 'info';
   }
 
   updateEventLog() {
     this.logContainer.innerHTML = this.events
-      .map(event => `
-        <div class="log-entry">
-          <small>${event.timestamp}</small>
-          <div>${event.message}</div>
-        </div>
-      `)
-      .join('');
-  }
+        .filter(event => !event.message.toLowerCase().includes('system error'))
+        .map(event => `
+            <div class="log-entry ${event.type}">
+                <div class="log-time">${event.timestamp}</div>
+                <div class="log-message">${event.message}</div>
+            </div>
+        `)
+        .join('');
+}
+
+resolveEvent(eventType) {
+    this._activeViolations.delete(eventType);
+}
 
   drawFaceBox(detection, color = '#2ecc71') {
     const ctx = this.faceOverlay.getContext('2d');
@@ -66,8 +79,9 @@ class FaceUI {
 
     // Match canvas size to video
     const video = document.getElementById('video-feed');
-    this.faceOverlay.width = video.videoWidth;
-    this.faceOverlay.height = video.videoHeight;
+  const canvas = document.getElementById('face-overlay');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
     // Draw face box with dynamic color
     ctx.strokeStyle = color;

@@ -7,109 +7,126 @@
   <style>
     :root {
       --primary-color: #2c3e50;
+      --secondary-color: #34495e;
       --success-color: #2ecc71;
       --warning-color: #f1c40f;
       --danger-color: #e74c3c;
-      --bg-color: #f5f5f5;
+      --bg-color: #f0f2f5;
       --card-bg: #ffffff;
+      --border-color: #e0e0e0;
     }
-
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
       background-color: var(--bg-color);
       color: var(--primary-color);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-
+    button {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: var(--secondary-color);
+    }
     #exam-container {
       display: flex;
       flex-direction: column;
-      max-width: 1200px;
-      margin: 0 auto;
+      height: 100%;
+      width: 100%;
       padding: 20px;
-      gap: 20px;
     }
-
-    #monitoring-container {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
+    .exam-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
+      padding: 0 10px;
     }
-
-    @media (max-width: 768px) {
-      #monitoring-container {
-        grid-template-columns: 1fr;
-      }
+    .exam-header > div {
+      background-color: var(--card-bg);
+      padding: 8px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-
-    .monitoring-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    #video-container {
-      position: relative;
+    .proctor-layout {
+      display: flex;
+      gap: 20px;
+      flex: 1;
       overflow: hidden;
     }
-
+    .main-content {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .sidebar-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+    #exam-content {
+      flex: 1;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+    #question-container {
+      flex: 1;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+    #video-container {
+      position: relative;
+    }
     #video-feed {
       width: 100%;
       border-radius: 12px;
-      object-fit: cover;
+      background-color: #000;
+      aspect-ratio: 4 / 3;
     }
-
     #face-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 15px;
+      left: 15px;
+      right: 15px;
+      bottom: 15px;
+      width: calc(100% - 30px);
+      height: calc(100% - 30px);
       pointer-events: none;
     }
-
-    #status-container {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-    }
-
-    .status-icon {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    .status-active {
-      background: var(--success-color);
-      animation: pulse 2s infinite;
-    }
-
-    .status-warning {
-      background: var(--warning-color);
-    }
-
-    .status-error {
-      background: var(--danger-color);
-    }
-
     #rec-indicator {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      top: 25px;
+      right: 25px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -119,7 +136,6 @@
       border-radius: 20px;
       font-size: 14px;
     }
-
     .rec-dot {
       width: 8px;
       height: 8px;
@@ -127,46 +143,67 @@
       border-radius: 50%;
       animation: blink 1s infinite;
     }
-
+    #status-container {
+      flex: 1;
+      overflow: hidden;
+    }
     #event-log {
-      margin-top: 15px;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.02);
-      border-radius: 8px;
-      font-size: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-
+    .log-entries {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 10px; /* For scrollbar */
+    }
     .log-entry {
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.03);
+        margin-bottom: 8px;
     }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
+    .log-entry.critical {
+        background: rgba(231, 76, 60, 0.1);
+        border-left: 3px solid var(--danger-color);
     }
-
+    .log-entry.warning {
+        background: rgba(241, 196, 15, 0.1);
+        border-left: 3px solid var(--warning-color);
+    }
+    .log-time {
+        color: var(--primary-color);
+        opacity: 0.7;
+        font-size: 0.9em;
+    }
+    .log-message {
+        color: var(--primary-color);
+    }
+    /* Custom scrollbar */
+    .log-entries::-webkit-scrollbar {
+        width: 8px;
+    }
+    .log-entries::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 4px;
+    }
+    .log-entries::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+    }
+    .log-entries::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.2);
+    }
     @keyframes blink {
-      0% { opacity: 1; }
       50% { opacity: 0; }
-      100% { opacity: 1; }
     }
-
-    /* Preserve existing exam content styles */
-    #exam-content {
-      background-color: var(--card-bg);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    /* Modal Styles */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(8px);
       display: none;
@@ -174,7 +211,6 @@
       align-items: center;
       z-index: 1000;
     }
-    
     .modal {
       background: white;
       padding: 24px;
@@ -184,73 +220,89 @@
       text-align: center;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
-    
     .modal h3 {
       margin: 0 0 16px;
       color: var(--danger-color);
     }
-    
     .modal p {
       margin: 0 0 20px;
       line-height: 1.5;
     }
-    
-    .modal button {
-      background: var(--primary-color);
+    .exam-badge {
+      background-color: var(--primary-color);
       color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    
-    .modal button:hover {
-      background: #34495e;
+    .exam-info {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    .exam-info .exam-badge {
+      margin-bottom: 0;
     }
   </style>
 </head>
 <body>
   <div id="exam-container">
-    <div id="monitoring-container">
-      <div class="monitoring-card" id="video-container">
-        <video id="video-feed" autoplay muted></video>
-        <canvas id="face-overlay"></canvas>
-        <div id="rec-indicator">
-          <div class="rec-dot"></div>
-          <span>REC</span>
+    <div class="proctor-layout">
+      <main class="main-content">
+        <div id="exam-content">
+          <!-- Move the badge here, above the questions section -->
+          <div id="exam-badge-row">
+            <div class="exam-info">
+              <span class="exam-badge">
+                <span style='font-weight:normal;font-size:14px;'>Name of Exam: </span><span id="exam-name"></span>
+              </span>
+              <span class="exam-badge">
+                <span style='font-weight:normal;font-size:14px;'>Role: </span><span id="exam-role"></span>
+              </span>
+              <span class="exam-badge">
+                <span style='font-weight:normal;font-size:14px;'>Duration: </span><span id="exam-duration"></span>
+              </span>
+              <span class="exam-badge" id="exam-timer-badge" style="background: #27ae60;">
+                <span style='font-weight:normal;font-size:14px;'>Time Left: </span><span id="exam-timer">--:--</span>
+              </span>
+            </div>
+          </div>
+          <div id="question-container">
+            <!-- Exam questions will be loaded here by exam.js -->
+            <h2>Questions Here</h2>
+            <p>This is a placeholder for where the exam questions will appear.</p>
+          </div>
+          <div id="navigation-buttons">
+            <button id="prev-btn" style="display: none;">Previous</button>
+            <button id="next-btn" style="display: none;">Next</button>
+            <button id="submit-exam-btn" style="display: none;">Submit Exam</button>
+          </div>
         </div>
-      </div>
-      <div class="monitoring-card" id="status-container">
-        <h3>Monitoring Status</h3>
-        <div class="status-indicator">
-          <div class="status-icon status-active"></div>
-          <span>Face Detection Active</span>
-        </div>
-        <div id="face-status" class="status-indicator">
-          <div class="status-icon"></div>
-          <span>Checking face position...</span>
-        </div>
-        <div id="fullscreen-status" class="status-indicator">
-          <div class="status-icon"></div>
-          <span>Fullscreen Mode</span>
-        </div>
-        <div id="event-log">
-          <h4>Recent Events</h4>
-          <div class="log-entries"></div>
-        </div>
-      </div>
-    </div>
+      </main>
 
-    <div id="exam-content">
-      <!-- Existing exam content -->
-      <div id="question-container"></div>
-      <div id="navigation-buttons">
-        <button id="prev-btn">Previous</button>
-        <button id="next-btn">Next</button>
-      </div>
-      <button id="submit-exam-btn">Submit Exam</button>
+      <aside class="sidebar">
+        <div id="video-container" class="sidebar-card">
+          <video id="video-feed" autoplay muted></video>
+          <canvas id="face-overlay"></canvas>
+          <div id="rec-indicator">
+            <div class="rec-dot"></div>
+            <span>REC</span>
+          </div>
+        </div>
+        <div id="status-container" class="sidebar-card">
+          <div id="event-log">
+            <h4>Violation Reports</h4>
+            <div class="log-entries">
+              <!-- Log entries will be added here by faceUI.js -->
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 
@@ -324,10 +376,3 @@
   </script>
 </body>
 </html>
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal">
-    <h3>⚠️ Warning</h3>
-    <p id="modal-message">Please remain in fullscreen mode during the exam.</p>
-    <button id="modal-ok">Return to Fullscreen</button>
-  </div>
-</div>

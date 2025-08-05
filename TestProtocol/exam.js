@@ -12,6 +12,9 @@ class ExamManager {
         this.examEndTime = null;
         this.isExamActive = false;
         this.autoSaveInterval = null;
+        this.examTimer = null;
+        this.examDuration = null;
+        this.timeRemaining = null;
     }
 
     /**
@@ -141,14 +144,7 @@ class ExamManager {
                         margin: 0;
                         font-size: 18px;
                     ">Question ${this.currentQuestionIndex + 1} of ${this.questions.length}</h3>
-                    <div style="
-                        background: #3498db;
-                        color: white;
-                        padding: 4px 12px;
-                        border-radius: 12px;
-                        font-size: 12px;
-                        font-weight: 600;
-                    ">${question.subject || 'General'}</div>
+                    <!-- Removed subject badge here -->
                 </div>
                 
                 <div style="
@@ -279,65 +275,91 @@ class ExamManager {
      */
     async submitExam() {
         try {
-            // Show confirmation dialog
-            const confirmed = confirm(
-                `Are you sure you want to submit your exam?\n\n` +
-                `Questions answered: ${Object.keys(this.userAnswers).length} of ${this.questions.length}\n` +
-                `This action cannot be undone.`
-            );
-
-            if (!confirmed) return;
-
-            console.log('📤 Submitting exam...');
-            this.examEndTime = new Date();
-
-            // Log exam submission
-            if (violationLogger) {
-                violationLogger.logViolation(
-                    'exam_submitted',
-                    'low',
-                    'Exam submitted by user',
-                    {
-                        endTime: this.examEndTime.toISOString(),
-                        duration: this.examEndTime - this.examStartTime,
-                        questionsAnswered: Object.keys(this.userAnswers).length,
-                        totalQuestions: this.questions.length,
-                        answers: this.userAnswers
-                    },
-                    false
-                );
+            console.log('📝 Submitting exam...');
+            
+            // Get testId from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const testName = urlParams.get('testName');
+            
+            console.log('🔍 URL Parameters:', {
+                testName: testName,
+                answers: this.userAnswers,
+                questionsCount: this.questions.length
+            });
+            
+            // Get test details to find testId
+            const testResponse = await fetch(`/api/tests/by-name/${encodeURIComponent(testName)}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            
+            if (!testResponse.ok) {
+                console.error('❌ Failed to get test details:', testResponse.status, testResponse.statusText);
+                throw new Error('Failed to get test details');
             }
-
-            // Calculate score (basic implementation)
+            
+            const test = await testResponse.json();
+            const testId = test._id;
+            
+            console.log('✅ Got test details:', { testId, testName: test.name });
+            
+            // Calculate score
             let score = 0;
+            const totalQuestions = this.questions.length;
+            
             this.questions.forEach((question, index) => {
-                if (this.userAnswers[index] === question.correctAnswer) {
-                    score++;
+                const userAnswer = this.userAnswers[index];
+                if (userAnswer && userAnswer === question.correctAnswer) {
+                    score += question.points || 1;
                 }
             });
-
-            // Show submission success
-            this.showSubmissionSuccess(score);
-
-            // Cleanup and redirect
-            setTimeout(() => {
-                this.cleanup();
-                window.location.href = '/user-dashboard/user.html';
-            }, 3000);
-
+            
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+            
+            const submissionData = {
+                answers: this.userAnswers,
+                score: percentage,
+                timeTaken: this.examStartTime ? Math.floor((Date.now() - this.examStartTime.getTime()) / 1000) : 0
+            };
+            
+            console.log('📤 Sending submission data:', submissionData);
+            
+            // Submit to server
+            const response = await fetch(`/api/tests/${testId}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(submissionData)
+            });
+            
+            console.log('📥 Response status:', response.status);
+            
+            if (response.ok) {
+                // const result = await response.json(); // Don't use score
+                // console.log('✅ Exam submitted successfully:', result);
+                this.showSubmissionSuccess(); // No score passed
+                setTimeout(() => {
+                    window.location.href = '/user-dashboard/user.html';
+                }, 3000);
+            } else {
+                const errorData = await response.json();
+                console.error('❌ Submission failed:', errorData);
+                throw new Error(errorData.message || 'Failed to submit exam');
+            }
+            
         } catch (error) {
             console.error('❌ Error submitting exam:', error);
-            this.showError('Failed to submit exam', error.message);
+            this.showError('Submission Failed', 'Failed to submit exam. Please try again.');
         }
     }
 
     /**
-     * Show submission success message
+     * Show submission success message (no score)
      */
-    showSubmissionSuccess(score) {
+    showSubmissionSuccess() {
         const container = document.getElementById('exam-container');
         if (!container) return;
-
         const successUI = document.createElement('div');
         successUI.style.cssText = `
             position: fixed;
@@ -352,7 +374,6 @@ class ExamManager {
             z-index: 10000;
             font-family: 'Inter', -apple-system, sans-serif;
         `;
-
         successUI.innerHTML = `
             <div style="
                 background: white;
@@ -376,21 +397,12 @@ class ExamManager {
                     margin-bottom: 20px;
                     line-height: 1.6;
                 ">Your exam has been submitted and recorded.</p>
-                <div style="
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 8px;
-                    margin-bottom: 20px;
-                ">
-                    <strong style="color: #2c3e50;">Score: ${score}/${this.questions.length}</strong>
-                </div>
                 <p style="
                     font-size: 14px;
                     color: #95a5a6;
                 ">Redirecting to dashboard...</p>
             </div>
         `;
-
         document.body.appendChild(successUI);
     }
 
@@ -502,6 +514,15 @@ class ExamManager {
         this.examStartTime = new Date();
         this.isExamActive = true;
         
+        // Parse exam duration from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const durationStr = urlParams.get('duration') || '';
+        this.examDuration = this.parseDuration(durationStr);
+        
+        if (this.examDuration) {
+            this.startTimer();
+        }
+        
         // Load questions
         this.loadQuestions(testName);
         
@@ -509,6 +530,72 @@ class ExamManager {
         this.loadProgress();
         
         console.log('🎯 Exam started:', testName);
+    }
+   
+    /**
+     * Parse duration string to minutes
+     * @param {string} durationStr - Duration string like "4 minutes" or "N/A minutes"
+     * @returns {number|null} Duration in minutes or null if invalid
+     */
+    parseDuration(durationStr) {
+        if (!durationStr || durationStr.includes('N/A')) {
+            return null;
+        }
+        
+        const match = durationStr.match(/(\d+)\s*minutes?/i);
+        return match ? parseInt(match[1]) : null;
+    }
+    
+    /**
+     * Start the exam timer
+     */
+    startTimer() {
+        if (!this.examDuration) return;
+        
+        this.timeRemaining = this.examDuration * 60; // Convert to seconds
+        
+        // Update timer display immediately
+        this.updateTimerDisplay();
+        
+        this.examTimer = setInterval(() => {
+            this.timeRemaining--;
+            
+            if (this.timeRemaining <= 0) {
+                this.submitExam(); // Auto-submit when time runs out
+                return;
+            }
+            
+            this.updateTimerDisplay();
+        }, 1000);
+        
+        console.log(`⏰ Timer started: ${this.examDuration} minutes`);
+    }
+    
+    /**
+     * Update timer display
+     */
+    updateTimerDisplay() {
+        const timerContainer = document.getElementById('exam-timer');
+        if (!timerContainer) return;
+        
+        const minutes = Math.floor(this.timeRemaining / 60);
+        const seconds = this.timeRemaining % 60;
+        const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Update timer text
+        timerContainer.textContent = timeStr;
+        
+        // Change badge color based on time remaining
+        const timerBadge = document.getElementById('exam-timer-badge');
+        if (timerBadge) {
+            if (this.timeRemaining <= 300) { // 5 minutes or less
+                timerBadge.style.background = '#e74c3c';
+            } else if (this.timeRemaining <= 600) { // 10 minutes or less
+                timerBadge.style.background = '#f39c12';
+            } else {
+                timerBadge.style.background = '#27ae60';
+            }
+        }
     }
 
     /**
@@ -520,6 +607,24 @@ class ExamManager {
         // Clear auto-save interval
         if (this.autoSaveInterval) {
             clearInterval(this.autoSaveInterval);
+        }
+        
+        // Clear exam timer
+        if (this.examTimer) {
+            clearInterval(this.examTimer);
+            this.examTimer = null;
+        }
+        
+        // Reset timer display
+        const timerContainer = document.getElementById('exam-timer');
+        if (timerContainer) {
+            timerContainer.textContent = '--:--';
+        }
+        
+        // Reset timer badge color
+        const timerBadge = document.getElementById('exam-timer-badge');
+        if (timerBadge) {
+            timerBadge.style.background = '#27ae60';
         }
 
         // Cleanup all monitoring systems
@@ -566,10 +671,88 @@ document.addEventListener('DOMContentLoaded', async () => {
     const examManager = new ExamManager();
     window.examManager = examManager; // Make available globally
     
+    // Function to set exam data in the UI
+    const setExamData = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const examName = urlParams.get('testName') || '';
+        const examRole = urlParams.get('role') || '';
+        const examDuration = urlParams.get('duration') || '';
+        const userId = urlParams.get('userId') || '';
+        
+        console.log('🔍 URL Parameters:', {
+            testName: examName,
+            role: examRole,
+            duration: examDuration,
+            userId: userId
+        });
+        
+        const examNameSpan = document.getElementById('exam-name');
+        const examRoleSpan = document.getElementById('exam-role');
+        const examDurationSpan = document.getElementById('exam-duration');
+        if (examNameSpan) examNameSpan.textContent = examName;
+        if (examRoleSpan) examRoleSpan.textContent = examRole;
+        if (examDurationSpan) examDurationSpan.textContent = examDuration;
+        console.log('✅ Set exam data:', { examName, examRole, examDuration });
+        
+        // Also log the actual DOM elements
+        console.log('🔍 DOM Elements:', {
+            examNameSpan: examNameSpan,
+            examRoleSpan: examRoleSpan,
+            examDurationSpan: examDurationSpan
+        });
+    };
+    
+    // Set exam data immediately
+    setExamData();
+    
+    // Also set exam data when window loads
+    window.addEventListener('load', setExamData);
+    
+    // Make setExamData available globally for debugging
+    window.setExamData = setExamData;
+   
+    // Debug: Log current URL
+    console.log('🔍 Current URL:', window.location.href);
+    console.log('🔍 URL Search:', window.location.search);
+   
+    // Test function to manually set exam data
+    window.testExamData = () => {
+        console.log('🧪 Testing exam data setting...');
+        setExamData();
+    };
+    
     // Initialize the exam
     const initialized = await examManager.initialize();
     
     if (initialized) {
+        // Set exam name and role in the badge/header
+        if (window.examInitializer && window.examInitializer.examData) {
+            const examName = window.examInitializer.examData.testName || '';
+            const examRole = window.examInitializer.examData.role || '';
+            const examDuration = window.examInitializer.examData.duration || '';
+            const examNameSpan = document.getElementById('exam-name');
+            const examRoleSpan = document.getElementById('exam-role');
+            const examDurationSpan = document.getElementById('exam-duration');
+            if (examNameSpan) examNameSpan.textContent = examName;
+            if (examRoleSpan) examRoleSpan.textContent = examRole;
+            if (examDurationSpan) examDurationSpan.textContent = examDuration;
+            console.log('✅ Set exam data from examInitializer:', { examName, examRole, examDuration });
+        } else {
+            // Fallback: Get data directly from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const examName = urlParams.get('testName') || '';
+            const examRole = urlParams.get('role') || '';
+            const examDuration = urlParams.get('duration') || '';
+            const examNameSpan = document.getElementById('exam-name');
+            const examRoleSpan = document.getElementById('exam-role');
+            const examDurationSpan = document.getElementById('exam-duration');
+            if (examNameSpan) examNameSpan.textContent = examName;
+            if (examRoleSpan) examRoleSpan.textContent = examRole;
+            if (examDurationSpan) examDurationSpan.textContent = examDuration;
+            console.log('✅ Set exam data from URL params:', { examName, examRole, examDuration });
+        }
+        // Set exam data again after a short delay to ensure it's set
+        setTimeout(setExamData, 1000);
         // Get test name from URL
         const urlParams = new URLSearchParams(window.location.search);
         const testName = urlParams.get('testName');
