@@ -2,23 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pre-Exam Details</title>
-  <link rel="stylesheet" href="loader.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Exam Details - Posspole</title>
+  <link rel="icon" href="/components/Asset 2posspole_logo_svg.png" type="image/png">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    #pre-exam-container { max-width: 500px; margin: 40px auto; padding: 2rem; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    h2 { margin-top: 1.5rem; }
-    #begin-exam-btn { margin-top: 2rem; background: #2563eb; color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 5px; font-size: 1.1rem; cursor: pointer; }
-    #begin-exam-btn:hover { background: #1d4ed8; }
-    p { margin: 0.5rem 0; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pre-exam-container {
+      max-width: 600px;
+      width: 100%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      padding: 2.5rem;
+      border: 1px solid #e0e0e0;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-container img {
+      height: 52px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #000;
+      margin: 1.5rem 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .details-section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e9ecef;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.95rem;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      color: #000;
+      font-size: 0.95rem;
+    }
+
+    .begin-exam-btn {
+      width: 100%;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 2rem;
+    }
+
+    .begin-exam-btn:hover {
+      background: #333;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .begin-exam-btn:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 640px) {
+      .pre-exam-container {
+        padding: 1.5rem;
+        margin: 10px;
+      }
+      
+      .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div id="pre-exam-container">
-    <h2>Test Details</h2>
-    <div id="test-details"></div>
-    <h2>User Information</h2>
-    <div id="user-details"></div>
-    <button id="begin-exam-btn">Begin Exam</button>
+  <div class="pre-exam-container">
+    <!-- Logo -->
+    <div class="logo-container">
+      <img src="/components/Asset 4posspole_logo_svg.png" alt="Posspole Logo">
+    </div>
+
+    
+    
+    <div class="details-section">
+      <b><center><h2>Test Information</h2></center></b>
+      <div id="test-details"></div>
+    </div>
+
+    <div class="details-section">
+      <b><center><h2>User Information</h2></center><b>
+      <div id="user-details"></div>
+    </div>
+
+    <button id="begin-exam-btn" class="begin-exam-btn">
+      Begin Exam
+    </button>
   </div>
   <script src="pre-exam.js"></script>
 </body>

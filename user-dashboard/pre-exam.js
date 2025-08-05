@@ -17,11 +17,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     // fallback
   }
 
-  document.getElementById('test-details').innerHTML = `
-    <p><strong>Name:</strong> ${testDetails.name || testName}</p>
-    <p><strong>Role:</strong> ${testDetails.role || 'N/A'}</p>
-    <p><strong>Duration:</strong> ${testDetails.duration || 'N/A'} minutes.</p>
+  // Create test details with new styling
+  const testDetailsHTML = `
+    <div class="detail-row">
+      <span class="detail-label">Test Name</span>
+      <span class="detail-value">${testDetails.name || testName || 'N/A'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Role</span>
+      <span class="detail-value">${testDetails.role || 'Candidate'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Duration</span>
+      <span class="detail-value">${testDetails.duration || 'N/A'} minutes</span>
+    </div>
   `;
+
+  document.getElementById('test-details').innerHTML = testDetailsHTML;
 
   // Try to get user info from userData, else fallback to individual keys
   let user = {};
@@ -34,13 +46,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!user.dob && localStorage.getItem('userDob')) user.dob = localStorage.getItem('userDob');
   if (!user.email && localStorage.getItem('userEmail')) user.email = localStorage.getItem('userEmail');
 
-  document.getElementById('user-details').innerHTML = `
-    <p><strong>User ID:</strong> ${user.userId || 'N/A'}</p>
-    <p><strong>Name:</strong> ${user.fullName || 'N/A'}</p>
-    <p><strong>Email:</strong> ${user.email || 'N/A'}</p>
-    <p><strong>College:</strong> ${user.collegeName || 'N/A'}</p>
-    <p><strong>DOB:</strong> ${user.dob || 'N/A'}</p>
+  // Create user details with new styling
+  const userDetailsHTML = `
+    <div class="detail-row">
+      <span class="detail-label">User ID</span>
+      <span class="detail-value">${user.userId || 'N/A'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Full Name</span>
+      <span class="detail-value">${user.fullName || 'N/A'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Email</span>
+      <span class="detail-value">${user.email || 'N/A'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">College</span>
+      <span class="detail-value">${user.collegeName || 'N/A'}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Date of Birth</span>
+      <span class="detail-value">${user.dob || 'N/A'}</span>
+    </div>
   `;
+
+  document.getElementById('user-details').innerHTML = userDetailsHTML;
 
   document.getElementById('begin-exam-btn').addEventListener('click', () => {
     window.location.href = `../TestProtocol/index.html?testName=${encodeURIComponent(testName)}&role=${encodeURIComponent(testDetails.role || 'Candidate')}&duration=${encodeURIComponent(testDetails.duration || 'N/A')} minutes`;
