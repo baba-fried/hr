@@ -1,4 +1,4 @@
-nodenode_modules/
+node_modules/
 .env
 *.log
 .vscode/
@@ -7,4 +7,3 @@ uploads/
 Thumbs.db
 package-lock.json
 violation-report.json/
-logs/

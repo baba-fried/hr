@@ -4,6 +4,13 @@ class AlertSystem {
   }
 
   showAlert(message, type = 'warning') {
+    // Only show modal alerts, skip violation notifications
+    if (message.toLowerCase().includes('violation') || 
+        message.toLowerCase().includes('warning') || 
+        message.toLowerCase().includes('detected')) {
+      return;
+    }
+
     // Clear existing alert if any
     if (this.alertTimeout) {
       clearTimeout(this.alertTimeout);

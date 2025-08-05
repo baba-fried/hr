@@ -16,7 +16,7 @@
       "timestamp": "2025-07-30T12:21:15.684Z",
       "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
       "screenResolution": "1536x864",
-      "viewportSize": "1661x786"
+      "viewportSize": "1495x707"
     },
     "timestamp": "2025-07-30T12:21:15.767Z",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0"
@@ -38,7 +38,7 @@
       "timestamp": "2025-07-30T12:21:15.654Z",
       "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
       "screenResolution": "1536x864",
-      "viewportSize": "1661x786"
+      "viewportSize": "1495x707"
     },
     "timestamp": "2025-07-30T12:21:15.875Z",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0"
@@ -60,7 +60,7 @@
       "timestamp": "2025-07-30T12:21:15.654Z",
       "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
       "screenResolution": "1536x864",
-      "viewportSize": "1661x786"
+      "viewportSize": "1495x707"
     },
     "timestamp": "2025-07-30T12:21:15.888Z",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0"
@@ -101,7 +101,7 @@
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
       "url": "http://localhost:5001/TestProtocol/index.html?testName=hello",
       "screenResolution": "1536x864",
-      "viewportSize": "1661x786"
+      "viewportSize": "1536x864"
     },
     "timestamp": "2025-07-30T12:21:18.995Z",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",

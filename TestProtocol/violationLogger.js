@@ -82,13 +82,7 @@ class ViolationLogger {
             if (result.success) {
                 console.log(`✅ Violation logged: ${violationType} (${severity})`);
                 
-                // Show real-time alert if requested
-                if (showAlert) {
-                    await this.sendAlert(violationType, severity, description);
-                }
-                
-                // Update UI
-                this.updateViolationUI(violation);
+                // Silently log violation without UI updates
                 
                 return true;
             } else {

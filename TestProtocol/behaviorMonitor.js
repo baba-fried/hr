@@ -311,18 +311,20 @@ class BehaviorMonitor {
      * Handle window blur (focus lost)
      */
     handleWindowBlur() {
+        // Silently track window blur without UI notification
         this.logViolation('window_blur', 'high', 'Window lost focus', {
             timestamp: Date.now()
-        });
+        }, false);
     }
 
     /**
      * Handle window focus (focus gained)
      */
     handleWindowFocus() {
+        // Silently track window focus without UI notification
         this.logViolation('window_focus', 'medium', 'Window gained focus', {
             timestamp: Date.now()
-        });
+        }, false);
     }
 
     /**
