@@ -164,11 +164,18 @@ router.post('/:testId/submit', auth, async (req, res) => {
             totalQuestions: test.questions.length
         });
 
-        res.json({
-            message: 'Test submitted successfully',
-            score,
-            totalPoints: test.questions.reduce((sum, q) => sum + (q.points || 1), 0)
-        });
+        // Only return score to HR or admin
+        if (req.user.role === 'hr' || req.user.role === 'admin') {
+            return res.json({
+                message: 'Test submitted successfully',
+                score,
+                totalPoints: test.questions.reduce((sum, q) => sum + (q.points || 1), 0)
+            });
+        } else {
+            return res.json({
+                message: 'Test submitted successfully'
+            });
+        }
     } catch (err) {
         console.error('❌ Error submitting test:', err);
         res.status(500).json({ message: 'Error submitting test', error: err.message });

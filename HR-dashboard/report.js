@@ -259,11 +259,17 @@ async function showReport(userId, testId) {
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p class="font-semibold text-gray-800">Student's Answer:</p>
-                <p class="text-gray-700">${userAnswer !== null && userAnswer !== undefined ? 
-                  (question.questionType === 'mcq' ? 
-                    `Option ${String.fromCharCode(65 + userAnswer)}` : 
-                    userAnswer) : 
-                  'Not answered'}</p>
+                <p class="text-gray-700">$${
+                  userAnswer !== null && userAnswer !== undefined
+                    ? (
+                        question.questionType === 'mcq'
+                          ? (typeof Number(userAnswer) === 'number' && question.options && question.options[Number(userAnswer)]
+                              ? `${String.fromCharCode(65 + Number(userAnswer))}. ${question.options[Number(userAnswer)]}`
+                              : `Option ${String.fromCharCode(65 + Number(userAnswer))}`)
+                          : userAnswer
+                      )
+                    : 'Not answered'
+                }</p>
               </div>
               <div>
                 <p class="font-semibold text-gray-800">Correct Answer:</p>
@@ -274,7 +280,7 @@ async function showReport(userId, testId) {
             </div>
           </div>
         `;
-      });
+  });
       
       examDetailsHtml += `
           </div>
@@ -313,6 +319,67 @@ async function showReport(userId, testId) {
         </div>
       </div>
     `;
+  }
+
+  // --- Violation Report Section (HR only) ---
+  // Only show if on HR dashboard (simple check: URL contains /HR-dashboard/)
+  if (window.location.pathname.includes('/HR-dashboard/')) {
+    const violationSectionId = 'violationReportSection';
+    let violationSection = document.getElementById(violationSectionId);
+    if (!violationSection) {
+      violationSection = document.createElement('div');
+      violationSection.id = violationSectionId;
+      violationSection.className = 'report-section mt-6';
+      individualReport.appendChild(violationSection);
+    }
+    violationSection.innerHTML = `<h3 class="text-xl font-semibold mb-2">Violation Report</h3><p>Loading violations...</p>`;
+
+    // Fetch violations for this user
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      fetch(`/api/proctoring/user-violations/${userId}?date=${today}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.violations && data.violations.length > 0) {
+            // Filter for this test only
+            const filtered = data.violations.filter(v => v.testId === testId);
+            if (filtered.length > 0) {
+              violationSection.innerHTML = `<h3 class="text-xl font-semibold mb-2">Violation Report</h3>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-sm border">
+                    <thead><tr>
+                      <th class="border px-2 py-1">Type</th>
+                      <th class="border px-2 py-1">Time</th>
+                      <th class="border px-2 py-1">Severity</th>
+                      <th class="border px-2 py-1">Description</th>
+                    </tr></thead>
+                    <tbody>
+                      ${filtered.map(v => `
+                        <tr>
+                          <td class="border px-2 py-1">${v.violationType}</td>
+                          <td class="border px-2 py-1">${new Date(v.timestamp).toLocaleString()}</td>
+                          <td class="border px-2 py-1">${v.severity}</td>
+                          <td class="border px-2 py-1">${v.description}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>`;
+            } else {
+              violationSection.innerHTML = `<h3 class="text-xl font-semibold mb-2">Violation Report</h3><p>No violations detected for this test.</p>`;
+            }
+          } else {
+            violationSection.innerHTML = `<h3 class="text-xl font-semibold mb-2">Violation Report</h3><p>No violations detected for this test.</p>`;
+          }
+        })
+        .catch(err => {
+          violationSection.innerHTML = `<h3 class="text-xl font-semibold mb-2">Violation Report</h3><p class='text-red-600'>Failed to load violations.</p>`;
+        });
+    } catch (err) {
+      violationSection.innerHTML = `<h3 class="text-xl font-semibold mb-2">Violation Report</h3><p class='text-red-600'>Failed to load violations.</p>`;
+    }
   }
 }
 

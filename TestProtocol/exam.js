@@ -336,14 +336,12 @@ class ExamManager {
             console.log('📥 Response status:', response.status);
             
             if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Exam submitted successfully:', result);
-                this.showSubmissionSuccess(percentage);
-                
-                // Redirect to user dashboard after a short delay
+                // const result = await response.json(); // Don't use score
+                // console.log('✅ Exam submitted successfully:', result);
+                this.showSubmissionSuccess(); // No score passed
                 setTimeout(() => {
-                    window.location.href = '/user-dashboard';
-                }, 3000); // 3 second delay to show submission message
+                    window.location.href = '/user-dashboard/user.html';
+                }, 3000);
             } else {
                 const errorData = await response.json();
                 console.error('❌ Submission failed:', errorData);
@@ -357,12 +355,11 @@ class ExamManager {
     }
 
     /**
-     * Show submission success message
+     * Show submission success message (no score)
      */
-    showSubmissionSuccess(score) {
+    showSubmissionSuccess() {
         const container = document.getElementById('exam-container');
         if (!container) return;
-
         const successUI = document.createElement('div');
         successUI.style.cssText = `
             position: fixed;
@@ -377,7 +374,6 @@ class ExamManager {
             z-index: 10000;
             font-family: 'Inter', -apple-system, sans-serif;
         `;
-
         successUI.innerHTML = `
             <div style="
                 background: white;
@@ -401,21 +397,12 @@ class ExamManager {
                     margin-bottom: 20px;
                     line-height: 1.6;
                 ">Your exam has been submitted and recorded.</p>
-                <div style="
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 8px;
-                    margin-bottom: 20px;
-                ">
-                    <strong style="color: #2c3e50;">Score: ${score}/${this.questions.length}</strong>
-                </div>
                 <p style="
                     font-size: 14px;
                     color: #95a5a6;
                 ">Redirecting to dashboard...</p>
             </div>
         `;
-
         document.body.appendChild(successUI);
     }
 
