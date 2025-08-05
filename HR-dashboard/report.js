@@ -182,28 +182,15 @@ async function showReport(userId, testId) {
       `;
       
       testData.questions.forEach((question, index) => {
-        const userAnswer = submission.answers && submission.answers[index];
-        let isCorrect = false;
-        
-        if (userAnswer !== null && userAnswer !== undefined) {
-          if (question.questionType === 'mcq') {
-            // For MCQ, compare the user's answer text with the correct option text
-            const correctOptionText = question.options[question.correctAnswer];
-            isCorrect = userAnswer === correctOptionText;
-          } else {
-            // For other question types, direct comparison
-            isCorrect = userAnswer === question.correctAnswer;
-          }
-        }
-        
-        const answerStatus = isCorrect ? '✅ Correct' : '❌ Incorrect';
-        const answerColor = isCorrect ? 'text-green-600' : 'text-red-600';
+        const answerObj = submission.answers && submission.answers[index];
+        const userAnswer = answerObj ? answerObj.userAnswer : undefined;
+        let isCorrect = answerObj ? answerObj.isCorrect : false;
         
         examDetailsHtml += `
           <div class="bg-white border rounded-lg p-4 ${isCorrect ? 'border-green-200' : 'border-red-200'}">
             <div class="flex justify-between items-start mb-2">
               <h5 class="font-semibold text-lg">Question ${index + 1}</h5>
-              <span class="text-sm font-medium ${answerColor}">${answerStatus}</span>
+              <span class="text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}">${isCorrect ? '✅ Correct' : '❌ Incorrect'}</span>
             </div>
             <div class="mb-3">
               <p class="text-gray-800 mb-2"><strong>Question:</strong></p>
