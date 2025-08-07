@@ -184,5 +184,30 @@ router.get('/profile/:id', async (req, res) => {
         res.status(200).json({ users });
       });
   
+// TEMPORARY: Admin Creation Route
+/*router.post('/create-admin', async (req, res) => {
+    const { email, password, fullName } = req.body;
+
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Admin already exists' });
+        }
+
+        const newUser = new User({
+            email,
+            password,
+            fullName: fullName || 'Admin User',
+            role: 'admin'
+        });
+
+        await newUser.save();
+
+        res.status(201).json({ message: '✅ Admin user created successfully' });
+    } catch (error) {
+        console.error('[ADMIN CREATE ERROR]', error);
+        res.status(500).json({ message: 'Server error while creating admin', error: error.message });
+    }
+});*/
 
 module.exports = router;

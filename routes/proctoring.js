@@ -32,7 +32,7 @@ router.post('/violations', auth, async (req, res) => {
 
         const violation = {
             id: Date.now() + Math.random().toString(36).substr(2, 9),
-            userId,
+            userId: req.user._id, // Use authenticated user ID
             userEmail: req.user.email,
             userName: req.user.fullName,
             testId,
@@ -48,7 +48,7 @@ router.post('/violations', auth, async (req, res) => {
 
         // Create filename with date
         const date = new Date().toISOString().split('T')[0];
-        const logFile = path.join(logsDir, `violations-${userId}-${date}.json`);
+        const logFile = path.join(logsDir, `violations-${req.user._id}-${date}.json`);
 
         // Read existing violations or create empty array
         let violations = [];
