@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('user-details').innerHTML = userDetailsHTML;
 
   document.getElementById('begin-exam-btn').addEventListener('click', () => {
-    window.location.href = `../TestProtocol/index.html?testName=${encodeURIComponent(testName)}&role=${encodeURIComponent(testDetails.role || 'Candidate')}&duration=${encodeURIComponent(testDetails.duration || 'N/A')} minutes`;
+    const userId = user.userId || localStorage.getItem('userId');
+    window.location.href = `../TestProtocol/index.html?testName=${encodeURIComponent(testName)}&role=${encodeURIComponent(testDetails.role || 'Candidate')}&duration=${encodeURIComponent(testDetails.duration || 'N/A')} minutes&userId=${encodeURIComponent(userId)}`;
   });
 }); 

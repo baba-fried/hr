@@ -115,6 +115,7 @@
             <option value="2nd Year">2nd Year</option>
             <option value="3rd Year">3rd Year</option>
             <option value="4th Year">4th Year</option>
+            <option value="Graduated">Graduated</option>
           </select>
         </div>
         <div>
@@ -175,7 +176,7 @@
       <div>
         <label for="confirm-password" class="block mb-1 text-sm font-medium text-black">Confirm Password</label>
         <div class="relative">
-          <input type="password" name="confirm-password" id="confirm_password" required
+          <input type="password" name="confirm-password" id="confirm-password" required
                  class="w-full px-3 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-black text-black" />
           <button type="button" id="toggleConfirmPassword" class="absolute inset-y-0 right-3 flex items-center text-gray-600 focus:outline-none" aria-label="Toggle confirm password visibility">
             <!-- Eye icon SVG -->
@@ -208,7 +209,17 @@
     function setupToggle(toggleBtnId, inputId, eyeIconId) {
       const toggleBtn = document.getElementById(toggleBtnId);
       const input = document.getElementById(inputId);
+      
+      if (!toggleBtn || !input) {
+        console.warn(`Toggle elements not found: ${toggleBtnId}, ${inputId}`);
+        return;
+      }
+      
       const eyeIcon = toggleBtn.querySelector('svg');
+      if (!eyeIcon) {
+        console.warn(`Eye icon not found for: ${toggleBtnId}`);
+        return;
+      }
 
       toggleBtn.addEventListener('click', () => {
         const type = input.getAttribute('type');
@@ -240,7 +251,8 @@
     const ruleNumber = document.getElementById('ruleNumber');
     const ruleSpecial = document.getElementById('ruleSpecial');
 
-    passwordInput.addEventListener('input', () => {
+    if (passwordInput && ruleLength && ruleUpper && ruleNumber && ruleSpecial) {
+      passwordInput.addEventListener('input', () => {
       const value = passwordInput.value;
 
       // Length at least 8
@@ -271,6 +283,9 @@
         ruleSpecial.classList.remove('valid');
       }
     });
+    } else {
+      console.warn('Password validation elements not found');
+    }
     // Loader helpers (already present below)
     function showLoader() {
       document.getElementById('loader').classList.remove('hidden');
@@ -290,7 +305,7 @@
       // Show loader
       showLoader();
       try {
-        const response = await fetch("http://localhost:5000/api/auth/register", {
+        const response = await fetch("http://localhost:5001/api/auth/register", {
           method: "POST",
           body: formData
         });
