@@ -12,6 +12,7 @@ const testRoutes = require('./routes/testRoutes'); // <-- Add this after other r
 const userRoutes = require('./routes/users');
 const examResultsRouter = require('./routes/examResults');
 const proctoringRoutes = require('./routes/proctoring');
+const candidateDecisionsRoutes = require('./routes/candidateDecisions');
 
 
 
@@ -60,6 +61,7 @@ app.use('/api/tests', testRoutes);
 app.use('/api/mock-results', mockResultsRoute); // <-- Add this after examRoutes
 app.use('/api/exam-results', examResultsRouter);
 app.use('/api/proctoring', proctoringRoutes);
+app.use('/api/candidate-decisions', candidateDecisionsRoutes);
 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'login-page', 'login.html'));

@@ -1,5 +1,6 @@
 let users = [];
 let testSubmissions = [];
+let candidateDecisions = [];
 
 async function fetchUsersFromDB() {
   try {
@@ -50,6 +51,22 @@ async function fetchTestSubmissions() {
   }
 }
 
+async function fetchCandidateDecisions() {
+  try {
+    console.log('🔍 Fetching candidate decisions...');
+    const res = await fetch('/api/candidate-decisions', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      candidateDecisions = data.decisions;
+      console.log('📊 Candidate decisions fetched:', candidateDecisions.length);
+    }
+  } catch (error) {
+    console.error('❌ Failed to fetch candidate decisions:', error);
+  }
+}
+
 function populateReports() {
   console.log('🎯 Populating reports...');
   console.log('📊 Test submissions count:', testSubmissions.length);
@@ -79,6 +96,9 @@ function populateReports() {
     const submissionDate = new Date(submission.submittedAt).toLocaleDateString();
     const submissionTime = new Date(submission.submittedAt).toLocaleTimeString();
     
+    // Check if decision exists for this submission
+    const decision = candidateDecisions.find(d => d.userId === submission.userId && d.testId === submission.testId);
+    
     reportContent.innerHTML += `
       <div class="p-4 border rounded-lg hover:shadow-md transition-shadow bg-white">
         <div class="flex justify-between items-start">
@@ -92,10 +112,26 @@ function populateReports() {
             <div class="text-2xl font-bold text-green-600">${submission.score}/${submission.totalQuestions}</div>
             <div class="text-sm text-gray-500">Score</div>
             <div class="text-sm text-gray-500">Status: ${submission.status}</div>
+            ${decision ? `
+              <div class="mt-2">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full ${
+                  decision.decision === 'accepted' ? 'bg-green-100 text-green-800' : 
+                  decision.decision === 'rejected' ? 'bg-red-100 text-red-800' : 
+                  'bg-gray-100 text-gray-800'
+                }">
+                  ${decision.decision.toUpperCase()}
+                </span>
+              </div>
+            ` : ''}
           </div>
         </div>
-        <div class="flex justify-end items-center mt-4">
+        <div class="flex justify-end items-center mt-4 space-x-2">
           <button onclick="showReport('${submission.userId}', '${submission.testId}')" class="download-btn">View Details</button>
+          ${!decision ? `
+            <button onclick="showDecisionModal('${submission.userId}', '${submission.userName}', '${submission.userEmail}', '${submission.testId}', '${submission.testName}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Make Decision</button>
+          ` : `
+            <button onclick="showDecisionModal('${submission.userId}', '${submission.userName}', '${submission.userEmail}', '${submission.testId}', '${submission.testName}', '${decision.decision}', '${decision.notes || ''}')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">Update Decision</button>
+          `}
         </div>
       </div>
     `;
@@ -374,6 +410,10 @@ window.onload = async () => {
   await fetchTestSubmissions();
   console.log('✅ Test submissions fetched:', testSubmissions.length);
 
+  console.log('📥 Fetching candidate decisions...');
+  await fetchCandidateDecisions();
+  console.log('✅ Candidate decisions fetched:', candidateDecisions.length);
+
   if (userId) {
     console.log('👤 Showing specific user report for:', userId);
     // Find the first submission for this user
@@ -394,3 +434,107 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
   localStorage.removeItem('token');
   window.location.href = '/login-page/login.html';
 });
+
+// Decision Modal Functions
+function showDecisionModal(userId, userName, userEmail, testId, testName, currentDecision = '', currentNotes = '') {
+  const modal = document.createElement('div');
+  modal.id = 'decisionModal';
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+  
+  const isUpdate = currentDecision !== '';
+  
+  modal.innerHTML = `
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">${isUpdate ? 'Update Decision' : 'Make Decision'}</h3>
+        <button onclick="closeDecisionModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+      </div>
+      
+      <div class="mb-4">
+        <p class="text-sm text-gray-600 mb-2">Candidate: <strong>${userName}</strong></p>
+        <p class="text-sm text-gray-600 mb-2">Test: <strong>${testName}</strong></p>
+        <p class="text-sm text-gray-600">Email: <strong>${userEmail}</strong></p>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Decision:</label>
+        <div class="flex space-x-4">
+          <label class="flex items-center">
+            <input type="radio" name="decision" value="accepted" ${currentDecision === 'accepted' ? 'checked' : ''} class="mr-2">
+            <span class="text-green-600 font-medium">Accept</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="decision" value="rejected" ${currentDecision === 'rejected' ? 'checked' : ''} class="mr-2">
+            <span class="text-red-600 font-medium">Reject</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional):</label>
+        <textarea id="decisionNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add any additional notes or feedback...">${currentNotes}</textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3">
+        <button onclick="closeDecisionModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+          Cancel
+        </button>
+        <button onclick="submitDecision('${userId}', '${userName}', '${userEmail}', '${testId}', '${testName}', '${isUpdate}')" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          ${isUpdate ? 'Update' : 'Submit'} Decision
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+function closeDecisionModal() {
+  const modal = document.getElementById('decisionModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function submitDecision(userId, userName, userEmail, testId, testName, isUpdate) {
+  const decision = document.querySelector('input[name="decision"]:checked');
+  const notes = document.getElementById('decisionNotes').value;
+  
+  if (!decision) {
+    alert('Please select a decision (Accept or Reject)');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/candidate-decisions/decide', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
+        userId,
+        userName,
+        userEmail,
+        testId,
+        testName,
+        decision: decision.value,
+        notes
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert(`Candidate ${decision.value} successfully! Email notification sent.`);
+      closeDecisionModal();
+      // Refresh the page to show updated status
+      window.location.reload();
+    } else {
+      alert(result.message || 'Failed to submit decision');
+    }
+  } catch (error) {
+    console.error('Error submitting decision:', error);
+    alert('Failed to submit decision. Please try again.');
+  }
+}
