@@ -583,61 +583,58 @@ async function loadDashboardStats() {
 
 // Fetch and populate upcoming tests table
 async function loadUpcomingTests() {
-    try {
-      const res = await fetch('http://localhost:5001/api/tests/my-tests', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-  
-      if (!res.ok) throw new Error('Failed to fetch assigned tests');
-  
-      const tests = await res.json();
-      console.log('✅ All fetched tests:', tests);
-  
-      const tbody = document.querySelector('#upcoming-tests-table tbody');
-      tbody.innerHTML = '';
-  
-      const token = localStorage.getItem('token');
-      const userId = JSON.parse(atob(token.split('.')[1])).userId;
-      console.log('👤 Decoded userId from token:', userId);
-  
-      const assignedTests = tests.filter(test => {
-        const includesUser = test.candidates?.includes(userId);
-        console.log(`🔍 Test "${test.name}" includes user?`, includesUser);
-        return includesUser;
-      });
-  
-      if (assignedTests.length === 0) {
-        console.warn('⚠️ No tests matched user ID!');
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="2" class="text-center py-4 text-gray-500">
-              No tests assigned to you.
+  try {
+    // Fetch assigned tests
+    const res = await fetch('http://localhost:5001/api/tests/my-tests', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (!res.ok) throw new Error('Failed to fetch assigned tests');
+    const tests = await res.json();
+
+    // Fetch completed exam results for this user
+    const token = localStorage.getItem('token');
+    const userId = JSON.parse(atob(token.split('.')[1])).userId;
+    const resultsRes = await fetch(`http://localhost:5001/api/exam-results?userId=${userId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const examResults = resultsRes.ok ? await resultsRes.json() : [];
+    // Get a set of completed test IDs
+    const completedTestIds = new Set(examResults.map(r => r.testId));
+
+    const tbody = document.querySelector('#upcoming-tests-table tbody');
+    tbody.innerHTML = '';
+
+    const assignedTests = tests.filter(test => test.candidates?.includes(userId));
+    if (assignedTests.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="2" class="text-center py-4 text-gray-500">
+            No tests assigned to you.
+          </td>
+        </tr>
+      `;
+    } else {
+      assignedTests.forEach(test => {
+        const isCompleted = completedTestIds.has(test._id);
+        tbody.innerHTML += `
+          <tr class="border-b border-gray-100">
+            <td class="py-3">${test.name}</td>
+            <td class="py-3">
+              ${isCompleted
+                ? `<button class="bg-gray-300 text-gray-500 px-4 py-2 rounded cursor-not-allowed" disabled>Completed</button>`
+                : `<a href="/user-dashboard/pre-exam.html?testName=${encodeURIComponent(test.name)}" class="text-blue-600 hover:underline start-exam-link" data-test-name="${test.name}">Start Test</a>`
+              }
             </td>
           </tr>
         `;
-      } else {
-        console.log('✅ Assigned tests:', assignedTests);
-        assignedTests.forEach(test => {
-          tbody.innerHTML += `
-            <tr class="border-b border-gray-100">
-              <td class="py-3">${test.name}</td>
-              <td class="py-3">
-                <a href="/user-dashboard/pre-exam.html?testName=${encodeURIComponent(test.name)}" class="text-blue-600 hover:underline start-exam-link" data-test-name="${test.name}">Start Test</a>
-              </td>
-            </tr>
-          `;
-        });
-      }
-    } catch (err) {
-      console.error('❌ Error loading upcoming tests:', err);
+      });
     }
+  } catch (err) {
+    console.error('❌ Error loading upcoming tests:', err);
   }
-  
-  
-
-  
+}
 
 // Fetch and populate mock tests table
 async function loadMockTests() {

@@ -80,3 +80,4 @@ router.post('/decide', auth, async (req, res) => {
 });
 
 // Remove the update decision endpoint. Only POST /decide is allowed for new decisions.
+module.exports = router;
