@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+  --app-font: 'Roboto', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+}
+
+html, body,
+button, input, select, textarea,
+a, p, span, div,
+table, th, td,
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--app-font) !important;
+}
+
+

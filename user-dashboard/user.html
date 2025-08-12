@@ -14,11 +14,14 @@
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
     font-src https://fonts.gstatic.com;">
         <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+            @import url('/styles/global.css');
 
             body {
-                font-family: 'Inter', sans-serif;
+                font-family: var(--app-font);
                 background: #f8f9fa;
                 color: #333;
                 margin: 0;
@@ -330,14 +333,7 @@
                             }
                         });
                 
-                        if (logoutBtn) {
-                            logoutBtn.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                localStorage.removeItem('userName');
-                                localStorage.removeItem('token');
-                                window.location.href = '/login-page/login.html';
-                            });
-                        }
+                        // Per-page logout replaced by shared modal in user-dashboard/ui.js
                     });
                 </script>
             </div>
@@ -356,13 +352,13 @@
                             <li>Best Mock Test Score: <span id="stat-mock-best" class="font-bold">--</span></li>
                         </ul>
                     </div>
-                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
+                    <div id="cta-exam-performance" class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow hover:shadow-lg hover:bg-green-100 cursor-pointer transition">
                         <h3 class="font-semibold text-green-700 mb-2 flex items-center">
                             <svg class="inline mr-2" width="20" height="20" fill="none" stroke="currentColor"><circle cx="10" cy="10" r="9" stroke-width="2"/><path d="M10 6v4l2 2" stroke-width="2"/></svg>
-                            Exam Performance
+                            Test Performance
                         </h3>
                         <ul class="text-gray-700 text-sm">
-                            <li>Total Exams Completed: <span id="stat-exam-completed" class="font-bold">--</span></li>
+                            <li>Total Tests Completed: <span id="stat-exam-completed" class="font-bold">--</span></li>
                         </ul>
                     </div>
                 </div>
@@ -389,10 +385,10 @@
                         </div>
                         <!-- Exams Stats -->
                         <div class="pl-8">
-                            <h3 class="text-lg font-semibold mb-4">Exams</h3>
+                            <h3 class="text-lg font-semibold mb-4">Tests</h3>
                             <div class="grid grid-cols-1 gap-4">
                                 <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h4 class="font-medium text-gray-800 mb-2">Exams Completed</h4>
+                                    <h4 class="font-medium text-gray-800 mb-2">Tests Completed</h4>
                                     <p class="text-3xl font-bold" id="exams-completed">--</p>
                                     <p class="text-xs text-gray-500 mt-1">Last 30 days</p>
                                 </div>
@@ -482,8 +478,8 @@
             </div>
             <!-- Exam & Mock Test Section (Merged) -->
             <div id="exam-content" class="content-section" style="display: none;">
-                <h1 class="text-2xl font-bold mb-6">Exam Portal</h1>
-                <p class="text-gray-600 mb-8">Manage your exams, view upcoming tests, and practice with mock tests in one place.</p>
+                <h1 class="text-2xl font-bold mb-2">Test Portal</h1>
+                <p class="text-gray-600 mb-2">Manage your tests, view upcoming tests, and practice with mock tests in one place.</p>
             
                 <!-- Informative Overview -->
                 <div class="mb-8">
@@ -494,9 +490,9 @@
                         <circle cx="10" cy="10" r="9" stroke-width="2" />
                         <path d="M10 6v4l2 2" stroke-width="2" />
                         </svg>
-                        Upcoming Exams
+                        Upcoming Tests
                     </h3>
-                    <p class="text-gray-700">Stay updated with your scheduled exams and never miss a deadline. Check the table below for your next assessments.</p>
+                    <p class="text-gray-700">Stay updated with your scheduled Tests and never miss a deadline. Check the table below for your next assessments.</p>
                     </div>
                     <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
                     <h3 class="font-semibold text-green-700 mb-2 flex items-center">
@@ -504,7 +500,7 @@
                         <rect x="3" y="3" width="14" height="14" rx="2" stroke-width="2" />
                         <path d="M8 9h4M8 13h4" stroke-width="2" />
                         </svg>
-                        Exam Tips
+                        Test Tips
                     </h3>
                     <ul class="list-disc ml-5 text-gray-700 text-sm">
                         <li>Review your syllabus and focus on weak areas.</li>
@@ -527,9 +523,9 @@
             
                 <!-- ✅ WORKING Upcoming Tests Section from OLD -->
                 <div class="border border-red-400 rounded-lg p-6 mb-8 bg-white">
-                <h2 class="text-xl font-semibold mb-4">Exam Information</h2>
+                <h2 class="text-xl font-semibold mb-4">Test Information</h2>
+                <p class="text-gray-600 mb-4 text-sm">Here you can find details about your upcoming scheduled tests. You can only take the test once.</p>
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-2">Upcoming Tests</h3>
                     <table class="w-full" id="upcoming-tests-table">
                     <thead>
                         <tr class="border-b border-gray-200 bg-gray-50">
@@ -611,10 +607,18 @@
         <script>
         window.addEventListener('load', hideLoader);
         </script>
+        <script src="/user-dashboard/ui.js"></script>
+        <script>initUserLayout();</script>
         <script src="user-page.js"></script>
     </body>
     <script>
         // Add section switching functionality
+        const headerEl = document.querySelector('.header');
+        function setHeaderVisibility(sectionId) {
+            if (!headerEl) return;
+            headerEl.style.display = sectionId === 'exam-content' ? 'none' : 'flex';
+        }
+
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', function() {
                 // Remove active class from all menu items
@@ -636,6 +640,27 @@
                     section.style.display = 'block';
                     section.classList.add('active');
                 }
+
+                // Toggle header visibility (hide on Exams section)
+                setHeaderVisibility(sectionId);
+            });
+        });
+
+        // Initial header visibility based on current active menu item
+        (function initHeader() {
+            const active = document.querySelector('.menu-item.active');
+            const sectionId = active ? active.getAttribute('data-section') : 'dashboard-content';
+            setHeaderVisibility(sectionId);
+        })();
+
+        // CTA: Clicking on Exam Performance card opens Exams section
+        document.addEventListener('DOMContentLoaded', function() {
+            const cta = document.getElementById('cta-exam-performance');
+            if (!cta) return;
+            cta.addEventListener('click', function() {
+                const examMenu = document.querySelector('.menu-item[data-section="exam-content"]');
+                if (examMenu) examMenu.click();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
@@ -948,6 +973,41 @@
         if (el) el.textContent = successRate + '%';
     }
 
+    </script>
+    <script>
+    // Update real exam counts (total and last 30 days)
+    async function updateExamStats() {
+        try {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+            const res = await fetch(`http://localhost:5001/api/exam-results?userId=${encodeURIComponent(userId)}`);
+            if (!res.ok) throw new Error('Failed to fetch exam results');
+            const results = await res.json();
+
+            const now = Date.now();
+            const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+            const total = results.length;
+            const last30 = results.filter(r => {
+                const ts = new Date(r.takenAt || r.createdAt || r.updatedAt || 0).getTime();
+                return now - ts <= THIRTY_DAYS;
+            }).length;
+
+            const topTotalEl = document.getElementById('stat-exam-completed');
+            if (topTotalEl) topTotalEl.textContent = String(total);
+
+            const last30El = document.getElementById('exams-completed');
+            if (last30El) last30El.textContent = String(last30);
+        } catch (err) {
+            console.error('Error fetching exam stats:', err);
+        }
+    }
+
+    // Run on load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateExamStats);
+    } else {
+        updateExamStats();
+    }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>

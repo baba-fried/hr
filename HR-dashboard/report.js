@@ -165,7 +165,7 @@ async function showReport(userId, testId) {
   const personalInfoSection = document.getElementById("personalInfoSection");
   personalInfoSection.innerHTML = `
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-bold">${submission.userName} - Test Report</h2>
+      <h2 class="text-3xl font-bold">${submission.userName} - Examination Report</h2>
       <span class="text-lg text-gray-500">${submission.userId}</span>
     </div>
     <div class="report-section">
